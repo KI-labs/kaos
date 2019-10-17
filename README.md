@@ -38,7 +38,7 @@ Train, serve and predict in your **own** running cluster with [8 commands!](http
 * **Private**
   * _Deployed and maintained in own environment_
  -->
- 
+
 ## 
 ### Documentation
 
