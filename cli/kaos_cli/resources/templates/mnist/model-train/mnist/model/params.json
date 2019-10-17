@@ -1,0 +1,7 @@
+{
+  "label_column": 1,
+  "decision_function_shape": "ovo",
+  "degree": 5,
+  "gamma": 0.1,
+  "kernel": "poly"
+}

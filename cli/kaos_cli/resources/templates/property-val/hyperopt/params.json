@@ -1,0 +1,14 @@
+{
+  "hidden_layers": [
+    10,
+    25
+  ],
+  "alpha": [
+    0.1,
+    1
+  ],
+  "activation": [
+    "relu",
+    "logistic"
+  ]
+}

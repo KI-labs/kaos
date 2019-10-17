@@ -1,0 +1,2 @@
+checksumdir==1.1.7
+PyPDF2==1.26.0

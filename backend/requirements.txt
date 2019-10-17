@@ -1,0 +1,13 @@
+Flask==1.0.2
+gunicorn==19.9.0
+Werkzeug==0.14.1
+python-pachyderm==1.9.0.post5
+protobuf==3.8.0
+docker==3.7.2
+graphviz==0.10.1
+boto3==1.9.93
+bitstring==3.1.5
+pytest-mock==1.10.4
+dataclasses-json==0.2.14
+cgroupspy==0.1.6
+psutil

@@ -1,0 +1,22 @@
+[
+    {
+    "name": "mnist",
+    "description": "Train an image classification model with the MNIST dataset",
+    "input_type": "images"
+  },
+  {
+    "name": "notebook",
+    "description": "Deploy a hosted notebook with custom requirements",
+    "input_type": "any"
+  },
+  {
+    "name": "property-val",
+    "description": "Train a model to predict housing prices",
+    "input_type": "numerical & categorical"
+  },
+  {
+    "name": "notebook-gpu",
+    "description": "Deploy a gpu-enabled notebook",
+    "input_type": "any"
+  }
+]

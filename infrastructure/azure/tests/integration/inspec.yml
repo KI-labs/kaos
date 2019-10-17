@@ -1,0 +1,14 @@
+---
+name: inspec-tests
+title: Microsoft Azure Configuration Testing
+maintainer: Taseer Ahmed
+copyright: Taseer Ahmed
+license: All Rights Reserved
+summary: Azure profile by writing the controls with InSpec
+version: 0.1.0
+inspec_version: '>= 3.0.0'
+depends:
+  - name: inspec-azure-master
+    url: https://github.com/inspec/inspec-azure/archive/master.tar.gz
+supports:
+  - platform: azure
