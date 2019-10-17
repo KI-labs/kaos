@@ -51,3 +51,5 @@ Check out our [Official Documentation](https://ki-labs.gitbook.io/kaos)
 - Check the [Changelog](https://ki-labs.gitbook.io/kaos/miscellaneous/changelog) for release information
 - Visit the [Public Roadmap](https://ki-labs.gitbook.io/kaos/miscellaneous/roadmap) to see what's coming next
 - Help improve kaos by following our [Contribution Guide](.github/CONTRIBUTING.md)
+
+Get in touch via our [slack channel](https://kaos-dev.slack.com) for user discussion.
