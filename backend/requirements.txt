@@ -1,6 +1,6 @@
 Flask==1.0.2
 gunicorn==19.9.0
-Werkzeug==0.14.1
+Werkzeug==0.15.3
 python-pachyderm==1.9.0.post5
 protobuf==3.8.0
 docker==3.7.2
