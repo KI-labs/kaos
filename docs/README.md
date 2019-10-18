@@ -22,7 +22,7 @@ Train, serve and predict in your **own** running cluster with [**8 commands!**](
 * Visit the [Public Roadmap](miscellaneous/roadmap.md) to see what's coming next
 * Bugs, issues and contributions should be created on [GitHub](https://github.com/KI-labs/kaos-infra)
 
-Get in touch via our [slack channel](https://kaos-dev.slack.com) for user discussion.
+Get in touch via our [slack channel](https://kaos-slack-inviter.herokuapp.com/) for user discussion.
 
 ![](.gitbook/assets/image-8.png)
 
