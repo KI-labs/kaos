@@ -297,7 +297,7 @@ Given the success in building the backend infrastructure for kaos and running th
 >
 > How to **attach data** to a hosted notebook?
 
-### \*\*\*\*[**Incremental Model Training**](../advanced-workflows/examples/bringing-your-own-model.md)\*\*\*\*
+### [**Incremental Model Training**](../advanced-workflows/examples/bringing-your-own-model.md)
 
 > How to work with new and/or additional **data**?
 >
