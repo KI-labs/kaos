@@ -61,3 +61,5 @@ jobs:
         - kubectl logs $BACKEND_POD_NAME
 #    - stage: Deploy Terraform
 #      script: bash scripts/ci/build.sh
+notifications:
+  slack: kaos-dev:axjjHl3KNB2C1RRWe1hHEP4i
