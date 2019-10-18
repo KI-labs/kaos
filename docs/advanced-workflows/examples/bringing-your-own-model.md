@@ -132,7 +132,7 @@ $ kaos train info -i 0
 +-----+--------------------+-----------------------+--------------------+-------------+-------+
 ```
 
-A specific metric can be displayed using  the `--sort_by` option in `kaos train info`.
+A specific metric can be displayed using the `--sort_by` option in `kaos train info`.
 
 ```text
 $ kaos train info -i 0 -s accuracy_test

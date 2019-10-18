@@ -36,7 +36,7 @@ binary data bundle
 
 {% endapi-method-response-example-description %}
 
-```
+```text
 
 ```
 {% endapi-method-response-example %}
@@ -50,7 +50,7 @@ add data manifest
 {% endapi-method-summary %}
 
 {% api-method-description %}
- This route allows uploading a **data manifest** for ingesting remote data in kaos.
+This route allows uploading a **data manifest** for ingesting remote data in kaos.
 {% endapi-method-description %}
 
 {% api-method-spec %}
@@ -80,7 +80,7 @@ binary dataset
 
 {% endapi-method-response-example-description %}
 
-```
+```text
 
 ```
 {% endapi-method-response-example %}
@@ -124,7 +124,7 @@ JSON representation of parameters
 
 {% endapi-method-response-example-description %}
 
-```
+```text
 
 ```
 {% endapi-method-response-example %}
@@ -138,7 +138,7 @@ add notebook data
 {% endapi-method-summary %}
 
 {% api-method-description %}
- This route allows uploading a **dataset** for experimentation within a hosted notebook.
+This route allows uploading a **dataset** for experimentation within a hosted notebook.
 {% endapi-method-description %}
 
 {% api-method-spec %}
@@ -165,18 +165,9 @@ Could not find a cake matching this query.
 ```javascript
 {
     "message": "Ain't no cake like that."
-
 ```
 {% endapi-method-response-example %}
 {% endapi-method-response %}
 {% endapi-method-spec %}
 {% endapi-method %}
-
-
-
-
-
-
-
-
 

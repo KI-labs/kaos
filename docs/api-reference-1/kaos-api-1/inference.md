@@ -24,7 +24,7 @@ selected workspace
 
 {% endapi-method-response-example-description %}
 
-```
+```text
 
 ```
 {% endapi-method-response-example %}
@@ -72,7 +72,7 @@ binary source bundle
 
 {% endapi-method-response-example-description %}
 
-```
+```text
 
 ```
 {% endapi-method-response-example %}
@@ -108,7 +108,7 @@ selected endpoint name
 
 {% endapi-method-response-example-description %}
 
-```
+```text
 
 ```
 {% endapi-method-response-example %}
@@ -144,7 +144,7 @@ selected endpoint name
 
 {% endapi-method-response-example-description %}
 
-```
+```text
 
 ```
 {% endapi-method-response-example %}
@@ -176,7 +176,7 @@ selected endpoint name
 
 {% endapi-method-response-example-description %}
 
-```
+```text
 
 ```
 {% endapi-method-response-example %}
@@ -190,7 +190,7 @@ endpoint build logs
 {% endapi-method-summary %}
 
 {% api-method-description %}
-This route retrieves logs associated with **building** the source endpoint ****image.
+This route retrieves logs associated with **building** the source endpoint _\*\*_image.
 {% endapi-method-description %}
 
 {% api-method-spec %}
@@ -212,7 +212,7 @@ selected **building** job\_id
 
 {% endapi-method-response-example-description %}
 
-```
+```text
 
 ```
 {% endapi-method-response-example %}
@@ -244,7 +244,7 @@ selected endpoint name
 
 {% endapi-method-response-example-description %}
 
-```
+```text
 
 ```
 {% endapi-method-response-example %}

@@ -8,15 +8,15 @@ A local cluster is included for rapid prototyping, debugging and non-production 
 It only takes approximately **1 minute** to successfully deploy a **local** kaos cluster
 {% endhint %}
 
-### Docker Desktop
+## Docker Desktop
 
 A correctly running local kubernetes cluster is **absolutely** necessary prior to deploying kaos. The following steps are required before building kaos.
 
-#### 1\) Local Kubernetes Cluster
+### 1\) Local Kubernetes Cluster
 
 A local kubernetes cluster within Docker Desktop must be **enabled.**
 
-![](../../.gitbook/assets/image%20%2840%29.png)
+![](../../.gitbook/assets/image-40%20%281%29.png)
 
 {% hint style="warning" %}
 Docker Desktop **does not** enable a Kubernetes cluster by default
@@ -24,7 +24,7 @@ Docker Desktop **does not** enable a Kubernetes cluster by default
 
 The following resource requirements are **suggested** for running the Quick Start locally.
 
-![](../../.gitbook/assets/image%20%2824%29.png)
+![](../../.gitbook/assets/image-24.png)
 
 **2\) Set Kubernetes Context**
 
@@ -56,7 +56,7 @@ kaos build -c DOCKER -v
 kaos destroy -c DOCKER -v
 ```
 
-### Minikube
+## Minikube
 
 {% hint style="warning" %}
 **Only used for running integration tests -** use Docker Desktop for deploying a local cluster

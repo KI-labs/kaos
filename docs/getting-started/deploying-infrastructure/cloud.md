@@ -8,7 +8,7 @@ Check [AWS](https://aws.amazon.com/ec2/instance-types/) or [GCP](https://cloud.g
 
 The state of the infrastructure deployment is handled within the terraform [backend](https://www.terraform.io/docs/backends/index.html). kaos allows the user to use either a local or remote backend with the available `-l` or `--local_backend` option. Deploying a local backend should only be considered for testing purposes since it resides **locally**.
 
-### Amazon Web Services \(AWS\)
+## Amazon Web Services \(AWS\)
 
 The cluster type and size can be specified through `ENV` based on the following naming convention:
 
@@ -57,7 +57,7 @@ kaos destroy -c AWS -v
 It can take upwards of **15 minutes** to successfully deploy a kaos cluster in **AWS**
 {% endhint %}
 
-### Google Cloud Platform \(GCP\)
+## Google Cloud Platform \(GCP\)
 
 The cluster type and size can be specified through `ENV` based on the following naming convention
 
@@ -117,7 +117,7 @@ kaos destroy -c GCP -v
 It can take upwards of **15 minutes** to successfully deploy a kaos cluster in **GCP**
 {% endhint %}
 
-### Microsoft Azure \(AZ\)
+## Microsoft Azure \(AZ\)
 
 {% hint style="danger" %}
 Note that Azure is not fully implemented for the current release

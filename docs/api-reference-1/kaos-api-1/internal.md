@@ -1,34 +1,10 @@
 # /internal
 
 {% api-method method="delete" host="https://xxxx.yyyy.zzzz.com" path="/internal/resources" %}
-{% api-method-summary %}
-destroy all resources
-{% endapi-method-summary %}
-
-{% api-method-description %}
-This route **destroys** all kaos resources.
-{% endapi-method-description %}
-
-{% api-method-spec %}
-{% api-method-request %}
-
-{% api-method-response %}
-{% api-method-response-example httpCode=200 %}
-{% api-method-response-example-description %}
-
-{% endapi-method-response-example-description %}
-
-```
-
-```
-{% endapi-method-response-example %}
-{% endapi-method-response %}
-{% endapi-method-spec %}
-{% endapi-method %}
 
 {% api-method method="post" host="https://xxxx.yyyy.zzzz.com" path="/internal/train\_pipeline/{workspace}/{user}" %}
 {% api-method-summary %}
-create training pipeline
+
 {% endapi-method-summary %}
 
 {% api-method-description %}
@@ -64,7 +40,7 @@ name of image for running training
 
 {% endapi-method-response-example-description %}
 
-```
+```text
 
 ```
 {% endapi-method-response-example %}
@@ -110,7 +86,7 @@ name of image for spawning notebook
 
 {% endapi-method-response-example-description %}
 
-```
+```text
 
 ```
 {% endapi-method-response-example %}
@@ -156,7 +132,7 @@ name of image for spawning notebook
 
 {% endapi-method-response-example-description %}
 
-```
+```text
 
 ```
 {% endapi-method-response-example %}

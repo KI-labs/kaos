@@ -1,6 +1,6 @@
 # ✔ Flexibility
 
-![https://github.com/pachyderm/pachyderm](../.gitbook/assets/image%20%2846%29.png)
+![https://github.com/pachyderm/pachyderm](../.gitbook/assets/image-46.png)
 
 The kaos core is built with [Pachyderm](https://pachyderm.github.io/), an open source language-agnostic tool for data pipelines. Pachyderm is committed to the notion that "_data scientists should be able to focus on data science, not infrastructure_". The main benefits of using Pachyderm are listed below.
 
@@ -22,6 +22,4 @@ kaos augments the core Pachyderm building blocks by creating **dynamic** pipelin
 {% hint style="success" %}
 kaos leverages **all the benefits** of Pachyderm for ensuring full "processing freedom"
 {% endhint %}
-
-
 

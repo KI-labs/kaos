@@ -2,7 +2,7 @@
 
 Whenever your training submission is getting stuck at either building or training stage, you can kill it with a `kaos train kill` command.
 
-```
+```text
 $ kaos train list
 
 +--------------------------------------------------------------------------------------------+

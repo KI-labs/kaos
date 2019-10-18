@@ -14,9 +14,7 @@ Train, serve and predict in your **own** running cluster with [**8 commands!**](
 
 ## Features
 
-
-
-![](.gitbook/assets/kaos-features.png)
+![](.gitbook/assets/kaos-features%20%281%29.png)
 
 ## Support
 
@@ -26,9 +24,5 @@ Train, serve and predict in your **own** running cluster with [**8 commands!**](
 
 Get in touch via our [slack channel](https://kaos-dev.slack.com) for user discussion.
 
-
-
-
-
-![](.gitbook/assets/image%20%288%29.png)
+![](.gitbook/assets/image-8.png)
 

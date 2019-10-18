@@ -46,11 +46,11 @@ Resulting model **satisfies** the desired KPI!
 {% endtab %}
 {% endtabs %}
 
-![incremental model development in time with kaos](../.gitbook/assets/image%20%2826%29.png)
+![incremental model development in time with kaos](../.gitbook/assets/image-26.png)
 
 {% hint style="success" %}
 kaos enables incremental processing when **any or all updated inputs are desired**
 {% endhint %}
 
- Check out the [Training Pipeline](../usage/high-level-usage/ml-deployment/train-pipeline.md) for detailed information regarding its inputs and outputs.
+Check out the [Training Pipeline](../usage/high-level-usage/ml-deployment/train-pipeline.md) for detailed information regarding its inputs and outputs.
 

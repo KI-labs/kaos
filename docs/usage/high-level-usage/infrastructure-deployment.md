@@ -6,7 +6,7 @@ This involves deploying the underlying infrastructure within the selected comput
 
 The conceptual overview shown below indicates how `kaos build` deploys the entire kaos backend.
 
-![](../../.gitbook/assets/kaos_build%20%281%29.png)
+![](../../.gitbook/assets/kaos_build-1.png)
 
 ## General Usage
 
@@ -61,7 +61,7 @@ user =
 
 [backend]
 url = http://XYZ.amazonaws.com:80/api/
-token = 
+token =
 ```
 {% endcode-tabs-item %}
 {% endcode-tabs %}

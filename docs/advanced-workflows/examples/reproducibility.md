@@ -110,11 +110,10 @@ mnist
             ├── requirements.txt
             ├── train
             └── utils.py
-
 ```
 
 {% hint style="success" %}
-kaos **simplifies retraining** by running `kaos train deploy` after `kaos train get` 
+kaos **simplifies retraining** by running `kaos train deploy` after `kaos train get`
 {% endhint %}
 
 #### Data
@@ -196,12 +195,12 @@ $ kaos train info -i 0
 |     | Path: /mnist:e23a2 | Path: /features:9fd9d |                    |             |
 +-----+--------------------+-----------------------+--------------------+-------------+
 
-$ 
+$
 ```
 
 In short, running `kaos train provenance -m e23a2_9fd9d:b82151` yields the visual overview \(below\) of the entire training provenance.
 
-![mnist/provenance/model-e23a2\_9fd9d:b82151.pdf](../../.gitbook/assets/image%20%281%29.png)
+![mnist/provenance/model-e23a2\_9fd9d:b82151.pdf](../../.gitbook/assets/image-1.png)
 
 {% hint style="success" %}
 kaos tracks **training** provenance to keep all processing **fully transparent**
@@ -258,7 +257,6 @@ mnist
             ├── serve
             ├── web-requirements.txt
             └── wsgi.py
-
 ```
 
 {% hint style="success" %}
@@ -283,7 +281,7 @@ $ kaos serve list
 
 Running `kaos serve provenance -e serve-mnist-ae6466` yields a visual overview \(below\) of the entire endpoint provenance \(i.e. both training and serving and their respective inputs\).
 
-![mnist/provenance/serve-mnist-ae6466.pdf](../../.gitbook/assets/image%20%2848%29.png)
+![mnist/provenance/serve-mnist-ae6466.pdf](../../.gitbook/assets/image-48.png)
 
 {% hint style="success" %}
 kaos tracks **endpoint** provenance to keep all processing **fully transparent**

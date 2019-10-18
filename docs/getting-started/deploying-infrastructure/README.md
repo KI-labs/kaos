@@ -10,7 +10,7 @@ Note that only **a single backend** can be deployed from the same directory. **D
 
 ## Requirements
 
-kaos is cloud agnostic, meaning it can be deployed in **all** major cloud providers. The following sections highlight the required `ENV` by cloud. 
+kaos is cloud agnostic, meaning it can be deployed in **all** major cloud providers. The following sections highlight the required `ENV` by cloud.
 
 ```bash
 export KAOS_HOME="<path/to/local/cloned/kaos>"
@@ -43,7 +43,6 @@ Options:
   -l, --local_backend             terraform will store backend locally, only
                                   relevant for clouds
   --help                          Show this message and exit.
-
 ```
 
 {% hint style="info" %}
@@ -67,10 +66,4 @@ There is **no actual difference** between deploying a `prod` vs. a `dev` cluster
 {% hint style="danger" %}
 Local infrastructure backends **do not support** environments!
 {% endhint %}
-
-
-
-
-
-
 

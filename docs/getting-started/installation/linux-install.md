@@ -6,25 +6,25 @@ The kaos command-line utility is used for all interactions. It is rather lightwe
 
 {% tabs %}
 {% tab title="Data Scientist" %}
-* [**jq**](https://stedolan.github.io/jq/download/) ****for processing JSON
+* [**jq**](https://stedolan.github.io/jq/download/) for processing JSON
 
   ```bash
   apt-get install jq
   ```
 
-* \*\*\*\*[**coreutils**](https://www.gnu.org/software/coreutils/) ****for additional core utilities
+* [**coreutils**](https://www.gnu.org/software/coreutils/) for additional core utilities
 
   ```bash
   apt-get install coreutils
   ```
 
-* \*\*\*\*[**graphviz**](https://www.graphviz.org/download/) ****for visualization of data provenance
+* [**graphviz**](https://www.graphviz.org/download/) for visualization of data provenance
 
   ```bash
   apt-get install graphviz
   ```
 
-* [**python 3.7**](https://www.python.org/downloads/) ****for running all kaos commands
+* [**python 3.7**](https://www.python.org/downloads/) for running all kaos commands
 
   ```bash
   apt-get install python3.7
@@ -32,31 +32,31 @@ The kaos command-line utility is used for all interactions. It is rather lightwe
 {% endtab %}
 
 {% tab title="Superhero" %}
-* [**jq**](https://stedolan.github.io/jq/download/) ****for processing JSON
+* [**jq**](https://stedolan.github.io/jq/download/) for processing JSON
 
   ```bash
   apt-get install jq
   ```
 
-* \*\*\*\*[**coreutils**](https://www.gnu.org/software/coreutils/) ****for additional core utilities
+* [**coreutils**](https://www.gnu.org/software/coreutils/) for additional core utilities
 
   ```bash
   apt-get install coreutils
   ```
 
-* \*\*\*\*[**graphviz**](https://www.graphviz.org/download/) ****for visualization of data provenance
+* [**graphviz**](https://www.graphviz.org/download/) for visualization of data provenance
 
   ```bash
   apt-get install graphviz
   ```
 
-* \*\*\*\*[**docker**](https://docs.docker.com/install/linux/docker-ce/ubuntu/) for dynamic linking of docker registry \(function of `kaos build`\)
+* [**docker**](https://docs.docker.com/install/linux/docker-ce/ubuntu/) for dynamic linking of docker registry \(function of `kaos build`\)
 
   ```bash
   apt-get install docker
   ```
 
-* \*\*\*\*[**kubectl**](https://kubernetes.io/docs/tasks/tools/install-kubectl/) for interacting with the kaos cluster
+* [**kubectl**](https://kubernetes.io/docs/tasks/tools/install-kubectl/) for interacting with the kaos cluster
 
   ```bash
   export version=$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)
@@ -65,7 +65,7 @@ The kaos command-line utility is used for all interactions. It is rather lightwe
   mv kubectl /usr/local/bin/
   ```
 
-* [**Terraform**](https://learn.hashicorp.com/terraform/getting-started/install.html) ****for building entire infrastructure as IaC \(see [Deploying Infrastructure](../deploying-infrastructure/)\)
+* [**Terraform**](https://learn.hashicorp.com/terraform/getting-started/install.html) for building entire infrastructure as IaC \(see [Deploying Infrastructure](../deploying-infrastructure/)\)
 
   ```bash
   export tf_version=0.12.8
@@ -75,7 +75,7 @@ The kaos command-line utility is used for all interactions. It is rather lightwe
   rm terraform_${tf_version}_linux_amd64.zip
   ```
 
-* [**python 3.7**](https://www.python.org/downloads/) ****for running all kaos commands
+* [**python 3.7**](https://www.python.org/downloads/) for running all kaos commands
 
   ```bash
   apt-get install python3.
@@ -87,7 +87,7 @@ The kaos command-line utility is used for all interactions. It is rather lightwe
   pip3 install awscli
   ```
 
-* [**aws authenticator**](https://docs.aws.amazon.com/eks/latest/userguide/install-aws-iam-authenticator.html) ****for deploying Kubernetes \(EKS\) in AWS **\[OPTIONAL\]**
+* [**aws authenticator**](https://docs.aws.amazon.com/eks/latest/userguide/install-aws-iam-authenticator.html) for deploying Kubernetes \(EKS\) in AWS **\[OPTIONAL\]**
 
   ```bash
   curl -o aws-iam-authenticator https://amazon-eks.s3-us-west-2.amazonaws.com/1.14.6/2019-08-22/bin/linux/amd64/aws-iam-authenticator
@@ -114,7 +114,7 @@ kaos supports **two** installation methods based on the desired simplicity and e
 | Methods | Description |
 | :--- | :--- |
 | Automatic \[**Recommended**\] | Isolated dependencies **with** a virtual environment \(requires [**pipenv**](https://docs.pipenv.org/en/latest/install/#installing-pipenv)\) |
-| Manual \[**Advanced**\] | Manual installation **without** a virtual environment  |
+| Manual \[**Advanced**\] | Manual installation **without** a virtual environment |
 
 {% hint style="info" %}
 Note that the following installation steps assume the kaos repository is accessed by **HTTPS**
@@ -149,7 +149,7 @@ cd ../cli && python3 setup.py install
 
 Running `kaos` will greet the user with the following response.
 
-![](../../.gitbook/assets/image%20%2850%29.png)
+![](../../.gitbook/assets/image-50.png)
 
 Refer to [**Quick Start**](../quick-start.md#2-create-a-workspace) for hands-on experience with training and serving a model within kaos.
 

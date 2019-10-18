@@ -6,7 +6,7 @@ description: Source Bundle + Data = Hosted Notebook
 
 The **Notebook Pipeline** consists of two stages - **Build** and **Host**. They are separate Pachyderm pipelines but are linked together to form a cohesive process. The user is able to identify and track progress \(and logs\) throughout both the **Build** and **Host** stages of the **Notebook Pipeline**. Status is shown via`kaos notebook list`, while logs are available via `kaos notebook build-logs`.
 
-![](../../../.gitbook/assets/image%20%2843%29.png)
+![](../../../.gitbook/assets/image-43.png)
 
 ## Inputs
 
@@ -41,7 +41,7 @@ Submit the above bundle with `kaos train deploy -s notebook/example`
 The data bundle is responsible for submitting **local** data to the hosted notebook.
 
 {% hint style="info" %}
-The data bundle ****can be any shape since the notebook has access to its content.
+The data bundle _\*\*_can be any shape since the notebook has access to its content.
 {% endhint %}
 
 The sample **local** data bundle for the mnist model is shown below.

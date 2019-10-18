@@ -40,7 +40,7 @@ $ kaos template get --name mnist
 
 ## Train with Remote Data
 
-The training pipeline **requires** at least a valid source and data bundle. The following command uses **remote** data in the form of a data manifest, opposed to **local** data. Refer to [Data Bundle](../../usage/high-level-usage/ml-deployment/train-pipeline.md#data-bundle) for additional information. 
+The training pipeline **requires** at least a valid source and data bundle. The following command uses **remote** data in the form of a data manifest, opposed to **local** data. Refer to [Data Bundle](../../usage/high-level-usage/ml-deployment/train-pipeline.md#data-bundle) for additional information.
 
 {% hint style="info" %}
 The data manifest,`/templates/mnist/data_manifest_mid/data.mf`, contains links to **1000s of small files** for training. There is a tiny **debug version** containing links to 6 files in`/templates/mnist/data_manifest_micro/data.mf`
@@ -49,7 +49,7 @@ The data manifest,`/templates/mnist/data_manifest_mid/data.mf`, contains links t
 ```text
 kaos train deploy -s templates/mnist/model-train \
                   -m templates/mnist/data_manifest_mid/data.mf
-                  
+
 Submitting source bundle: templates/mnist/model-train
 Compressing source bundle: 100%|███████████████████████████|
  ✔ Setting source bundle: /mnist:e23a2
@@ -67,6 +67,4 @@ CURRENT TRAINING INPUTS
 | <building> | /features:c6062 |             |
 +------------+-----------------+-------------+
 ```
-
- 
 

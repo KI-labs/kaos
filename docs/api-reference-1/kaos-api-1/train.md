@@ -24,7 +24,7 @@ selected workspace
 
 {% endapi-method-response-example-description %}
 
-```
+```text
 
 ```
 {% endapi-method-response-example %}
@@ -56,7 +56,7 @@ selected workspaces\_\_
 
 {% endapi-method-response-example-description %}
 
-```
+```text
 
 ```
 {% endapi-method-response-example %}
@@ -100,7 +100,7 @@ binary source bundle
 
 {% endapi-method-response-example-description %}
 
-```
+```text
 
 ```
 {% endapi-method-response-example %}
@@ -146,7 +146,7 @@ metric for sorting trained models
 
 {% endapi-method-response-example-description %}
 
-```
+```text
 
 ```
 {% endapi-method-response-example %}
@@ -196,7 +196,7 @@ flag for downloading trained model
 
 {% endapi-method-response-example-description %}
 
-```
+```text
 
 ```
 {% endapi-method-response-example %}
@@ -232,7 +232,7 @@ selected model id
 
 {% endapi-method-response-example-description %}
 
-```
+```text
 
 ```
 {% endapi-method-response-example %}
@@ -268,7 +268,7 @@ selected **training** job id
 
 {% endapi-method-response-example-description %}
 
-```
+```text
 
 ```
 {% endapi-method-response-example %}
@@ -304,14 +304,14 @@ selected workspace
 Is returned if the job was successfully killed
 {% endapi-method-response-example-description %}
 
-```
+```text
 
 ```
 {% endapi-method-response-example %}
 
 {% api-method-response-example httpCode=400 %}
 {% api-method-response-example-description %}
-Is returned if  the job was not in a running state
+Is returned if the job was not in a running state
 {% endapi-method-response-example-description %}
 
 ```javascript

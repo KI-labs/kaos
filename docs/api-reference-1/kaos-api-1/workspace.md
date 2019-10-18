@@ -24,7 +24,7 @@ This route lists all existing **workspaces** within kaos
 
 {% endapi-method-response-example-description %}
 
-```
+```text
 
 ```
 {% endapi-method-response-example %}
@@ -56,7 +56,7 @@ selected workspace
 
 {% endapi-method-response-example-description %}
 
-```
+```text
 
 ```
 {% endapi-method-response-example %}
@@ -94,7 +94,7 @@ user for tracking ownership of parameters
 
 {% endapi-method-response-example-description %}
 
-```
+```text
 
 ```
 {% endapi-method-response-example %}
@@ -126,7 +126,7 @@ selected workspace
 
 {% endapi-method-response-example-description %}
 
-```
+```text
 
 ```
 {% endapi-method-response-example %}

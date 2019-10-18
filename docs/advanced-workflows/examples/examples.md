@@ -4,7 +4,7 @@
 
 kaos supports hyperparameter optimization based on a simplistic [Grid Search](https://en.wikipedia.org/wiki/Hyperparameter_optimization#Grid_search) approach. More information regarding its implementation is explained in the [Train Pipeline](../../usage/high-level-usage/ml-deployment/train-pipeline.md#params-optional).
 
-This example showcases the ease of selecting the best hyperparameter based on parallel training jobs with all combinations \(i.e. Grid Search\) of the user inputs. 
+This example showcases the ease of selecting the best hyperparameter based on parallel training jobs with all combinations \(i.e. Grid Search\) of the user inputs.
 
 {% hint style="warning" %}
 This example assumes you are a [Data Scientist](../../usage/high-level-usage/#kaos-personas) using kaos with a running endpoint
@@ -51,12 +51,12 @@ def train():
     # load "static" params
     with open(params_fid, 'r') as src:
         params = json.load(src)
-        
+
     # load params from "hyperopt" job
     params = hyperparams(params)
-    
+
     <do stuff>
-    
+
     classifier = svm.SVC(gamma=float(params['gamma']),
         decision_function_shape=params['decision_function_shape'],
         kernel=params['kernel'],
@@ -116,7 +116,7 @@ $ kaos train deploy -d templates/mnist/data \
 Submitting data bundle: templates/mnist/data
 Compressing data bundle: 100%|███████████████████████████|
  ✔ Setting data bundle: /features:9fd9d
- 
+
  Submitting hyperparams bundle: templates/mnist/hyperopt/params.json
  ✔ Setting hyperparameters bundle: /3fbf2/*
 
@@ -217,7 +217,7 @@ $ kaos train info -i 0
 Note that kaos **results are paginated** if exceeding 10 trained models within a single job
 {% endhint %}
 
-A specific metric can be displayed using  the `--sort_by` option in `kaos train info`. For this example, the **best** hyperparameter set is determined based on `accuracy_validation`.
+A specific metric can be displayed using the `--sort_by` option in `kaos train info`. For this example, the **best** hyperparameter set is determined based on `accuracy_validation`.
 
 ```text
 $ kaos train info -i 0 -s accuracy_validation

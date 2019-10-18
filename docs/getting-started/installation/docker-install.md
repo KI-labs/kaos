@@ -18,7 +18,7 @@ The kaos command-line utility is used for all interactions. It is lightweight bu
 
 ## Installation
 
-kaos supports  installation methods based on the desired simplicity and environment.
+kaos supports installation methods based on the desired simplicity and environment.
 
 {% hint style="info" %}
 Note that the following installation steps assume the kaos repository is accessed by **HTTPS**
@@ -42,7 +42,7 @@ The default docker installation **only mounts the current directory** - addition
 
 Running `kaos` will greet the user with the following response.
 
-![](../../.gitbook/assets/image%20%2850%29.png)
+![](../../.gitbook/assets/image-50.png)
 
 Refer to [**Quick Start**](../quick-start.md#2-create-a-workspace) for hands-on experience with training and serving a model within kaos.
 

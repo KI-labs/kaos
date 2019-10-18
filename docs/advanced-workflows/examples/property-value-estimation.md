@@ -1,6 +1,6 @@
 # Debugging
 
-Although kaos was designed and abstracted for simplicity, it still requires some form of debugging since erroneous inputs are inevitable. This example presents a few built-in approaches for debugging both training and serving jobs. 
+Although kaos was designed and abstracted for simplicity, it still requires some form of debugging since erroneous inputs are inevitable. This example presents a few built-in approaches for debugging both training and serving jobs.
 
 {% hint style="warning" %}
 This example assumes you are a [Data Scientist](https://app.gitbook.com/@ki-labs/s/kaos/usage/high-level-usage#kaos-personas) using kaos with a running endpoint
@@ -40,7 +40,7 @@ $ kaos template get --name mnist
 
 ## 1. Build errors
 
-A simplistic example of a build error is presented below. In short, a typo in the `requirements.txt` file will cause an error during the build stage of the [Train Pipeline](../../usage/high-level-usage/ml-deployment/train-pipeline.md). Note that this is identical to an error during the build stage of the [Serve Pipeline](../../usage/high-level-usage/ml-deployment/serve-pipeline.md)  and Notebook Pipeline but this example will focus on **training**.
+A simplistic example of a build error is presented below. In short, a typo in the `requirements.txt` file will cause an error during the build stage of the [Train Pipeline](../../usage/high-level-usage/ml-deployment/train-pipeline.md). Note that this is identical to an error during the build stage of the [Serve Pipeline](../../usage/high-level-usage/ml-deployment/serve-pipeline.md) and Notebook Pipeline but this example will focus on **training**.
 
 ```text
 scikit-learn==0.20.3
@@ -86,10 +86,9 @@ $ kaos train list
 +----------+----------------------------------+-------------------------------+-------------+
 |    20    | 7a74b6974ba346238baf0a5f397774df | Mon, 29 Jul 2019 15:08:36 GMT | JOB_FAILURE |
 +----------+----------------------------------+-------------------------------+-------------+
-
 ```
 
-Debugging kaos jobs in the building stage is completed by inspecting the job logs. This functionality is exposed through `kaos train build-logs`. 
+Debugging kaos jobs in the building stage is completed by inspecting the job logs. This functionality is exposed through `kaos train build-logs`.
 
 ```text
 $ kaos train build-logs -j 7a74b6974ba346238baf0a5f397774df
@@ -111,9 +110,9 @@ A basic example for debugging an error during training is presented. Once again,
 
 ```python
 def train():
-   
+
     <do stuff>
-    
+
     # Model definition and classification
     classifier = svm.SVC(gamma=float(params['gamma']),
                          decision_function_shape=params['decision_function_shape'],
@@ -160,7 +159,7 @@ $ kaos train list
 +-----+----------+----------+----------------------------------+-------------------------------+-------------+
 ```
 
-Debugging kaos jobs in the training stage is completed by inspecting the job logs. This functionality is exposed through `kaos train logs`. 
+Debugging kaos jobs in the training stage is completed by inspecting the job logs. This functionality is exposed through `kaos train logs`.
 
 ```text
 $ kaos train logs -j 8811746e3f6343d1bd6f3d520f7a54d0
@@ -212,7 +211,7 @@ The serve job is deployed with the erroneous source bundle.
 ```text
 $ kaos serve deploy -s templates/mnist/model-serve \
                     -m e23a2_9fd9d:134639
-                    
+
 Submitting source bundle: templates/mnist/model-serve
 Compressing source bundle: 100%|███████████████████████████|
  ✔ Adding trained model_id: e23a2_9fd9d:134639

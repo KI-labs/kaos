@@ -2,7 +2,7 @@
 
 The application is divided into **four** layers.
 
-#### Module `routes`
+## Module `routes`
 
 The outermost layer that specifies the REST API of the backend and leaves all the processing to`controllers`. It handles everything HTTP-specific, marshals exceptions into responses.
 
@@ -15,15 +15,15 @@ The outermost layer that specifies the REST API of the backend and leaves all th
 | [/inference](inference.md) | deploy an endpoint with a trained model |
 | [/internal](internal.md) | callback for deploying pipelines |
 
-#### Module `controllers`
+## Module `controllers`
 
 It contains all the high-level business logic of the application.
 
-#### Module `services`
+## Module `services`
 
 It encapsulates all low-level mechanics and exposes an abstracted interface, so that the controllers manipulate with kaos-specific concepts without any low-level logic.
 
-#### Module `clients`
+## Module `clients`
 
 A thin wrapper over [Pachyderm](https://pachyderm.io/) internal storage and pipeline clients. It organizes access to Pachyderms' subsystems, decodes the responses and provides error handling.
 

@@ -2,7 +2,7 @@
 
 Pipelines and job within kaos rely on [Pachyderm](https://pachyderm.github.io/), which uses the following descriptions for distinguishing different states.
 
-### Training Jobs \(and all Build Jobs\)
+## Training Jobs \(and all Build Jobs\)
 
 The following states are valid when deploying a **training** **job** in kaos.
 
@@ -15,7 +15,7 @@ The following states are valid when deploying a **training** **job** in kaos.
 | **`JOB_FAILURE`** | Job _failed_ - check logs |
 | **`JOB_KILLED`** | Job _killed_ by user |
 
-### Serve Pipelines
+## Serve Pipelines
 
 The following states are valid when deploying a **serve** **pipeline** in kaos.
 

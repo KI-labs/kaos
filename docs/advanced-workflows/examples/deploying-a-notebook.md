@@ -55,18 +55,17 @@ $ kaos notebook list
 +-----+-------------------------------+--------------------------+------------------+----------------------------------------+-----------+
 |  0  | Mon, 29 Jul 2019 19:35:55 GMT | notebook-local-jfriedman | PIPELINE_RUNNING | localhost/notebook-local-jfriedman/lab | jfriedman |
 +-----+-------------------------------+--------------------------+------------------+----------------------------------------+-----------+
-
 ```
 
 ### Resulting Notebook
 
 Connecting to the presented url will present the following familiar landing page. Note that the **token** was previously displayed when deploying the notebook \(i.e. `jfriedman`\).
 
-![localhost/notebook-local-jfriedman/lab](../../.gitbook/assets/image%20%2834%29.png)
+![localhost/notebook-local-jfriedman/lab](../../.gitbook/assets/image-34%20%281%29.png)
 
 The resulting basic notebook is as advertised - free of any code, data and/or requirements. Files can still be added by either dragging and dropping into the browser or by following the `File/<Open from Path>` option.
 
-![hosted notebook python3 kernel](../../.gitbook/assets/image%20%2823%29.png)
+![hosted notebook python3 kernel](../../.gitbook/assets/image-23.png)
 
 {% hint style="success" %}
 kaos deploys **basic notebooks** for experimentation with one simple command
@@ -114,7 +113,7 @@ $ kaos notebook list
 
 The same landing page will greet upon connection. Note that the **token** was previously displayed when deploying the notebook \(i.e. `jfriedman`\). The difference is that `numpy` was added to the `requirements.txt` when building the notebook, enabling direct access to the package.
 
-![hosted notebook python3 kernel with numpy package](../../.gitbook/assets/image%20%2819%29.png)
+![hosted notebook python3 kernel with numpy package](../../.gitbook/assets/image-19.png)
 
 {% hint style="success" %}
 kaos deploys **custom notebooks** for experimentation with one simple command
@@ -133,7 +132,7 @@ Compressing data bundle: 100%|████████████████�
 
 The resulting `templates/mnist/data` directory is immediately attached and ready for experimentation within the hosted notebook.
 
-![](../../.gitbook/assets/image%20%282%29.png)
+![](../../.gitbook/assets/image-2.png)
 
 {% hint style="success" %}
 kaos can **attach any data** to a running notebook via `kaos notebook deploy`

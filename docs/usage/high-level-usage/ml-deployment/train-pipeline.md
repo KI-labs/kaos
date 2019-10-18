@@ -6,7 +6,7 @@ description: Source Bundle + Data Bundle (+ Hyperparams) = Trained Model
 
 The **Train Pipeline** consists of two stages - **Build** and **Train**. They are separate Pachyderm pipelines but are linked together to form a cohesive process. The user is able to identify and track progress \(and logs\) throughout both the **Build** and **Train** stages of the **Train Pipeline**. Progress is shown via`kaos train list`, while logs are available via `kaos train logs`.
 
-![conceptual train pipeline](../../../.gitbook/assets/image%20%2827%29.png)
+![conceptual train pipeline](../../../.gitbook/assets/image-27.png)
 
 ## Inputs
 
@@ -47,7 +47,7 @@ kaos supports both **local** and **remote** data bundles for training.
 The data bundle is responsible for submitting **local** data necessary by the source bundle. The same "hands-off versioning" approach is also implemented for the data bundle. Submit data, train a model, change data, submit data, train a new model, etc... Rinse and repeat!
 
 {% hint style="info" %}
-The data bundle ****can be any shape since only the`train` script \(in the source bundle\) needs to be able to access its content.
+The data bundle _\*\*_can be any shape since only the`train` script \(in the source bundle\) needs to be able to access its content.
 {% endhint %}
 
 The sample **local** data bundle for the mnist model is shown below.
@@ -90,13 +90,13 @@ Submit a **manifest file** with a this command:`kaos train deploy -m mnist/data_
 
 #### Internal Structure
 
-The following generalized JSON structure is required for the manifest file. 
+The following generalized JSON structure is required for the manifest file.
 
 ```text
 {"url": string, "path": string}
 ```
 
-The `"url"` specifies the remote address of the desired data, while `"path"` specifies the relative location within kaos for ingestion **based on the location of the manifest file**. 
+The `"url"` specifies the remote address of the desired data, while `"path"` specifies the relative location within kaos for ingestion **based on the location of the manifest file**.
 
 A small excerpt from the mnist training manifest file saved at `mnist/data_manifest_micro/data.mf` is highlighted below.
 
@@ -120,12 +120,12 @@ def train():
     # load "static" params
     with open(params_fid, 'r') as src:
         params = json.load(src)
-        
+
     # load params from "hyperopt" job
     params = hyperparams(params)
-    
+
     <do stuff>
-    
+
     classifier = svm.SVC(gamma=float(params['gamma']),
         decision_function_shape=params['decision_function_shape'],
         kernel=params['kernel'],
@@ -146,7 +146,6 @@ The structure of a valid hyperopt input is a simple JSON with the correct keys \
     "ova"
   ]
 }
-
 ```
 
 {% hint style="success" %}
@@ -170,6 +169,4 @@ The result of the **Train Pipeline** is \(ideally\) a trained model but the user
 {% hint style="info" %}
 There are absolutely **no restrictions** on the output from a training job!
 {% endhint %}
-
-
 

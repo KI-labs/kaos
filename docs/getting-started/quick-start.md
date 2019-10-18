@@ -171,7 +171,7 @@ $ kaos train provenance -m 1909d_5c3ca:828c4e -o mnist/
 Info - Retrieving provenance from 1909d_5c3ca:828c4e
 ```
 
-![trained model provenance](../.gitbook/assets/image%20%287%29.png)
+![trained model provenance](../.gitbook/assets/image-7.png)
 
 ## 6. Serve the trained model
 
@@ -224,7 +224,7 @@ $ kaos serve provenance -i 0 -o mnist/
 Info - Retrieving provenance from serve-mnist-53d3da
 ```
 
-![endpoint provenance](../.gitbook/assets/image%20%286%29.png)
+![endpoint provenance](../.gitbook/assets/image-6.png)
 
 ## 8. Predict
 
@@ -232,7 +232,7 @@ Info - Retrieving provenance from serve-mnist-53d3da
 
 The running endpoint is now ready for "real world" testing - prediction against a self-made handrawn digit.
 
-![templates/mnist/test\_payload.jpg](../.gitbook/assets/test_payload.jpg)
+![templates/mnist/test\_payload.jpg](../.gitbook/assets/test_payload%20%282%29.jpg)
 
 ```text
 $ curl -X POST localhost/serve-mnist-53d3da/invocations \
@@ -247,7 +247,7 @@ $ curl -X POST localhost/serve-mnist-53d3da/invocations \
 
 ## Removal
 
-The **Quick Start** example can be removed with two different methods - **workspace** and/or by **cluster**. 
+The **Quick Start** example can be removed with two different methods - **workspace** and/or by **cluster**.
 
 > The following kaos commands should be **only be used when absolutely necessary!**
 >
@@ -289,7 +289,7 @@ Info - Successfully destroyed kaos environment
 
 ## What's Next?
 
-Given the success in building the backend infrastructure for kaos and running the MNIST template, it is time to **dig deeper into "real" workflows**  inspired by the following questions.
+Given the success in building the backend infrastructure for kaos and running the MNIST template, it is time to **dig deeper into "real" workflows** inspired by the following questions.
 
 ### [Deploying a Notebook](../advanced-workflows/examples/deploying-a-notebook.md)
 

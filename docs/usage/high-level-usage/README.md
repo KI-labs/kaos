@@ -2,7 +2,7 @@
 
 kaos is not functional as an ML platform **until it has been deployed in a user-specified cloud environment** \(i.e. via `kaos build`\). Note that `kaos build` is distinct from the _typical_ ML workflow in kaos since it should be done infrequently and with greater knowledge of underlying infrastructure.
 
-### kaos Personas
+## kaos Personas
 
 The separation is purposely designed to split the intended user flows - **build** vs. **interact**. This aligns with the **three** intended kaos personas.
 
@@ -21,7 +21,7 @@ The separation is purposely designed to split the intended user flows - **build*
 * Refer to [Deploying Infrastructure](../../getting-started/deploying-infrastructure/) and [Quick Start](../../getting-started/quick-start.md) for _low level instructions_
 
 {% hint style="warning" %}
-Superheros have kaos automatically configured  - `kaos init` can be **skipped!**
+Superheros have kaos automatically configured - `kaos init` can be **skipped!**
 {% endhint %}
 {% endtab %}
 
@@ -37,7 +37,5 @@ Data Scientists **require an endpoint** from a System Administrator for `kaos in
 {% endtab %}
 {% endtabs %}
 
-![](../../.gitbook/assets/image%20%2839%29.png)
-
-
+![](../../.gitbook/assets/image-39.png)
 
