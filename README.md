@@ -32,7 +32,7 @@ Check out our [Official Documentation](https://ki-labs.gitbook.io/kaos)
 * Check the [Changelog](https://ki-labs.gitbook.io/kaos/miscellaneous/changelog) for release information
 * Visit the [Public Roadmap](https://ki-labs.gitbook.io/kaos/miscellaneous/roadmap) to see what's coming next
 * Bugs, issues and contributions should be created on [GitHub](https://github.com/KI-labs/kaos)
-* Check out the [list](https://github.com/KI-labs/kaos/CONTRIBUTORS.md) of people who already contributed
+* Check out the [list](CONTRIBUTORS.md) of people who already contributed
 
 Get in touch via our [slack channel](https://kaos-dev.slack.com) for user discussion.
 
