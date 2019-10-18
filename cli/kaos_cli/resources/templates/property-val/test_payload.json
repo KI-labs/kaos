@@ -1,0 +1,20 @@
+{
+  "LotFrontage": 265.0,
+  "LotArea": 8126.0,
+  "YearBuilt": 1997.0,
+  "YearRemodAdd": 997.0,
+  "MasVnrArea": 0.0,
+  "BsmtFinSF1": 821.0,
+  "BsmtFinSF2": 0.0,
+  "BsmtUnfSF": 107.0,
+  "TotalBsmtSF": 928.0,
+  "1stFlrSF": 928.0,
+  "2ndFlrSF": 836.0,
+  "GrLivArea": 1764.0,
+  "GarageYrBlt": 21597.0,
+  "GarageArea": 0.0,
+  "WoodDeckSF": 276.0,
+  "OpenPorchSF": 99.0,
+  "EnclosedPorch": 0,
+  "ScreenPorch": 0.0
+}

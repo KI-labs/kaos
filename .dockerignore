@@ -1,0 +1,24 @@
+# prevents from sending the whole directory to docker engine
+.github
+.git
+.kaos
+.terraform
+docs
+assets
+images
+infrastructure
+ingestion
+scripts
+testing
+tmp
+.gitignore
+.pre-commit-config.yaml
+.travis.yml
+config.json
+Gemfile
+Gemfile.lock
+LICENSE
+Pipfile
+README.md
+terraform.tfstate
+terraform.tfstate.backup

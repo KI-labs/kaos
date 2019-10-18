@@ -1,0 +1,6 @@
+{"url": "https://kaos-feature-store.s3.eu-central-1.amazonaws.com/test/mnist-split/xaaa.csv", "path": "test/xaaa.csv"}
+{"url": "https://kaos-feature-store.s3.eu-central-1.amazonaws.com/test/mnist-split/xaab.csv", "path": "test/xaab.csv"}
+{"url": "https://kaos-feature-store.s3.eu-central-1.amazonaws.com/training/mnist-split/xaaaa.csv", "path": "training/xaaaa.csv"}
+{"url": "https://kaos-feature-store.s3.eu-central-1.amazonaws.com/training/mnist-split/xaaay.csv", "path": "training/xaaay.csv"}
+{"url": "https://kaos-feature-store.s3.eu-central-1.amazonaws.com/validation/mnist-split/xaaa.csv", "path": "validation/xaaa.csv"}
+{"url": "https://kaos-feature-store.s3.eu-central-1.amazonaws.com/validation/mnist-split/xaab.csv", "path": "validation/xaab.csv"}

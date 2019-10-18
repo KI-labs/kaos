@@ -1,0 +1,26 @@
+{
+  "features": [
+    "LotFrontage",
+    "LotArea",
+    "YearBuilt",
+    "YearRemodAdd",
+    "MasVnrArea",
+    "BsmtFinSF1",
+    "BsmtFinSF2",
+    "BsmtUnfSF",
+    "TotalBsmtSF",
+    "1stFlrSF",
+    "2ndFlrSF",
+    "GrLivArea",
+    "GarageYrBlt",
+    "GarageArea",
+    "WoodDeckSF",
+    "OpenPorchSF",
+    "EnclosedPorch",
+    "ScreenPorch"
+  ],
+  "target": "SalePrice",
+  "hidden_layers": 50,
+  "activation": "relu",
+  "alpha": 0.01
+}

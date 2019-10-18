@@ -1,0 +1,170 @@
+#!/usr/bin/env python3
+
+import json
+import os
+import sys
+from pathlib import Path
+
+import joblib
+import pandas as pd
+from sklearn.metrics import mean_squared_error, mean_absolute_error
+from sklearn.neural_network import MLPClassifier
+
+# params file
+params_fid = 'params.json'
+
+# ===================== #
+# START OF FIXED INPUTS #
+# ===================== #
+
+# FIXED input paths
+out = sys.argv[1]
+data_dir = os.listdir('/pfs/data')[0]
+data_path = os.path.join('/pfs/data', data_dir)
+param_path = '/pfs/hyper'
+model_path = f'{out}/model'
+metrics_path = f'{out}/metrics'
+
+# build directories (if required)
+if not os.path.exists(model_path):
+    os.makedirs(model_path)
+if not os.path.exists(metrics_path):
+    os.makedirs(metrics_path)
+
+# data files (currently fixed)
+training_path = os.path.join(data_path, 'training')
+validation_path = os.path.join(data_path, 'validation')
+test_path = os.path.join(data_path, 'test')
+
+
+def hyperparams(params):
+    try:
+        path = next(Path(param_path).rglob("*.json"))
+        print(path)
+        with open(path, 'r') as src:
+            hyper = json.load(src)
+        print("****** Loading hyperparameters ******")
+        for k, v in hyper.items():
+            print(f"Setting {k}={v}")
+        params.update(hyper)
+    except StopIteration:
+        pass
+    return params
+
+
+def load_all_data(path):
+    data_paths = []
+    files = [f for f in os.listdir(path) if f.endswith('.csv')]
+    for file in files:
+        data_paths.append(os.path.join(path, file))
+    df_list = [pd.read_csv(file, index_col=None, header=0, engine='python') for file in data_paths]
+    return pd.concat(df_list)
+
+
+# =================== #
+# END OF FIXED INPUTS #
+# =================== #
+
+
+# main function for training
+def train():
+    # start
+    print('****** Training started ******')
+    print("****** Loading parameters ******")
+    print("Loaded from {}".format(params_fid))
+    with open(params_fid, 'r') as src:
+        params = json.load(src)
+    features = params['features']
+    target = params['target']
+
+    # load hyperparams (if necessary)
+    params = hyperparams(params)
+
+    print("****** Loading datasets ******")
+
+    # path to training/validation
+    print("Training: {}".format(training_path))
+    print("Validation: {}".format(validation_path))
+
+    # load training + validation data
+    training_df = load_all_data(training_path)
+    validation_df = load_all_data(validation_path)
+
+    # check shape of df
+    print("****** Check shape of datasets ******")
+    print("Training -> ({}, {})".format(*training_df.shape))
+    print("Validation -> ({}, {})".format(*validation_df.shape))
+
+    X = training_df[features].fillna(0)
+    y = training_df[target]
+
+    clf = MLPClassifier(hidden_layer_sizes=(int(params['hidden_layers']),),
+                        activation=params['activation'], solver='adam',
+                        alpha=float(params['alpha']), learning_rate='constant',
+                        learning_rate_init=0.001,
+                        shuffle=False, random_state=42424242,
+                        max_iter=1000, verbose=True, tol=0.0001, n_iter_no_change=10)
+
+    clf.fit(X, y)
+    y_pred = clf.predict(X)
+
+    # save model
+    out_path = os.path.join(model_path, 'model.pkl')
+    joblib.dump(clf, out_path)
+    print("Saved model to -> {}".format(out_path))
+
+    # training metrics
+    out = {"MAE_train": mean_absolute_error(y_pred, y),
+           "RMSE_train": mean_squared_error(y_pred, y),
+           "R2_train": clf.score(X, y)}
+
+    print("****** Training Metrics ******")
+    print("Training_MAE = {}".format(out["MAE_train"]))
+    print("Training_RMSE = {}".format(out["RMSE_train"]))
+    print("Training_R2 = {}".format(out["R2_train"]))
+
+    # validation metrics
+    X_valid = validation_df[features].fillna(0)
+    y_valid = validation_df[target]
+    y_pred = clf.predict(X_valid)
+
+    out["MAE_vld"] = mean_absolute_error(y_pred, y_valid)
+    out["RMSE_vld"] = mean_squared_error(y_pred, y_valid)
+    out["R2_vld"] = clf.score(X_valid, y_valid)
+
+    print("****** Validation Metrics ******")
+    print("Validation_MAE = {}".format(out["MAE_vld"]))
+    print("Validation_RMSE = {}".format(out["RMSE_vld"]))
+    print("Validation_R2 = {}".format(out["R2_vld"]))
+
+    # only proceed if test data exists...
+    if os.path.exists(test_path):
+        print("****** Calculate test metrics ******")
+
+        print("Read test data...")
+        test_df = load_all_data(test_path)
+
+        print("Prediction with test data...")
+        # validation metrics
+        X_test = test_df[features].fillna(0)
+        y_test = test_df[target]
+        y_pred = clf.predict(X_test)
+
+        out["MAE_test"] = mean_absolute_error(y_pred, y_test)
+        out["RMSE_test"] = mean_squared_error(y_pred, y_test)
+        out["R2_test"] = clf.score(X_test, y_test)
+
+        print("****** Test Metrics ******")
+        print("Test MAE = {}".format(out["MAE_test"]))
+        print("Test RMSE = {}".format(out["RMSE_test"]))
+        print("Test R2 = {}".format(out["R2_test"]))
+
+    print('****** Saving metrics ******')
+    with open(os.path.join(metrics_path, "metrics.json"), 'w') as fp:
+        json.dump(out, fp, indent=4, sort_keys=True)
+
+    print('****** Training completed ******')
+
+
+if __name__ == '__main__':
+    train()

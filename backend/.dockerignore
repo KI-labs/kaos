@@ -1,0 +1,6 @@
+.coverage
+.tox
+htmlcov
+kaos_backend.egg-info
+dist
+build

@@ -1,0 +1,130 @@
+#!/usr/bin/env python3
+from __future__ import print_function
+
+import json
+import os
+import sys
+from pathlib import Path
+
+import joblib
+from sklearn import svm
+from sklearn.preprocessing import StandardScaler
+from utils import prepare_dataframe, create_metrics
+
+# params file
+params_fid = 'params.json'
+
+# ===================== #
+# START OF FIXED INPUTS #
+# ===================== #
+
+# FIXED input paths
+out = sys.argv[1]
+data_dir = os.listdir('/pfs/data')[0]
+data_path = os.path.join('/pfs/data', data_dir)
+param_path = '/pfs/hyper'
+model_path = f'{out}/model'
+metrics_path = f'{out}/metrics'
+
+# build directories (if required)
+if not os.path.exists(model_path):
+    os.makedirs(model_path)
+if not os.path.exists(metrics_path):
+    os.makedirs(metrics_path)
+
+# data files (currently fixed)
+training_path = os.path.join(data_path, 'training')
+validation_path = os.path.join(data_path, 'validation')
+test_path = os.path.join(data_path, 'test')
+
+
+def hyperparams(params):
+    try:
+        path = next(Path(param_path).rglob("*.json"))
+        print(path)
+        with open(path, 'r') as src:
+            hyper = json.load(src)
+        print("****** Loading hyperparameters ******")
+        for k, v in hyper.items():
+            print(f"Setting {k}={v}")
+        params.update(hyper)
+    except StopIteration:
+        pass
+    return params
+
+
+# =================== #
+# END OF FIXED INPUTS #
+# =================== #
+
+
+# main function for training
+def train():
+    # start
+    print('****** Training started ******')
+    print("****** Loading parameters ******")
+    print("Loaded from {}".format(params_fid))
+    with open(params_fid, 'r') as src:
+        params = json.load(src)
+
+    # load hyperparams (if necessary)
+    params = hyperparams(params)
+
+    # Since the data and target values are in the same file, let's split them into separate dataframes
+    training_labels, training_data = prepare_dataframe(training_path, params['label_column'])
+    validation_labels, validation_data = prepare_dataframe(validation_path, params['label_column'])
+    sc_X = StandardScaler()
+    training_data = sc_X.fit_transform(training_data)
+    validation_data = sc_X.transform(validation_data)
+    print("Data preprocessed starting model training")
+
+    # Model definition and classification
+    classifier = svm.SVC(gamma=float(params['gamma']),
+                         decision_function_shape=params['decision_function_shape'],
+                         kernel=params['kernel'],
+                         degree=int(params['degree']))
+    model = classifier.fit(training_data, training_labels.values)
+    print("Model trained!")
+
+    # save model
+    out_path = os.path.join(model_path, 'model.pkl')
+    joblib.dump({'model': model, 'scaler': sc_X}, out_path)
+    print("Saved model to -> {}".format(out_path))
+
+    # Predicting on training and validation
+    training_prediction = model.predict(training_data)
+    validation_prediction = model.predict(validation_data)
+
+    out_training = create_metrics(training_prediction, training_labels, "train")
+    out_validation = create_metrics(validation_prediction, validation_labels, "validation")
+
+    print("****** Training Metrics ******")
+    print("Training accuracy: {}".format(out_training['accuracy_train']))
+    print("Training metrics: [{}]".format(out_training['metrics_train']))
+
+    print("****** Validation Metrics ******")
+    print("Validation accuracy: {}".format(out_validation['accuracy_validation']))
+    print("Validation metrics: [{}]".format(out_validation['metrics_validation']))
+
+    if os.path.exists(test_path):
+        # Splitting test data
+        test_labels, test_data = prepare_dataframe(test_path, params['label_column'])
+        test_data = sc_X.transform(test_data)
+        # Test prediction
+        test_prediction = model.predict(test_data)
+        out_test = create_metrics(test_prediction, test_labels, "test")
+
+        print("****** Test Metrics ******")
+        print("Test accuracy: {}".format(out_test['accuracy_test']))
+        print("Test metrics: [{}]".format(out_test['metrics_test']))
+
+    print('****** Saving metrics ******')
+    out = {**out_training, **out_validation, **out_test}
+    with open(os.path.join(metrics_path, "metrics.json"), 'w') as fp:
+        json.dump(out, fp, indent=4, sort_keys=True)
+
+    print('****** Training completed ******')
+
+
+if __name__ == '__main__':
+    train()

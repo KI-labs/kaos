@@ -1,0 +1,19 @@
+name: integration
+title: GCP InSpec Profile
+maintainer: kaos
+copyright: kaos
+copyright_email: kaos@ki-labs.com
+license: All Rights Reserved
+summary: GCP profile by writing the controls with InSpec
+version: 0.1.0
+inspec_version: '>= 3.0.0'
+attributes:
+- name: gcp_project_id
+  required: true
+  description: 'The GCP project identifier.'
+  type: string
+depends:
+- name: inspec-gcp
+  url: https://github.com/inspec/inspec-gcp/archive/master.tar.gz
+supports:
+- platform: gcp
