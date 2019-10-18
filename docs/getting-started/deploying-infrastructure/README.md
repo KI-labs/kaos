@@ -1,7 +1,7 @@
 # Deploying Infrastructure
 
 {% hint style="warning" %}
-This section is only for [**System Administrators**](../../usage/high-level-usage/#kaos-personas) and [**Superheros**](../../usage/high-level-usage/#kaos-personas)\*\*\*\*
+This section is only for [**System Administrators**](../../usage/high-level-usage/#kaos-personas) and [**Superheros**](../../usage/high-level-usage/#kaos-personas)
 {% endhint %}
 
 {% hint style="danger" %}

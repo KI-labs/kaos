@@ -23,7 +23,7 @@ Tracking provenance **explodes** when _multiple_ users share _multiple_ models a
 {% endhint %}
 
 {% hint style="success" %}
-[kaos ensures code, environment, data and parameters are **reproducible with full provenance**](reproducibility.md)\*\*\*\*
+[kaos ensures code, environment, data and parameters are **reproducible with full provenance**](reproducibility.md)
 {% endhint %}
 
 ## ML Infrastructure is Tough

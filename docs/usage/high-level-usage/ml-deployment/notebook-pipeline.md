@@ -41,7 +41,7 @@ Submit the above bundle with `kaos train deploy -s notebook/example`
 The data bundle is responsible for submitting **local** data to the hosted notebook.
 
 {% hint style="info" %}
-The data bundle _\*\*_can be any shape since the notebook has access to its content.
+The data bundle **can be any shape** since the notebook has access to its content.
 {% endhint %}
 
 The sample **local** data bundle for the mnist model is shown below.
