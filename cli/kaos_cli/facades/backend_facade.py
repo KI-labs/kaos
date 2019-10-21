@@ -2,15 +2,14 @@ import json
 import os
 import shutil
 import uuid
-from distutils.dir_util import copy_tree
 
 import requests
-from kaos_cli.constants import DOCKER, MINIKUBE, PROVIDER_DICT, TF_CONFIG_JSON, AWS, TF_DIR, TF_STATE, \
-    TF_STATE_BACKUP, BACKEND, INFRASTRUCTURE, GCP, LOCAL_CONFIG_DICT
+from kaos_cli.constants import DOCKER, MINIKUBE, PROVIDER_DICT, AWS, BACKEND, INFRASTRUCTURE, GCP, LOCAL_CONFIG_DICT
 from kaos_cli.exceptions.exceptions import HostnameError
 from kaos_cli.services.state_service import StateService
 from kaos_cli.services.terraform_service import TerraformService
 from kaos_cli.utils.environment import check_environment
+from distutils.dir_util import copy_tree
 
 
 def is_cloud_provider(cloud):
@@ -50,7 +49,7 @@ class BackendFacade:
         self.state_service.set(BACKEND, url=url, token=token)
         self.state_service.write()
 
-    def build(self, provider, env, local_backend=False, verbose=False):
+    def build(self, provider, env, dir_build, local_backend=False, verbose=False):
         extra_vars = self._get_vars(provider)
 
         self.tf_service.set_verbose(verbose)
@@ -58,38 +57,32 @@ class BackendFacade:
         self.tf_service.plan(directory, extra_vars)
         self.tf_service.apply(directory, extra_vars)
 
-        url, kubeconfig = self._parse_config()
+        url, kubeconfig = self._parse_config(dir_build)
 
-        self.state_service.create()
+        # self.state_service.create()
         self.state_service.set(BACKEND, url=url, token=uuid.uuid4())
         self.state_service.set(INFRASTRUCTURE, kubeconfig=kubeconfig)
         self.state_service.write()
 
-    def destroy(self, provider, env, verbose=False):
+    def destroy(self, provider, env, dir_build, verbose=False):
         extra_vars = self._get_vars(provider)
 
         self.tf_service.set_verbose(verbose)
         directory = self._tf_init(provider, env, local_backend=False, destroying=True)
         self._delete_resources()
         self.tf_service.destroy(directory, extra_vars)
-        self._remove_build_files()
+        self._remove_build_files(dir_build)
 
     def is_created(self):
         return self.state_service.is_created()
 
-    def _remove_build_files(self):
+    def _remove_build_files(self, dir_build):
         """
         Function to remove all "build" images
         """
-        self.state_service.delete()
-        shutil.rmtree(TF_DIR, ignore_errors=True)
-
-        if os.path.exists(TF_STATE):
-            os.remove(TF_STATE)
-        if os.path.exists(TF_CONFIG_JSON):
-            os.remove(TF_CONFIG_JSON)
-        if os.path.exists(TF_STATE_BACKUP):
-            os.remove(TF_STATE_BACKUP)
+        self.state_service.delete(dir_build)
+        if os.path.exists(dir_build):
+            shutil.rmtree(dir_build, ignore_errors=True)
 
     def _delete_resources(self):
         if self.state_service.has_section(BACKEND):
@@ -114,11 +107,12 @@ class BackendFacade:
         return directory
 
     @staticmethod
-    def _parse_config():
+    def _parse_config(dir_build):
         """
         Basic function to extract endpoint from deployed backend service
         """
-        with open(TF_CONFIG_JSON) as f:
+        config_json_path = os.path.join(dir_build, 'config.json')
+        with open(config_json_path) as f:
             raw_config = json.load(f)
 
         domain_value = raw_config["backend_domain"][0]
