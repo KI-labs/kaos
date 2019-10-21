@@ -43,9 +43,19 @@ def build(cloud, env, force, verbose, yes, local_backend):
     # Creating build directory
     build_dir(dir_build)
 
+    # validate ENV
+    env = validate_build_env(cloud, env)
+
     @in_dir(dir_build)
     @pass_obj(BackendFacade)
     def __build_backend(backend: BackendFacade, cloud, env, force, verbose, yes, local_backend, dir_build):
+
+        print("cloud", cloud)
+        print("env", env)
+        print("force", force)
+        print("verbose", verbose)
+        print("local_backend", local_backend)
+
         is_created = backend.is_created()
 
         if is_created and not force:
@@ -56,9 +66,6 @@ def build(cloud, env, force, verbose, yes, local_backend):
             click.echo('{} - Performing {} build of the backend'.format(
                 click.style("Warning", bold=True, fg='yellow'),
                 click.style("force", bold=True)))
-
-        # validate ENV
-        env = validate_build_env(cloud, env)
 
         if not yes:
             # confirm creation of backend
@@ -71,6 +78,7 @@ def build(cloud, env, force, verbose, yes, local_backend):
                         click.style(cloud, bold=True, fg='red')),
                     abort=True)
             else:
+                print("debug******")
                 click.confirm(
                     '{} - Are you sure about building {} backend in {}?'.format(
                         click.style("Warning", bold=True, fg='yellow'),
@@ -107,12 +115,16 @@ def build(cloud, env, force, verbose, yes, local_backend):
             click.echo("Successfully built {} [{}] environment".format(click.style('kaos', bold=True, fg='green'),
                                                                        click.style(env, bold=True, fg='blue')))
 
+            print("Azhor")
+
             if env:
+                print("Prince")
                 click.echo("{} - Successfully built {} [{}] environment".format(
                     click.style("Info", bold=True, fg='green'),
                     click.style('kaos', bold=True),
                     click.style(env, bold=True, fg='blue')))
             else:
+                print("Ahai")
                 click.echo("{} - Successfully built {} environment".format(
                     click.style("Info", bold=True, fg='green'),
                     click.style('kaos', bold=True)))
