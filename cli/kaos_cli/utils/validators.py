@@ -7,7 +7,7 @@ import click
 import textdistance
 from kaos_cli.exceptions.exceptions import MissingArgumentError
 
-from ..constants import KAOS_STATE_DIR, DOCKER, MINIKUBE
+from ..constants import KAOS_STATE_DIR, DOCKER, MINIKUBE, KAOS_TF_PATH
 
 
 def validate_index(n: int, ind: int, command: str):
@@ -133,4 +133,30 @@ def validate_build_env(cloud, env):
             return 'prod' if not env else env  # default = prod
     except KeyError:
         click.echo('{} - Key Error'.format(click.style("Aborting", bold=True, fg='red')))
+        sys.exit(1)
+
+
+def validate_build_dir(path):
+    """
+    Ensure existence of kaos backend dir
+
+    Args:
+        path (str): path containing kaos backend dir
+
+    """
+    if not os.path.exists(path):
+        cloud, *env = os.path.relpath(path, KAOS_TF_PATH).split('/')
+        if env:
+            click.echo("{} - {} [{}] backend in {} has not been deployed!".format(
+                click.style("Warning", bold=True, fg='yellow'),
+                click.style('kaos', bold=True),
+                click.style(env[0], bold=True, fg='blue'),
+                click.style(cloud, bold=True, fg='red')
+            ))
+        else:
+            click.echo("{} - {} backend in {} has not been deployed!".format(
+                click.style("Warning", bold=True, fg='yellow'),
+                click.style('kaos', bold=True),
+                click.style(cloud, bold=True, fg='red')
+            ))
         sys.exit(1)
