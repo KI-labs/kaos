@@ -2,12 +2,11 @@ import os
 import sys
 
 import click
-from kaos_cli.constants import AWS, GCP, DOCKER, MINIKUBE
+from kaos_cli.constants import AWS, GCP, DOCKER, MINIKUBE, KAOS_STATE_DIR
 from kaos_cli.utils.validators import validate_build_env
 from kaos_cli.exceptions.handle_exceptions import handle_specific_exception, handle_exception
 from kaos_cli.facades.backend_facade import BackendFacade, is_cloud_provider
 from kaos_cli.utils.decorators import build_env_check, pass_obj
-from kaos_cli.constants import AWS, GCP, DOCKER, MINIKUBE, KAOS_STATE_DIR
 from kaos_cli.utils.helpers import build_dir
 from kaos_cli.utils.decorators import in_dir
 
@@ -43,29 +42,24 @@ def build(cloud, env, force, verbose, yes, local_backend):
     # Creating build directory
     build_dir(dir_build)
 
-    # validate ENV
-    env = validate_build_env(cloud, env)
-
     @in_dir(dir_build)
     @pass_obj(BackendFacade)
     def __build_backend(backend: BackendFacade, cloud, env, force, verbose, yes, local_backend, dir_build):
 
-        print("cloud", cloud)
-        print("env", env)
-        print("force", force)
-        print("verbose", verbose)
-        print("local_backend", local_backend)
-
         is_created = backend.is_created()
 
         if is_created and not force:
-            click.echo('Aborting! - {} backend is already built.'.format(click.style("kaos", bold=True, fg='red')))
+            click.echo('{} - {} backend is already built.'.format(click.style("Aborting", bold=True, fg='red'),
+                                                                  click.style("kaos", bold=True)))
             sys.exit(1)
 
         elif is_created and force:
             click.echo('{} - Performing {} build of the backend'.format(
                 click.style("Warning", bold=True, fg='yellow'),
                 click.style("force", bold=True)))
+
+        # validate ENV
+        env = validate_build_env(cloud, env)
 
         if not yes:
             # confirm creation of backend
@@ -78,7 +72,6 @@ def build(cloud, env, force, verbose, yes, local_backend):
                         click.style(cloud, bold=True, fg='red')),
                     abort=True)
             else:
-                print("debug******")
                 click.confirm(
                     '{} - Are you sure about building {} backend in {}?'.format(
                         click.style("Warning", bold=True, fg='yellow'),
@@ -111,20 +104,12 @@ def build(cloud, env, force, verbose, yes, local_backend):
                            .format(click.style("Info", bold=True, fg='green'),
                                    click.style("export KUBECONFIG=" + kubeconfig,
                                                bold=True, fg='red')))
-
-            click.echo("Successfully built {} [{}] environment".format(click.style('kaos', bold=True, fg='green'),
-                                                                       click.style(env, bold=True, fg='blue')))
-
-            print("Azhor")
-
             if env:
-                print("Prince")
                 click.echo("{} - Successfully built {} [{}] environment".format(
                     click.style("Info", bold=True, fg='green'),
                     click.style('kaos', bold=True),
                     click.style(env, bold=True, fg='blue')))
             else:
-                print("Ahai")
                 click.echo("{} - Successfully built {} environment".format(
                     click.style("Info", bold=True, fg='green'),
                     click.style('kaos', bold=True)))
@@ -157,20 +142,22 @@ def destroy(cloud, env, verbose, yes):
 
     dir_build = os.path.join(KAOS_STATE_DIR, build_path)
 
-    # validate ENV
-    env = validate_build_env(cloud, env)
-
     @in_dir(dir_build)
     @pass_obj(BackendFacade)
     def __destroy_backend(backend: BackendFacade, cloud, env, dir_build, verbose, yes):
+
+        # validate ENV
+        env = validate_build_env(cloud, env)
+
         if not yes:
             # confirm creation of backend
             if env:
-                click.confirm('{} - Are you sure about destroying {} [{}] backend in {}?'.format(
-                    click.style("Warning", bold=True, fg='yellow'),
-                    click.style('kaos', bold=True),
-                    click.style(env, bold=True, fg='blue'),
-                    click.style(cloud, bold=True, fg='red')),
+                click.confirm(
+                    '{} - Are you sure about destroying {} [{}] backend in {}?'.format(
+                        click.style("Warning", bold=True, fg='yellow'),
+                        click.style('kaos', bold=True),
+                        click.style(env, bold=True, fg='blue'),
+                        click.style(cloud, bold=True, fg='red')),
                     abort=True)
             else:
                 click.confirm(
@@ -192,7 +179,6 @@ def destroy(cloud, env, verbose, yes):
                 click.echo(
                     "{} - Successfully destroyed {} environment".format(click.style("Info", bold=True, fg='green'),
                                                                         click.style('kaos', bold=True)))
-
         except Exception as e:
             handle_specific_exception(e)
             handle_exception(e)
