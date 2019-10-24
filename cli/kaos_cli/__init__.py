@@ -10,6 +10,9 @@ from .commands.train import train
 from .commands.workspace import workspace
 from .utils.custom_classes import CustomHelpOrder
 
+from configparser import ConfigParser, ExtendedInterpolation
+from kaos_cli.constants import DEFAULTS, CONFIG_PATH
+
 
 @click.group(cls=CustomHelpOrder)
 @click.pass_context
@@ -24,15 +27,21 @@ def kaos(ctx):
 ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝
 \b
 
-Open source cloud agnostic minimal DevOps private versioned ML platform.
+Open source cloud agnostic minimal DevOps private versoned ML platform.
 
     """
 
+    # derive current context from config
+    print("debug here")
+    config = ConfigParser(defaults=DEFAULTS, interpolation=ExtendedInterpolation())
+    config.read(CONFIG_PATH)
+    active_context = config.get("contexts", "active_context")
     factory = SimpleFactory()
-    factory.create()
+    factory.create(active_context)
     ctx.obj = factory
 
 
+# Creating kaos context adding commands
 kaos.add_command(build)
 kaos.add_command(destroy)
 kaos.add_command(init)

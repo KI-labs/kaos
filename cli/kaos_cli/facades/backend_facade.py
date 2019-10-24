@@ -22,31 +22,32 @@ class BackendFacade:
 
     """
 
-    def __init__(self, state_service: StateService, terraform_service: TerraformService):
+    def __init__(self, cloud_env, state_service: StateService, terraform_service: TerraformService):
         self.state_service = state_service
         self.tf_service = terraform_service
+        self.cloud_env = cloud_env
 
     @property
     def url(self):
-        return self.state_service.get(BACKEND, 'url')
+        return self.state_service.get(BACKEND + '_' + self.cloud_env, 'url')
 
     @property
     def user(self):
-        return self.state_service.get(BACKEND, 'user')
+        return self.state_service.get(BACKEND + '_' + self.cloud_env, 'user')
 
     @property
     def token(self):
-        return self.state_service.get(BACKEND, 'token')
+        return self.state_service.get(BACKEND + '_' + self.cloud_env, 'token')
 
     @property
     def kubeconfig(self):
-        return self.state_service.get(INFRASTRUCTURE, 'kubeconfig')
+        return self.state_service.get(INFRASTRUCTURE + '_' + self.cloud_env, 'kubeconfig')
 
     def init(self, url, token):
         if not self.state_service.is_created():
             self.state_service.create()
 
-        self.state_service.set(BACKEND, url=url, token=token)
+        self.state_service.set(BACKEND + '_' + self.cloud_env, url=url, token=token)
         self.state_service.write()
 
     def build(self, provider, env, dir_build, local_backend=False, verbose=False):
@@ -60,8 +61,8 @@ class BackendFacade:
         url, kubeconfig = self._parse_config(dir_build)
 
         # self.state_service.create()
-        self.state_service.set(BACKEND, url=url, token=uuid.uuid4())
-        self.state_service.set(INFRASTRUCTURE, kubeconfig=kubeconfig)
+        self.state_service.set(BACKEND + '_' + self.cloud_env, url=url, token=uuid.uuid4())
+        self.state_service.set(INFRASTRUCTURE + '_' + self.cloud_env, kubeconfig=kubeconfig)
         self.state_service.write()
 
     def destroy(self, provider, env, dir_build, verbose=False):
@@ -73,8 +74,8 @@ class BackendFacade:
         self.tf_service.destroy(directory, extra_vars)
         self._remove_build_files(dir_build)
 
-    def is_created(self):
-        return self.state_service.is_created()
+    def is_created(self, dir_build):
+        return self.state_service.is_created(dir_build)
 
     def _remove_build_files(self, dir_build):
         """
@@ -85,7 +86,7 @@ class BackendFacade:
             shutil.rmtree(dir_build, ignore_errors=True)
 
     def _delete_resources(self):
-        if self.state_service.has_section(BACKEND):
+        if self.state_service.has_section(BACKEND + '_' + self.cloud_env):
             requests.delete(f"{self.url}/internal/resources")
 
     def _tf_init(self, provider, env, local_backend, destroying=False):

@@ -9,6 +9,7 @@ from kaos_cli.facades.backend_facade import BackendFacade, is_cloud_provider
 from kaos_cli.utils.decorators import build_env_check, pass_obj
 from kaos_cli.utils.helpers import build_dir
 from kaos_cli.utils.decorators import in_dir
+from kaos_cli.factories.simple_factory import SimpleFactory
 
 
 # BUILD command
@@ -42,11 +43,15 @@ def build(cloud, env, force, verbose, yes, local_backend):
     # Creating build directory
     build_dir(dir_build)
 
+    # creating backend_identifier based on deployment environment
+    env = "local" if cloud in [DOCKER, MINIKUBE] else env
+    backend_identifier = cloud + '_' + env
+
     @in_dir(dir_build)
     @pass_obj(BackendFacade)
-    def __build_backend(backend: BackendFacade, cloud, env, force, verbose, yes, local_backend, dir_build):
+    def __build_backend(backend: BackendFacade, cloud, env, force, verbose, yes, local_backend, dir_build, backend_identifier):
 
-        is_created = backend.is_created()
+        is_created = backend.is_created(dir_build)
 
         if is_created and not force:
             click.echo('{} - {} backend is already built.'.format(click.style("Aborting", bold=True, fg='red'),
@@ -118,7 +123,7 @@ def build(cloud, env, force, verbose, yes, local_backend):
             handle_specific_exception(e)
             handle_exception(e)
 
-    __build_backend(cloud, env, force, verbose, yes, local_backend, dir_build)
+    __build_backend(cloud, env, force, verbose, yes, local_backend, dir_build, backend_identifier)
 
 
 @click.command(name='destroy',
@@ -142,9 +147,11 @@ def destroy(cloud, env, verbose, yes):
 
     dir_build = os.path.join(KAOS_STATE_DIR, build_path)
 
+    backend_identifier = cloud + '_' + env
+
     @in_dir(dir_build)
-    @pass_obj(BackendFacade)
-    def __destroy_backend(backend: BackendFacade, cloud, env, dir_build, verbose, yes):
+    @pass_obj(BackendFacade(backend_identifier))
+    def __destroy_backend(backend: BackendFacade(backend_identifier), cloud, env, dir_build, verbose, yes):
 
         # validate ENV
         env = validate_build_env(cloud, env)

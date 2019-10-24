@@ -14,9 +14,9 @@ class SimpleFactory:
         self.facades = None
         self.services = None
 
-    def create(self):
+    def create(self, cloud_env):
         self.services = self._create_services()
-        self.facades = self._create_facades(**self.services)
+        self.facades = self._create_facades(cloud_env, **self.services)
 
     def __getitem__(self, name):
         if name in self.facades:
@@ -35,9 +35,9 @@ class SimpleFactory:
         return services
 
     @staticmethod
-    def _create_facades(state=None, terraform=None):
+    def _create_facades(cloud_env, state=None, terraform=None):
         template = TemplateFacade()
-        backend = BackendFacade(state, terraform)
+        backend = BackendFacade(cloud_env, state, terraform)
         workspace = WorkspaceFacade(state)
         train = TrainFacade(state)
         serve = ServeFacade(state)
