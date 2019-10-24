@@ -118,6 +118,12 @@ def init_check(func):
                 click.style(os.path.split(KAOS_STATE_DIR)[-1], bold=True, fg='red'),
                 click.style("kaos init", bold=True, fg='green')))
             sys.exit(1)
+        if not os.path.exists(CONFIG_PATH):
+            click.echo("{} - {} does not exist - run {}".format(
+                click.style("Warning", bold=True, fg='yellow'),
+                click.style("./kaos/config", bold=True, fg='red'),
+                click.style("kaos init", bold=True, fg='green')))
+            sys.exit(1)
         func(*args, **kwargs)
 
     return wrapper
