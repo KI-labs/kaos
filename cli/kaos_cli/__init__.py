@@ -32,12 +32,11 @@ Open source cloud agnostic minimal DevOps private versoned ML platform.
     """
 
     # derive current context from config
-    print("debug here")
-    config = ConfigParser(defaults=DEFAULTS, interpolation=ExtendedInterpolation())
-    config.read(CONFIG_PATH)
-    active_context = config.get("contexts", "active_context")
+    # config = ConfigParser(defaults=DEFAULTS, interpolation=ExtendedInterpolation())
+    # config.read(CONFIG_PATH)
+    # active_context = config.get("contexts", "active_context")
     factory = SimpleFactory()
-    factory.create(active_context)
+    factory.create()
     ctx.obj = factory
 
 

@@ -22,32 +22,36 @@ class BackendFacade:
 
     """
 
-    def __init__(self, cloud_env, state_service: StateService, terraform_service: TerraformService):
+    def __init__(self, state_service: StateService, terraform_service: TerraformService):
         self.state_service = state_service
         self.tf_service = terraform_service
-        self.cloud_env = cloud_env
+
 
     @property
     def url(self):
-        return self.state_service.get(BACKEND + '_' + self.cloud_env, 'url')
+        return self.state_service.get(BACKEND, 'url')
 
     @property
     def user(self):
-        return self.state_service.get(BACKEND + '_' + self.cloud_env, 'user')
+        return self.state_service.get(BACKEND, 'user')
 
     @property
     def token(self):
-        return self.state_service.get(BACKEND + '_' + self.cloud_env, 'token')
+        return self.state_service.get(BACKEND, 'token')
 
     @property
     def kubeconfig(self):
-        return self.state_service.get(INFRASTRUCTURE + '_' + self.cloud_env, 'kubeconfig')
+        return self.state_service.get(INFRASTRUCTURE, 'kubeconfig')
+
+    @property
+    def deployed_backend_list(self):
+        return self.state_service.get(INFRASTRUCTURE, 'deployed_backend_list')
 
     def init(self, url, token):
         if not self.state_service.is_created():
             self.state_service.create()
 
-        self.state_service.set(BACKEND + '_' + self.cloud_env, url=url, token=token)
+        self.state_service.set(BACKEND, url=url, token=token)
         self.state_service.write()
 
     def build(self, provider, env, dir_build, local_backend=False, verbose=False):
@@ -60,9 +64,17 @@ class BackendFacade:
 
         url, kubeconfig = self._parse_config(dir_build)
 
+        deployed_backend = provider + '_' + env
+
         # self.state_service.create()
-        self.state_service.set(BACKEND + '_' + self.cloud_env, url=url, token=uuid.uuid4())
-        self.state_service.set(INFRASTRUCTURE + '_' + self.cloud_env, kubeconfig=kubeconfig)
+        self.state_service.set(BACKEND, url=url, token=uuid.uuid4())
+        self.state_service.set(INFRASTRUCTURE, kubeconfig=kubeconfig)
+        print("debug_1")
+        all_builds = self.state_service.get(INFRASTRUCTURE, 'deployed_backend_list')
+        print("all_builds", all_builds)
+        all_builds.append(deployed_backend)
+        print("all_builds_after_append", all_builds)
+        self.state_service.set(INFRASTRUCTURE, deployed_backend_list=all_builds)
         self.state_service.write()
 
     def destroy(self, provider, env, dir_build, verbose=False):
