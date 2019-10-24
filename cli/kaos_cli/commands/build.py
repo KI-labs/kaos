@@ -30,8 +30,9 @@ from kaos_cli.utils.validators import validate_build_env
 @pass_obj(BackendFacade)
 def build(backend: BackendFacade, cloud, env, force, verbose, yes, local_backend):
     """
-    Deploy kaos backend infrastructure based on selected provider provider.
+    Deploy kaos backend infrastructure based on selected provider.
     """
+
     is_created = backend.is_created()
 
     if is_created and not force:

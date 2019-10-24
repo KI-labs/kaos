@@ -37,19 +37,6 @@ def pass_config(fun):
     return decorator
 
 
-def in_dir(path):
-    def decorator(func):
-        def wrapper(*args, **kwargs):
-            prev_dir = os.getcwd()
-            os.chdir(path)
-            func(*args, **kwargs)
-            os.chdir(prev_dir)
-
-        return wrapper
-
-    return decorator
-
-
 def build_env_check(func):
     """
     Decorator for confirming the env vars are set.

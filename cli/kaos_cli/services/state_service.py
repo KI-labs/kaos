@@ -1,8 +1,9 @@
+import glob
 import os
 import shutil
 from configparser import ConfigParser, ExtendedInterpolation
 
-from kaos_cli.constants import KAOS_STATE_DIR, DEFAULTS, CONFIG_PATH
+from kaos_cli.constants import KAOS_STATE_DIR, DEFAULTS, CONFIG_PATH, KAOS_TF_PATH
 
 
 class StateService:
@@ -33,7 +34,15 @@ class StateService:
         os.mkdir(KAOS_STATE_DIR)
 
     @staticmethod
-    def delete():
+    def list_providers():
+        return [f for f in glob.glob(f'{KAOS_TF_PATH}/**/terraform.tfstate', recursive=True)]
+
+    @staticmethod
+    def provider_delete(dir_build):
+        shutil.rmtree(dir_build, ignore_errors=True)
+
+    @staticmethod
+    def full_delete():
         shutil.rmtree(KAOS_STATE_DIR, ignore_errors=True)
 
     def write(self):
