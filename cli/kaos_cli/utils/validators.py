@@ -167,7 +167,6 @@ def validate_unused_port(port: int, host: str='0.0.0.0') -> bool:
     Validate that a specific network port is unused.
 
     Args:
-        cloud (str): the specific cloud platform, example: DOCKER
         port (int): the integer port number to check
     """
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
