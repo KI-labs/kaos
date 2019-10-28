@@ -164,7 +164,7 @@ def validate_build_dir(path):
 
 def validate_unused_port(port: int, host: str='0.0.0.0') -> bool:
     """
-    Ensure that a specific port is unused for a given cloud (DOCKER)
+    Validate that a specific network port is unused.
 
     Args:
         cloud (str): the specific cloud platform, example: DOCKER
