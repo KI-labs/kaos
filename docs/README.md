@@ -24,7 +24,6 @@ Train, serve and predict in your **own** running cluster with [**8 commands!**](
 
 ## Community
 
-* Send us an [**email**](mailto:kaos@ki-labs.com) with any feedback
 * Join us on our [**slack workspace**](https://kaos-slack-inviter.herokuapp.com) for user discussion
 * Follow us on [**twitter**](https://twitter.com/intent/follow?screen_name=kaos_ml) for the latest updates
 
