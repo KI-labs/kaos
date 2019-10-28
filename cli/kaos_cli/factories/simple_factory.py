@@ -5,7 +5,7 @@ from kaos_cli.facades.template_facade import TemplateFacade
 from kaos_cli.facades.train_facade import TrainFacade
 from kaos_cli.facades.workspace_facade import WorkspaceFacade
 from kaos_cli.services.state_service import StateService
-from kaos_cli.services.terraform_service import TerraformService
+from kaos_cli.services.terraform_service import TerraformService, Command
 
 
 class SimpleFactory:
@@ -27,7 +27,8 @@ class SimpleFactory:
     @staticmethod
     def _create_services():
         state_service = StateService()
-        terraform_service = TerraformService()
+        cmd = Command()
+        terraform_service = TerraformService(cmd)
         services = {
             'state': state_service,
             'terraform': terraform_service

@@ -34,7 +34,10 @@ Check out our [Official Documentation](https://ki-labs.gitbook.io/kaos)
 * Bugs, issues and contributions should be created on [GitHub](https://github.com/KI-labs/kaos)
 * Check out the [list](CONTRIBUTORS.md) of people who already contributed
 
-Get in touch via our [slack channel](https://kaos-dev.slack.com) for user discussion.
+### Slack
+![](https://kaos-slack-inviter.herokuapp.com/badge.svg)
+
+Get in touch via our [slack workspace](https://kaos-slack-inviter.herokuapp.com/) for user discussion.
 
 
 ![](docs/.gitbook/assets/image%20%288%29.png)

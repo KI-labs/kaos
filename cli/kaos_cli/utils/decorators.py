@@ -37,19 +37,6 @@ def pass_config(fun):
     return decorator
 
 
-def in_dir(path):
-    def decorator(func):
-        def wrapper(*args, **kwargs):
-            prev_dir = os.getcwd()
-            os.chdir(path)
-            func(*args, **kwargs)
-            os.chdir(prev_dir)
-
-        return wrapper
-
-    return decorator
-
-
 def build_env_check(func):
     """
     Decorator for confirming the env vars are set.
@@ -116,6 +103,12 @@ def init_check(func):
             click.echo("{} - {} directory does not exist - first run {}".format(
                 click.style("Warning", bold=True, fg='yellow'),
                 click.style(os.path.split(KAOS_STATE_DIR)[-1], bold=True, fg='red'),
+                click.style("kaos init", bold=True, fg='green')))
+            sys.exit(1)
+        if not os.path.exists(CONFIG_PATH):
+            click.echo("{} - {} does not exist - run {}".format(
+                click.style("Warning", bold=True, fg='yellow'),
+                click.style("./kaos/config", bold=True, fg='red'),
                 click.style("kaos init", bold=True, fg='green')))
             sys.exit(1)
         func(*args, **kwargs)

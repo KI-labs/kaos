@@ -32,6 +32,9 @@ GCP_LOCAL_BACKEND_PATH = os.path.join(KAOS_HOME, 'infrastructure', 'gcp', 'backe
 AWS_LOCAL_BACKEND_PATH = os.path.join(KAOS_HOME, 'infrastructure', 'aws', 'backend_local', 'config.tf')
 AZURE_LOCAL_BACKEND_PATH = os.path.join(KAOS_HOME, 'infrastructure', 'azure', 'backend_local', 'config.tf')
 
+# kaos TF path
+KAOS_TF_PATH = os.path.join(KAOS_STATE_DIR, 'state')
+
 # Provider vars
 DOCKER = "DOCKER"
 MINIKUBE = "MINIKUBE"
