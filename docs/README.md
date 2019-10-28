@@ -18,11 +18,14 @@ Train, serve and predict in your **own** running cluster with [**8 commands!**](
 
 ## Support
 
-* Check the [Changelog](miscellaneous/changelog.md) for release information
-* Visit the [Public Roadmap](miscellaneous/roadmap.md) to see what's coming next
-* Bugs, issues and contributions should be created on [GitHub](https://github.com/KI-labs/kaos-infra)
+* Check the [**Changelog**](miscellaneous/changelog.md) for release information
+* Visit the [**Public Roadmap**](miscellaneous/roadmap.md) to see what's coming next
+* Bugs, issues and contributions should be created on [**GitHub**](https://github.com/KI-labs/kaos/issues/new/choose)\*\*\*\*
 
-Get in touch via our [slack channel](https://kaos-slack-inviter.herokuapp.com/) for user discussion.
+## Community
+
+* Join us on our [**slack workspace**](https://kaos-slack-inviter.herokuapp.com) for user discussion
+* Follow us on [**twitter**](https://twitter.com/intent/follow?screen_name=kaos_ml) for the latest updates
 
 ![](.gitbook/assets/image-8.png)
 
