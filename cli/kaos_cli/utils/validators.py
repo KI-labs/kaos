@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+import socket
 from json import JSONDecodeError
 
 import click
@@ -160,3 +161,20 @@ def validate_build_dir(path):
                 click.style(cloud, bold=True, fg='red')
             ))
         sys.exit(1)
+
+def validate_unused_port(port: int, host: str='0.0.0.0') -> bool:
+    """
+    Ensure that a specific port is unused for a given cloud (DOCKER)
+
+    Args:
+        cloud (str): the specific cloud platform, example: DOCKER
+        port (int): the integer port number to check
+    """
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        # Try to bind to a port, if it raises a socket error, 
+        # then return False; otherwise, return True
+        try:
+            s.bind((host, port))
+            return True
+        except socket.error:
+            return False
