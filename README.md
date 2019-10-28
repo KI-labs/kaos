@@ -46,4 +46,4 @@ Get in touch via our [slack workspace](https://kaos-slack-inviter.herokuapp.com/
 <a href="https://github.com/ki-labs/kaos/graphs/contributors">
   <img src="https://contributors-img.firebaseapp.com/image?repo=KI-labs/kaos" />
 </a>
-Made with [contributors-img](https://contributors-img.firebaseapp.com).
+<!--Made with [contributors-img](https://contributors-img.firebaseapp.com).-->
