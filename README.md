@@ -1,7 +1,31 @@
-# kaos
-<!---[![GitHub license](https://img.shields.io/badge/license-apache-green.svg)](https://github.com/ki-labs/kaos/blob/master/LICENSE)
--->
+<p align="center">
+    <img src="docs/.gitbook/assets/logo-text-black.png"
+        height="130">
+</p>
 
+<p align="center">
+    <a href="" alt="License">
+        <img src="https://img.shields.io/github/license/KI-labs/kaos?style=flat-square&color=blue" /></a>
+    <a href="" alt="Build">
+        <img src="https://img.shields.io/travis/com/KI-labs/kaos?style=flat-square&color=blue" /></a>
+    <a href="https://github.com/KI-labs/kaos/tags" alt="Tags">
+        <img src="https://img.shields.io/github/v/tag/KI-labs/kaos?style=flat-square&color=blue" /></a>
+    <a href="https://github.com/KI-labs/kaos/graphs/contributors" alt="Contributors">
+        <img src="https://img.shields.io/github/contributors/KI-labs/kaos?style=flat-square&color=blue" /></a>
+    <a href="https://github.com/KI-labs/kaos/pulse" alt="Activity">
+        <img src="https://img.shields.io/github/commit-activity/m/KI-labs/kaos?style=flat-square&color=blue" /></a>
+</p>
+
+<p align="center">
+    <a href="https://twitter.com/intent/follow?screen_name=kaos_ml">
+        <img src="https://img.shields.io/twitter/follow/kaos_ml?style=flat-square&logo=twitter&color=blue"
+            alt="follow on Twitter"></a>
+    <a href="https://kaos-slack-inviter.herokuapp.com/">
+        <img src="https://img.shields.io/badge/slack-@kaos-dev?style=flat-square&color=blue&logo=slack"
+            alt="join us on slack"></a>
+</p>
+
+##
 ### What is kaos?
 
 kaos is **the** platform for deploying **scalable reproducible machine learning workflows in your own private environment.**
@@ -9,12 +33,12 @@ kaos is **the** platform for deploying **scalable reproducible machine learning 
 ##
 ### Why kaos?
 
-Check out our [**motivation**](https://ki-labs.gitbook.io/kaos/motivation) for developing our own platform for **simplifying** both **ML** **DevOps** and enforcing **reproducible Data Science workflows**.
+Check out our [**motivation**](https://kaos.ki-labs.com/motivation) for developing our own platform for **simplifying** both **ML** **DevOps** and enforcing **reproducible Data Science workflows**.
 
 ##
 ### Quick Start
 
-Train, serve and predict in your **own** running cluster with [**8 commands!**](https://ki-labs.gitbook.io/kaos/getting-started/quick-start)
+Train, serve and predict in your **own** running cluster with [**8 commands!**](https://kaos.ki-labs.com/getting-started/quick-start)
 
 ##
 ### Features
@@ -24,14 +48,14 @@ Train, serve and predict in your **own** running cluster with [**8 commands!**](
 ## 
 ### Documentation
 
-Check out our [Official Documentation](https://ki-labs.gitbook.io/kaos)
+Check out our [Official Documentation](https://kaos.ki-labs.com)
 
 ##
 ### Get Involved
 
-* Check the [Changelog](https://ki-labs.gitbook.io/kaos/miscellaneous/changelog) for release information
-* Visit the [Public Roadmap](https://ki-labs.gitbook.io/kaos/miscellaneous/roadmap) to see what's coming next
-* Bugs, issues and contributions should be created on [GitHub](https://github.com/KI-labs/kaos)
+* Check the [Changelog](https://kaos.ki-labs.com/miscellaneous/changelog) for release information
+* Visit the [Public Roadmap](https://kaos.ki-labs.com/miscellaneous/roadmap) to see what's coming next
+* Bugs, issues and contributions should be created on [GitHub](https://github.com/KI-labs/kaos/issues/new/choose)
 * Check out the [list](CONTRIBUTORS.md) of people who already contributed
 
 ### Slack
@@ -40,7 +64,10 @@ Check out our [Official Documentation](https://ki-labs.gitbook.io/kaos)
 Get in touch via our [slack workspace](https://kaos-slack-inviter.herokuapp.com/) for user discussion.
 
 
-![](docs/.gitbook/assets/image%20%288%29.png)
+<p align="center">
+    <img src="docs/.gitbook/assets/image%20%288%29.png"
+        height="75">
+</p>
 
 ### Contributors
 <a href="https://github.com/ki-labs/kaos/graphs/contributors">
