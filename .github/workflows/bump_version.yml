@@ -2,7 +2,7 @@ name: Bump version and push to dockerhub
 on:
   push:
     branches:
-      - automate-build-and-tag-of-kaos-latest
+      - master
 jobs:
   tags:
     runs-on: ubuntu-latest
