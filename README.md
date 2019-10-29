@@ -58,6 +58,13 @@ Check out our [Official Documentation](https://kaos.ki-labs.com)
 * Bugs, issues and contributions should be created on [GitHub](https://github.com/KI-labs/kaos/issues/new/choose)
 * Check out the [list](CONTRIBUTORS.md) of people who already contributed
 
+##
+### Contributors
+<a href="https://github.com/ki-labs/kaos/graphs/contributors">
+  <img src="https://contributors-img.firebaseapp.com/image?repo=KI-labs/kaos" />
+</a>
+<!--Made with [contributors-img](https://contributors-img.firebaseapp.com).-->
+
 <p align="center">
     <img src="docs/.gitbook/assets/image%20%288%29.png"
         height="75">
