@@ -42,6 +42,9 @@ AWS = "AWS"
 AZ = "AZ"
 GCP = "GCP"
 
+# environments in config
+ENVIRONMENTS = 'environments'
+
 LOCAL_CONFIG_DICT = dict(AWS=AWS_LOCAL_BACKEND_PATH,
                          AZ=AZURE_LOCAL_BACKEND_PATH,
                          GCP=GCP_LOCAL_BACKEND_PATH)
@@ -83,6 +86,7 @@ METADATA_JSON = "metadata.json"
 DEFAULTS = {
     "user": os.environ.get("USER", "kaos")
 }
+DEFAULT = 'default'
 BACKEND = 'backend'
 INFRASTRUCTURE = "infrastructure"
 PACHYDERM = 'pachyderm'

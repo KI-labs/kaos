@@ -6,7 +6,7 @@ from distutils.dir_util import copy_tree
 
 import requests
 from kaos_cli.constants import DOCKER, MINIKUBE, PROVIDER_DICT, AWS, BACKEND, INFRASTRUCTURE, GCP, LOCAL_CONFIG_DICT, \
-    KAOS_TF_PATH
+    KAOS_TF_PATH, DEFAULT, DEFAULTS, ENVIRONMENTS
 from kaos_cli.exceptions.exceptions import HostnameError
 from kaos_cli.services.state_service import StateService
 from kaos_cli.services.terraform_service import TerraformService
@@ -35,7 +35,7 @@ class BackendFacade:
 
     @property
     def user(self):
-        return self.state_service.get(BACKEND, 'user')
+        return self.state_service.get(DEFAULT, 'user')
 
     @property
     def token(self):
@@ -50,8 +50,36 @@ class BackendFacade:
             self.state_service.create()
         self.tf_service.execute()
 
-        self.state_service.set(BACKEND, url=url, token=token)
-        self.state_service.write()
+        self.set(BACKEND, url=url, token=token)
+        self.state_service.write(ENVIRONMENTS)
+
+    def set_context(self, provider, env, url, kubeconfig, token=None):
+        all_contexts, active_context = self.state_service.get_all_contexts()
+        env = '' if provider in [DOCKER, MINIKUBE] else env
+        current_context = provider if provider in [DOCKER, MINIKUBE] else provider + '_' + env
+        context_configuration = self.build_configuration(current_context, all_contexts, url, kubeconfig)
+        print("context_configuration", context_configuration)
+        if current_context not in all_contexts or len(all_contexts) == 0:
+            self.state_service.add_context(context_configuration)
+        if current_context in all_contexts and len(all_contexts) > 0:
+            self.state_service.update_context(current_context, context_configuration)
+
+    def list_contexts(self):
+        all_contexts, active_context = self.state_service.get_all_contexts()
+        return all_contexts, active_context
+
+    @staticmethod
+    def build_configuration(current_context, all_contexts, url, kubeconfig):
+        token = ""
+        build_configuration = \
+            {"index": len(all_contexts),
+             "context": current_context,
+             "active_context": True,
+             "default": DEFAULTS,
+             "backend": {"url": url, "token": token},
+             "infrastructure": {"kubeconfig": kubeconfig},
+             "pachyderm": {"workspace": {}}}
+        return build_configuration
 
     @staticmethod
     def _set_build_dir(provider, env):
@@ -73,9 +101,9 @@ class BackendFacade:
 
         url, kubeconfig = self._parse_config(dir_build)
 
-        self.state_service.set(BACKEND, url=url, token=uuid.uuid4())
-        self.state_service.set(INFRASTRUCTURE, kubeconfig=kubeconfig)
-        self.state_service.write()
+        self.set_context(provider, env, url, kubeconfig)
+
+        self.state_service.write(ENVIRONMENTS)
 
     def destroy(self, provider, env, verbose=False):
         dir_build = self._set_build_dir(provider, env)
