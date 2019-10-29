@@ -77,15 +77,15 @@ def build(backend: BackendFacade, cloud, env, force, verbose, yes, local_backend
             click.style(cloud, bold=True, fg='red')))
 
     # validate unused port for DOCKER
-    if cloud == DOCKER:
-        is_available = validate_unused_port(80)
-        if not is_available:
-            click.echo(
-                "{} - Network port {} is used but is needed for building {} backend in {}".format(
-                    click.style("Warning", bold=True, fg='yellow'),
-                    click.style("80", bold=True),
-                    click.style("kaos", bold=True),
-                    click.style(cloud, bold=True, fg='red')))
+    if cloud == DOCKER and not validate_unused_port(80):
+        click.echo(
+            "{} - Network port {} is used but is needed for building {} backend in {}".format(
+                click.style("Warning", bold=True, fg='yellow'),
+                click.style("80", bold=True),
+                click.style("kaos", bold=True),
+                click.style(cloud, bold=True, fg='red')))
+        
+        sys.exit(1)
     
     try:
 
