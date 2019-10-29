@@ -17,6 +17,7 @@ inspec.lock
 config.json
 .DS_Store
 build
+.vscode
 
 # Python gitignore
 

@@ -6,7 +6,7 @@ from kaos_cli.constants import AWS, GCP, DOCKER, MINIKUBE
 from kaos_cli.exceptions.handle_exceptions import handle_specific_exception, handle_exception
 from kaos_cli.facades.backend_facade import BackendFacade, is_cloud_provider
 from kaos_cli.utils.decorators import build_env_check, pass_obj
-from kaos_cli.utils.validators import validate_build_env
+from kaos_cli.utils.validators import validate_build_env, validate_unused_port
 
 
 # BUILD command
@@ -76,6 +76,17 @@ def build(backend: BackendFacade, cloud, env, force, verbose, yes, local_backend
             click.style("Info", bold=True, fg='green'),
             click.style(cloud, bold=True, fg='red')))
 
+    # validate unused port for DOCKER
+    if cloud == DOCKER and not validate_unused_port(80):
+        click.echo(
+            "{} - Network port {} is used but is needed for building {} backend in {}".format(
+                click.style("Warning", bold=True, fg='yellow'),
+                click.style("80", bold=True),
+                click.style("kaos", bold=True),
+                click.style(cloud, bold=True, fg='red')))
+        
+        sys.exit(1)
+    
     try:
 
         backend.build(cloud, env, local_backend=local_backend, verbose=verbose)
