@@ -48,8 +48,6 @@ class BackendFacade:
     def init(self, url, token):
         if not self.state_service.is_created():
             self.state_service.create()
-        self.tf_service.execute()
-
         self.state_service.set(BACKEND, url=url, token=token)
         self.state_service.write()
 
