@@ -4,7 +4,6 @@ import sys
 import click
 from kaos_cli.constants import AWS, GCP, DOCKER, MINIKUBE
 from kaos_cli.exceptions.handle_exceptions import handle_specific_exception, handle_exception
-from kaos_cli.facades.workspace_facade import WorkspaceFacade
 from kaos_cli.facades.backend_facade import BackendFacade, is_cloud_provider
 from kaos_cli.utils.decorators import build_env_check, pass_obj
 from kaos_cli.utils.validators import validate_build_env, validate_unused_port
@@ -29,8 +28,7 @@ from kaos_cli.utils.validators import validate_build_env, validate_unused_port
               help='locally store terraform state [cloud only]', required=False)
 @build_env_check
 @pass_obj(BackendFacade)
-@pass_obj(WorkspaceFacade)
-def build(workspace: WorkspaceFacade, backend: BackendFacade, cloud, env, force, verbose, yes, local_backend):
+def build(backend: BackendFacade, cloud, env, force, verbose, yes, local_backend):
     """
     Deploy kaos backend infrastructure based on selected provider.
     """
