@@ -4,6 +4,7 @@ import sys
 import click
 from kaos_cli.constants import AWS, GCP, DOCKER, MINIKUBE
 from kaos_cli.exceptions.handle_exceptions import handle_specific_exception, handle_exception
+from kaos_cli.facades.workspace_facade import WorkspaceFacade
 from kaos_cli.facades.backend_facade import BackendFacade, is_cloud_provider
 from kaos_cli.utils.decorators import build_env_check, pass_obj
 from kaos_cli.utils.validators import validate_build_env, validate_unused_port
@@ -28,7 +29,8 @@ from kaos_cli.utils.validators import validate_build_env, validate_unused_port
               help='locally store terraform state [cloud only]', required=False)
 @build_env_check
 @pass_obj(BackendFacade)
-def build(backend: BackendFacade, cloud, env, force, verbose, yes, local_backend):
+@pass_obj(WorkspaceFacade)
+def build(workspace: WorkspaceFacade, backend: BackendFacade, cloud, env, force, verbose, yes, local_backend):
     """
     Deploy kaos backend infrastructure based on selected provider.
     """
@@ -78,14 +80,18 @@ def build(backend: BackendFacade, cloud, env, force, verbose, yes, local_backend
 
     # validate unused port for DOCKER
     if cloud == DOCKER and not validate_unused_port(80):
-        click.echo(
-            "{} - Network port {} is used but is needed for building {} backend in {}".format(
-                click.style("Warning", bold=True, fg='yellow'),
-                click.style("80", bold=True),
-                click.style("kaos", bold=True),
-                click.style(cloud, bold=True, fg='red')))
-        
-        sys.exit(1)
+        # If the force build flag was set to True and the kaos backend 
+        # was already built then skip the warning; otherwise, warn
+        # the user that the port is already taken by another service
+        # and issue a sys exit
+        if not (force and backend.is_created()):
+            click.echo(
+                "{} - Network port {} is used but is needed for building {} backend in {}".format(
+                    click.style("Warning", bold=True, fg='yellow'),
+                    click.style("80", bold=True),
+                    click.style("kaos", bold=True),
+                    click.style(cloud, bold=True, fg='red')))
+            sys.exit(1)
     
     try:
 
