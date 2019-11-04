@@ -3,10 +3,11 @@ import sys
 from configparser import ConfigParser, ExtendedInterpolation
 
 import click
+import time
 import requests
 from kaos_cli.utils.helpers import run_cmd
 
-from ..constants import KAOS_STATE_DIR, CONFIG_PATH, ENV_DICT
+from ..constants import KAOS_STATE_DIR, CONFIG_PATH, ENV_DICT, CONFIG_SPEC, DEFAULTS
 
 
 def pass_obj(obj_id):

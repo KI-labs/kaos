@@ -1,92 +1,48 @@
 import glob
 import os
 import shutil
-import json
+import time
 from configparser import ConfigParser, ExtendedInterpolation
+from configobj import ConfigObj
 
-from kaos_cli.constants import KAOS_STATE_DIR, CONFIG_PATH, KAOS_TF_PATH, ENVIRONMENTS
+from kaos_cli.constants import KAOS_STATE_DIR, CONFIG_PATH, KAOS_TF_PATH, CONFIG_SPEC, DEFAULTS
 
 
 class StateService:
 
     def __init__(self, config=None):
-        # self.config = config or ConfigParser(defaults=DEFAULTS, interpolation=ExtendedInterpolation())
-        # self.config.read(CONFIG_PATH)
-        # self.config.read_dict(CONFIG_PATH)
-        self.data = self.read_config(CONFIG_PATH, ENVIRONMENTS)
-
-    @staticmethod
-    def read_config(path, environments):
-        if os.path.exists(path):
-            with open(path, 'r') as f:
-                config = json.load(f)
-                return config[environments]
-        else:
-            return []
+        self.config = config or ConfigObj(CONFIG_PATH, configspec=self.create_config_spec(), interpolation=ExtendedInterpolation())
 
     def set(self, section, **kwargs):
-        environments = self.data
-        if environments:
-            for env in environments:
-                env[section][kwargs] == kwargs
+        self.config[section] = kwargs
 
     def get(self, section, param):
-        environments = self.data
-        print("environments", environments)
-        if environments:
-            print("inside get")
-            for env in environments:
-                if env['active'] is True:
-                    return env[section][param]
-        return None
+            return self.config[section][param]
 
-    def add_context(self, context_configuration):
-        print("inside add context")
-        environments = self.data
-        environments.append(context_configuration)
-        self.data = environments
+    def set_section(self, context, section, **kwargs):
+        self.config[context][section] = kwargs
 
-    def update_context(self, current_context, context_configuration):
-        print("inside update context")
-        existing_environments = self.data
-        environments = []
-        if existing_environments:
-            for env in existing_environments:
-                if env['context'] != current_context and env['active'] is True:
-                        env['active'] = False
-                        environments.append(env)
-                elif env['context'] == current_context:
-                    pass
-                    # do not append environment
-        environments.append(context_configuration)
-        self.data = environments
+    def get_section(self, context, section, param):
+            return self.config[context][section][param]
 
-    def get_all_contexts(self):
-        print("inside get all contexts")
-        all_contexts = []
-        active_context = None
-        environments = self.data
-        if environments:
-                for env in environments:
-                    all_contexts.append(env['context'])
-                    if env['active'] is True:
-                        active_context = env['context']
-        print("active_context", active_context)
-        print("all_contexts", all_contexts)
-        return all_contexts, active_context
-
-    def get_old(self, section, param):
-        return self.config.get(section, param)
-
-    def has_section_old(self, section):
+    def has_section(self, section):
         return self.config.has_section(section)
 
-    def remove_section_old(self, section):
+    def remove_section(self, section):
         self.config.remove_section(section)
 
-    def parse_config_json(self, config_path):
-        with open(config_path, 'r') as f:
-            self.data = json.load(f)
+    @staticmethod
+    def create_config_spec():
+        print("Outside")
+        if not os.path.exists(CONFIG_SPEC):
+            print("Inside")
+            config = ConfigParser()
+            config['DEFAULT'] = DEFAULTS
+            config['CONTEXTS'] = {"environments": ""}
+            with open(CONFIG_SPEC, 'w') as configfile:
+                config.write(configfile)
+            time.sleep(5)
+            return CONFIG_SPEC
 
     @staticmethod
     def is_created():
@@ -109,8 +65,6 @@ class StateService:
     def full_delete():
         shutil.rmtree(KAOS_STATE_DIR, ignore_errors=True)
 
-    def write(self, environments):
-        with open(CONFIG_PATH, 'w'):
-            data = self.data
-            config = {environments: data}
-            json.dumps(config)
+    def write(self):
+        with open(CONFIG_PATH, 'w') as f:
+            self.config.write(f)

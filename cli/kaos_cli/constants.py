@@ -6,6 +6,9 @@ import kaos_cli
 KAOS_STATE_DIR = os.path.abspath("./.kaos")
 KAOS_INSTALLATION_DIR = os.path.dirname(kaos_cli.__file__)
 
+#Config spec path
+CONFIG_SPEC = os.path.abspath("./config_spec")
+
 # Project name
 PROJECT = os.environ.get("PROJECT", "kaos")
 CONFIG_PATH = os.path.join(KAOS_STATE_DIR, "config")
@@ -90,3 +93,5 @@ DEFAULT = 'default'
 BACKEND = 'backend'
 INFRASTRUCTURE = "infrastructure"
 PACHYDERM = 'pachyderm'
+CONTEXTS = 'contexts'
+ACTIVE = 'active'

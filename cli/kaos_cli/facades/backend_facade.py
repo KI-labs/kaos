@@ -6,7 +6,7 @@ from distutils.dir_util import copy_tree
 
 import requests
 from kaos_cli.constants import DOCKER, MINIKUBE, PROVIDER_DICT, AWS, BACKEND, INFRASTRUCTURE, GCP, LOCAL_CONFIG_DICT, \
-    KAOS_TF_PATH, DEFAULT, DEFAULTS, ENVIRONMENTS
+    KAOS_TF_PATH, CONTEXTS, ACTIVE
 from kaos_cli.exceptions.exceptions import HostnameError
 from kaos_cli.services.state_service import StateService
 from kaos_cli.services.terraform_service import TerraformService
@@ -22,7 +22,6 @@ def is_cloud_provider(cloud):
 class BackendFacade:
     """
     This class should handle all backend related configuration and settings.
-
     """
 
     def __init__(self, state_service: StateService, terraform_service: TerraformService):
@@ -35,7 +34,7 @@ class BackendFacade:
 
     @property
     def user(self):
-        return self.state_service.get(DEFAULT, 'user')
+        return self.state_service.get(BACKEND, 'user')
 
     @property
     def token(self):
@@ -48,38 +47,8 @@ class BackendFacade:
     def init(self, url, token):
         if not self.state_service.is_created():
             self.state_service.create()
-        self.tf_service.execute()
-
-        self.set(BACKEND, url=url, token=token)
-        self.state_service.write(ENVIRONMENTS)
-
-    def set_context(self, provider, env, url, kubeconfig, token=None):
-        all_contexts, active_context = self.state_service.get_all_contexts()
-        env = '' if provider in [DOCKER, MINIKUBE] else env
-        current_context = provider if provider in [DOCKER, MINIKUBE] else provider + '_' + env
-        context_configuration = self.build_configuration(current_context, all_contexts, url, kubeconfig)
-        print("context_configuration", context_configuration)
-        if current_context not in all_contexts or len(all_contexts) == 0:
-            self.state_service.add_context(context_configuration)
-        if current_context in all_contexts and len(all_contexts) > 0:
-            self.state_service.update_context(current_context, context_configuration)
-
-    def list_contexts(self):
-        all_contexts, active_context = self.state_service.get_all_contexts()
-        return all_contexts, active_context
-
-    @staticmethod
-    def build_configuration(current_context, all_contexts, url, kubeconfig):
-        token = ""
-        build_configuration = \
-            {"index": len(all_contexts),
-             "context": current_context,
-             "active_context": True,
-             "default": DEFAULTS,
-             "backend": {"url": url, "token": token},
-             "infrastructure": {"kubeconfig": kubeconfig},
-             "pachyderm": {"workspace": {}}}
-        return build_configuration
+        self.state_service.set(BACKEND, url=url, token=token)
+        self.state_service.write()
 
     @staticmethod
     def _set_build_dir(provider, env):
@@ -101,9 +70,14 @@ class BackendFacade:
 
         url, kubeconfig = self._parse_config(dir_build)
 
-        self.set_context(provider, env, url, kubeconfig)
+        current_context = provider if provider in [DOCKER, MINIKUBE] else provider + '_' + env
 
-        self.state_service.write(ENVIRONMENTS)
+        self._set_context_list(current_context)
+        self._set_active_context(current_context)
+
+        self.state_service.set_section(current_context, BACKEND, url=url, token=uuid.uuid4())
+        self.state_service.set_section(current_context, INFRASTRUCTURE, kubeconfig=kubeconfig)
+        self.state_service.write()
 
     def destroy(self, provider, env, verbose=False):
         dir_build = self._set_build_dir(provider, env)
@@ -153,6 +127,16 @@ class BackendFacade:
         else:
             self.tf_service.init(directory)
         return directory
+
+    def _set_context_list(self, current_context):
+        available_contexts = self.state_service.get(CONTEXTS, 'environments')
+        print(available_contexts)
+        print(type(available_contexts))
+        updated_context_list = available_contexts + current_context
+        self.state_service.set(CONTEXTS, environments=updated_context_list)
+
+    def _set_active_context(self, current_context):
+        self.state_service.set(ACTIVE, environment=current_context)
 
     @staticmethod
     def _parse_config(dir_build):
