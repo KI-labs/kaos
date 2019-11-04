@@ -78,14 +78,18 @@ def build(backend: BackendFacade, cloud, env, force, verbose, yes, local_backend
 
     # validate unused port for DOCKER
     if cloud == DOCKER and not validate_unused_port(80):
-        click.echo(
-            "{} - Network port {} is used but is needed for building {} backend in {}".format(
-                click.style("Warning", bold=True, fg='yellow'),
-                click.style("80", bold=True),
-                click.style("kaos", bold=True),
-                click.style(cloud, bold=True, fg='red')))
-        
-        sys.exit(1)
+        # If the force build flag was set to True and the kaos backend 
+        # was already built then skip the warning; otherwise, warn
+        # the user that the port is already taken by another service
+        # and issue a sys exit
+        if not (force and backend.is_created()):
+            click.echo(
+                "{} - Network port {} is used but is needed for building {} backend in {}".format(
+                    click.style("Warning", bold=True, fg='yellow'),
+                    click.style("80", bold=True),
+                    click.style("kaos", bold=True),
+                    click.style(cloud, bold=True, fg='red')))
+            sys.exit(1)
     
     try:
 
