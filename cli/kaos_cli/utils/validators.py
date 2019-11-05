@@ -162,12 +162,14 @@ def validate_build_dir(path):
             ))
         sys.exit(1)
 
-def validate_unused_port(port: int, host: str='0.0.0.0') -> bool:
+
+def validate_unused_port(port: int, host: str = '0.0.0.0') -> bool:
     """
     Validate that a specific network port is unused.
 
     Args:
         port (int): the integer port number to check
+        host (str): hostip
     """
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         # Try to bind to a port, if it raises a socket error, 
@@ -177,3 +179,4 @@ def validate_unused_port(port: int, host: str='0.0.0.0') -> bool:
             return True
         except socket.error:
             return False
+

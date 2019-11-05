@@ -50,6 +50,34 @@ class BackendFacade:
         self.state_service.set(BACKEND, url=url, token=token)
         self.state_service.write()
 
+    def list(self):
+        try:
+            contexts = self.state_service.get(CONTEXTS, 'environments')
+            list_contexts = contexts.split(',')
+            contexts_info = self.jsonify_context_list(list_contexts)
+            return contexts_info
+
+        except KeyError:
+            return None
+
+    @staticmethod
+    def jsonify_context_list(list_contexts):
+        contexts_info = []
+        for context in list_contexts:
+            try:
+                cloud, env = context.split('_')
+            except ValueError:
+                cloud = context
+                env = None
+            env = "local" if not env else env
+            info = {
+                "name": context,
+                "provider": cloud,
+                "env": env
+            }
+            contexts_info.append(info)
+        return contexts_info
+
     @staticmethod
     def _set_build_dir(provider, env):
         dir_build = os.path.join(KAOS_TF_PATH,
@@ -74,9 +102,13 @@ class BackendFacade:
 
         self._set_context_list(current_context)
         self._set_active_context(current_context)
+        self.state_service.set(current_context)
 
-        self.state_service.set_section(current_context, BACKEND, url=url, token=uuid.uuid4())
-        self.state_service.set_section(current_context, INFRASTRUCTURE, kubeconfig=kubeconfig)
+        try:
+            self.state_service.set_section(current_context, BACKEND, url=url, token=uuid.uuid4())
+            self.state_service.set_section(current_context, INFRASTRUCTURE, kubeconfig=kubeconfig)
+        except KeyError:
+            pass
         self.state_service.write()
 
     def destroy(self, provider, env, verbose=False):
@@ -129,10 +161,12 @@ class BackendFacade:
         return directory
 
     def _set_context_list(self, current_context):
-        available_contexts = self.state_service.get(CONTEXTS, 'environments')
-        print(available_contexts)
-        print(type(available_contexts))
-        updated_context_list = available_contexts + current_context
+        try:
+            available_contexts = self.state_service.get(CONTEXTS, 'environments')
+        except KeyError:
+            available_contexts = ''
+        updated_context_list = available_contexts + current_context if not available_contexts else \
+            available_contexts + ',' + current_context
         self.state_service.set(CONTEXTS, environments=updated_context_list)
 
     def _set_active_context(self, current_context):

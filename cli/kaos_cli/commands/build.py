@@ -6,16 +6,26 @@ from kaos_cli.constants import AWS, GCP, DOCKER, MINIKUBE
 from kaos_cli.exceptions.handle_exceptions import handle_specific_exception, handle_exception
 from kaos_cli.facades.backend_facade import BackendFacade, is_cloud_provider
 
-from kaos_cli.utils.decorators import build_env_check, pass_obj, create_config_spec
+from kaos_cli.utils.custom_classes import CustomHelpOrder
+from kaos_cli.utils.decorators import build_env_check, pass_obj
 from kaos_cli.utils.validators import validate_build_env, validate_unused_port
+from kaos_cli.utils.rendering import render_table
 
 
-from configparser import ConfigParser, ExtendedInterpolation
-import time
-
-# BUILD command
+# BUILD group
 # =============
-@click.command(name='build',
+
+@click.group(name='build', cls=CustomHelpOrder,
+             short_help=' {} and its {} '.format(
+                 click.style('build', bold=True), click.style('sub-commands', bold=True)))
+def build():
+    """
+    Build command allows you to deploy infrastructre and list the available deployments
+    """
+    pass
+
+
+@build.command(name='deploy',
                short_help='{}'.format(
                    click.style('Build the kaos backend', bold=True, fg='black')))
 @click.option('-c', '--cloud', type=click.Choice([DOCKER, MINIKUBE, AWS, GCP]),
@@ -32,7 +42,7 @@ import time
               help='locally store terraform state [cloud only]', required=False)
 @build_env_check
 @pass_obj(BackendFacade)
-def build(backend: BackendFacade, cloud, env, force, verbose, yes, local_backend):
+def deploy(backend: BackendFacade, cloud, env, force, verbose, yes, local_backend):
     """
     Deploy kaos backend infrastructure based on selected provider.
     """
@@ -120,6 +130,22 @@ def build(backend: BackendFacade, cloud, env, force, verbose, yes, local_backend
             click.echo("{} - Successfully built {} environment".format(
                 click.style("Info", bold=True, fg='green'),
                 click.style('kaos', bold=True)))
+
+    except Exception as e:
+        handle_specific_exception(e)
+        handle_exception(e)
+
+
+@build.command(name='list')
+@pass_obj(BackendFacade)
+def list_all(backend: BackendFacade):
+    """
+    List all deployed kaos backend infrastructures.
+    """
+    try:
+        available_contexts = backend.list()
+        table = render_table(available_contexts, include_ind=True)
+        click.echo(table)
 
     except Exception as e:
         handle_specific_exception(e)
