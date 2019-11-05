@@ -120,7 +120,11 @@ class BackendFacade:
 
         self.tf_service.set_verbose(verbose)
         directory = self._tf_init(provider, env, local_backend=False, destroying=True)
-        self._delete_resources()
+        current_context = provider if provider in [DOCKER, MINIKUBE] else provider + '_' + env
+        self._delete_resources(current_context)
+        self._unset_context_list(current_context)
+        self._remove_section(current_context)
+        self._deactivate_context()
         self.tf_service.destroy(directory, extra_vars)
         self.tf_service.execute()
         self._remove_build_files(dir_build)
@@ -136,8 +140,8 @@ class BackendFacade:
         if not self.state_service.list_providers():
             self.state_service.full_delete()
 
-    def _delete_resources(self):
-        if self.state_service.has_section(BACKEND):
+    def _delete_resources(self, context):
+        if self.state_service.has_section(context, BACKEND):
             requests.delete(f"{self.url}/internal/resources")
 
     def _tf_init(self, provider, env, local_backend, destroying=False):
@@ -165,12 +169,32 @@ class BackendFacade:
             available_contexts = self.state_service.get(CONTEXTS, 'environments')
         except KeyError:
             available_contexts = ''
-        updated_context_list = available_contexts + current_context if not available_contexts else \
+        updated_contexts = available_contexts + current_context if not available_contexts else \
             available_contexts + ',' + current_context
-        self.state_service.set(CONTEXTS, environments=updated_context_list)
+        self.state_service.set(CONTEXTS, environments=updated_contexts)
+
+    def _unset_context_list(self, current_context):
+        available_contexts = self.state_service.get(CONTEXTS, 'environments')
+        context_list = available_contexts.split(',')
+        if len(context_list) <= 1:
+            updated_context_list = []
+        else:
+            try:
+                context_list.remove(current_context)
+            except ValueError:
+                updated_context_list = context_list
+        updated_contexts = ','.join(updated_context_list)
+        self.state_service.set(CONTEXTS, environments=updated_contexts)
 
     def _set_active_context(self, current_context):
         self.state_service.set(ACTIVE, environment=current_context)
+
+    def _remove_section(self, current_context):
+        empty_section = {}
+        self.state_service.set(current_context, empty_section)
+
+    def _deactivate_context(self):
+        self.state_service.set(ACTIVE, environment=None)
 
     @staticmethod
     def _parse_config(dir_build):

@@ -23,8 +23,8 @@ class StateService:
     def get_section(self, context, section, param):
         return self.config[context][section][param]
 
-    def has_section(self, section):
-        return self.config.has_section(section)
+    def has_section(self, context, section):
+        return self.config[context][section]
 
     def remove_section(self, section):
         self.config.remove_section(section)
