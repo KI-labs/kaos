@@ -3,7 +3,6 @@ import sys
 from configparser import ConfigParser, ExtendedInterpolation
 
 import click
-import time
 import requests
 from kaos_cli.utils.helpers import run_cmd
 

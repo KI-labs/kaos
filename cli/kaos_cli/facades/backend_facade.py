@@ -6,13 +6,13 @@ from distutils.dir_util import copy_tree
 
 import requests
 from kaos_cli.constants import DOCKER, MINIKUBE, PROVIDER_DICT, AWS, BACKEND, INFRASTRUCTURE, GCP, LOCAL_CONFIG_DICT, \
-    KAOS_TF_PATH, CONTEXTS, ACTIVE
+    KAOS_TF_PATH, CONTEXTS, ACTIVE, BACKEND_CACHE
 from kaos_cli.exceptions.exceptions import HostnameError
 from kaos_cli.services.state_service import StateService
 from kaos_cli.services.terraform_service import TerraformService
 from kaos_cli.utils.environment import check_environment
 from kaos_cli.utils.helpers import build_dir
-from kaos_cli.utils.validators import validate_build_dir
+from kaos_cli.utils.validators import validate_build_dir, validate_cache, validate_index
 
 
 def is_cloud_provider(cloud):
@@ -48,35 +48,56 @@ class BackendFacade:
         if not self.state_service.is_created():
             self.state_service.create()
         self.state_service.set(BACKEND, url=url, token=token)
+
         self.state_service.write()
 
     def list(self):
         try:
             contexts = self.state_service.get(CONTEXTS, 'environments')
-            list_contexts = contexts.split(',')
-            contexts_info = self.jsonify_context_list(list_contexts)
+            print("contexts", contexts)
+            print("contexts_type", type(contexts))
+            # list_contexts = contexts.split(',')
+            contexts_info = self.jsonify_context_list(contexts)
             return contexts_info
 
         except KeyError:
             return None
 
+    def set(self, current_context):
+        pass
+
     @staticmethod
-    def jsonify_context_list(list_contexts):
+    def get_context_info(context):
+        try:
+            cloud, env = context.split('_')
+        except ValueError:
+            cloud = context
+            env = None
+        env = "local" if not env else env
+        info = {
+            "context": context,
+            "provider": cloud,
+            "env": env
+        }
+        return info
+
+    def jsonify_context_list(self, contexts):
         contexts_info = []
-        for context in list_contexts:
-            try:
-                cloud, env = context.split('_')
-            except ValueError:
-                cloud = context
-                env = None
-            env = "local" if not env else env
-            info = {
-                "name": context,
-                "provider": cloud,
-                "env": env
-            }
-            contexts_info.append(info)
+        if isinstance(contexts, list):
+            for context in contexts:
+                contexts_info.append(self.get_context_info(context))
+        elif isinstance(contexts, str):
+            contexts_info.append(self.get_context_info(contexts))
         return contexts_info
+
+    @staticmethod
+    def set_context_by_ind(ind):
+        print("in set context")
+        data = validate_cache(BACKEND_CACHE, command='build')
+        print("data", data)
+        loc = validate_index(len(data['ind']), ind, command='build')
+        print("loc", loc)
+        return data['name'][loc]
 
     @staticmethod
     def _set_build_dir(provider, env):
@@ -195,6 +216,11 @@ class BackendFacade:
 
     def _deactivate_context(self):
         self.state_service.set(ACTIVE, environment=None)
+
+    @staticmethod
+    def cache(builds):
+        with open(BACKEND_CACHE, 'w') as fp:
+            json.dump(builds, fp)
 
     @staticmethod
     def _parse_config(dir_build):

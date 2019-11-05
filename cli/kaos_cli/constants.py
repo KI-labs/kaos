@@ -21,6 +21,7 @@ WORKSPACE_CACHE = os.path.join(KAOS_STATE_DIR, ".workspace.cache")
 NOTEBOOK_CACHE = os.path.join(KAOS_STATE_DIR, ".notebook.cache")
 TRAIN_CACHE = os.path.join(KAOS_STATE_DIR, ".train.cache")
 SERVE_CACHE = os.path.join(KAOS_STATE_DIR, ".serve.cache")
+BACKEND_CACHE = os.path.join(KAOS_STATE_DIR, ".backend.cache")
 
 KAOS_HOME = os.getenv("KAOS_HOME", "")
 

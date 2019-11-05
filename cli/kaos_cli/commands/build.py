@@ -6,9 +6,9 @@ from kaos_cli.constants import AWS, GCP, DOCKER, MINIKUBE
 from kaos_cli.exceptions.handle_exceptions import handle_specific_exception, handle_exception
 from kaos_cli.facades.backend_facade import BackendFacade, is_cloud_provider
 
-from kaos_cli.utils.custom_classes import CustomHelpOrder
+from kaos_cli.utils.custom_classes import CustomHelpOrder, NotRequiredIf
 from kaos_cli.utils.decorators import build_env_check, pass_obj
-from kaos_cli.utils.validators import validate_build_env, validate_unused_port
+from kaos_cli.utils.validators import validate_build_env, validate_unused_port, validate_inputs
 from kaos_cli.utils.rendering import render_table
 
 
@@ -136,7 +136,9 @@ def deploy(backend: BackendFacade, cloud, env, force, verbose, yes, local_backen
         handle_exception(e)
 
 
-@build.command(name='list')
+# build list
+# =============
+@build.command(name='list', short_help='List currently deployed backend builds')
 @pass_obj(BackendFacade)
 def list_all(backend: BackendFacade):
     """
@@ -144,8 +146,39 @@ def list_all(backend: BackendFacade):
     """
     try:
         available_contexts = backend.list()
-        table = render_table(available_contexts, include_ind=True)
-        click.echo(table)
+        if len(available_contexts) > 0:
+            backend.cache(available_contexts)
+            table = render_table(available_contexts, include_ind=True)
+            click.echo(table)
+
+    except Exception as e:
+        handle_specific_exception(e)
+        handle_exception(e)
+
+
+# build set
+# =============
+@build.command(name='set', short_help='Set active build context')
+@click.option('-c', '--context', type=str, help='set to a specific deployed context', cls=NotRequiredIf,
+              not_required_if='ind')
+@click.option('-i', '--ind', type=int, help='available contexts index', cls=NotRequiredIf,
+              not_required_if='context')
+@pass_obj(BackendFacade)
+def set_active_context(backend: BackendFacade, context, ind):
+    """
+    Set current model environment workspace.
+    """
+
+    try:
+        # ensure arguments are correctly defined
+        print("before validating inputs")
+        validate_inputs([context, ind], ['context', 'ind'])
+        print("after validating inputs")
+        # selection by index
+        if ind is not None:
+            print("before context")
+            context = backend.set_context_by_ind(ind)
+            print("after context")
 
     except Exception as e:
         handle_specific_exception(e)
