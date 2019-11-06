@@ -90,6 +90,7 @@ METADATA_JSON = "metadata.json"
 DEFAULTS = {
     "user": os.environ.get("USER", "kaos")
 }
+USER = os.environ.get("USER", "kaos")
 DEFAULT = 'default'
 BACKEND = 'backend'
 INFRASTRUCTURE = "infrastructure"

@@ -26,8 +26,11 @@ class StateService:
     def has_section(self, context, section):
         return self.config[context][section]
 
-    def remove_section(self, section):
-        self.config.remove_section(section)
+    def remove(self, section):
+        del self.config[section]
+
+    def remove_section(self, context, section):
+        del self.config[context][section]
 
     # @staticmethod
     # def create_config_spec():

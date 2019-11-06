@@ -6,7 +6,7 @@ from distutils.dir_util import copy_tree
 
 import requests
 from kaos_cli.constants import DOCKER, MINIKUBE, PROVIDER_DICT, AWS, BACKEND, INFRASTRUCTURE, GCP, LOCAL_CONFIG_DICT, \
-    KAOS_TF_PATH, CONTEXTS, ACTIVE, BACKEND_CACHE
+    KAOS_TF_PATH, CONTEXTS, ACTIVE, BACKEND_CACHE, DEFAULT, USER
 from kaos_cli.exceptions.exceptions import HostnameError
 from kaos_cli.services.state_service import StateService
 from kaos_cli.services.terraform_service import TerraformService
@@ -29,20 +29,24 @@ class BackendFacade:
         self.tf_service = terraform_service
 
     @property
+    def active_context(self):
+        return self.state_service.get(ACTIVE, 'environment')
+
+    @property
     def url(self):
-        return self.state_service.get(BACKEND, 'url')
+        return self.state_service.get_section(self.active_context, BACKEND, 'url')
 
     @property
     def user(self):
-        return self.state_service.get(BACKEND, 'user')
+        return self.state_service.get(DEFAULT, 'user')
 
     @property
     def token(self):
-        return self.state_service.get(BACKEND, 'token')
+        return self.state_service.get_section(self.active_context, BACKEND, 'token')
 
     @property
     def kubeconfig(self):
-        return self.state_service.get(INFRASTRUCTURE, 'kubeconfig')
+        return self.state_service.get_section(self.active_context, INFRASTRUCTURE, 'kubeconfig')
 
     def init(self, url, token):
         if not self.state_service.is_created():
@@ -121,6 +125,8 @@ class BackendFacade:
 
         current_context = provider if provider in [DOCKER, MINIKUBE] else provider + '_' + env
 
+        self.state_service.set(DEFAULT, user=USER)
+
         self._set_context_list(current_context)
         self._set_active_context(current_context)
         self.state_service.set(current_context)
@@ -130,6 +136,8 @@ class BackendFacade:
             self.state_service.set_section(current_context, INFRASTRUCTURE, kubeconfig=kubeconfig)
         except KeyError:
             pass
+
+
         self.state_service.write()
 
     def destroy(self, provider, env, verbose=False):
