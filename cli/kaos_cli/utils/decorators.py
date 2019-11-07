@@ -162,8 +162,6 @@ def context_check(func):
     def wrapper(*args, **kwargs):
         config = ConfigObj(CONFIG_PATH)
 
-        print("in context check")
-
         if 'active' not in config:
             click.echo("{} - {} not defined - first run {}".format(
                 click.style("Warning", bold=True, fg='yellow'),
@@ -196,8 +194,6 @@ def context_check(func):
                 click.style("kaos build list", bold=True, fg='green')))
             sys.exit(1)
 
-        print("after context check")
-
         func(*args, **kwargs)
 
     return wrapper
@@ -216,7 +212,6 @@ def health_check(func):
 
         # get base_url
         base_url = config[active_context]['backend']['url']
-        print("base_url", base_url)
 
         try:
             func(*args, **kwargs)
@@ -239,7 +234,5 @@ def health_check(func):
                 click.style("Warning", bold=True, fg='yellow'),
                 click.style("kaos init", bold=True, fg='green')), err=True)
             sys.exit(1)
-
-        print("after health_check")
 
     return wrapper

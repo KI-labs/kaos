@@ -12,7 +12,8 @@ from kaos_cli.services.state_service import StateService
 from kaos_cli.services.terraform_service import TerraformService
 from kaos_cli.utils.environment import check_environment
 from kaos_cli.utils.helpers import build_dir
-from kaos_cli.utils.validators import validate_build_dir, validate_cache, validate_index
+from kaos_cli.utils.validators import validate_build_dir
+from kaos_cli.exceptions.handle_exceptions import handle_specific_exception, handle_exception
 
 
 def is_cloud_provider(cloud):
@@ -58,8 +59,6 @@ class BackendFacade:
     def list(self):
         try:
             contexts = self.state_service.get(CONTEXTS, 'environments')
-            print("contexts", contexts)
-            print("contexts_type", type(contexts))
             # list_contexts = contexts.split(',')
             contexts_info = self.jsonify_context_list(contexts)
             return contexts_info
@@ -67,11 +66,8 @@ class BackendFacade:
         except KeyError:
             return None
 
-    def set(self, current_context):
-        pass
-
     @staticmethod
-    def get_context_info(context):
+    def get_context_info(context, index):
         try:
             cloud, env = context.split('_')
         except ValueError:
@@ -79,29 +75,48 @@ class BackendFacade:
             env = None
         env = "local" if not env else env
         info = {
+            "index": index,
             "context": context,
             "provider": cloud,
             "env": env
         }
         return info
 
+    @staticmethod
+    def get_context_by_index(context_info, index):
+        for context in context_info:
+            if context['index'] == int(index):
+                return context['context']
+
     def jsonify_context_list(self, contexts):
         contexts_info = []
+        index = 0
         if isinstance(contexts, list):
             for context in contexts:
-                contexts_info.append(self.get_context_info(context))
+                contexts_info.append(self.get_context_info(context, index))
+                index = index + 1
+
         elif isinstance(contexts, str):
-            contexts_info.append(self.get_context_info(contexts))
+            contexts_info.append(self.get_context_info(contexts, index))
         return contexts_info
 
-    @staticmethod
-    def set_context_by_ind(ind):
-        print("in set context")
-        data = validate_cache(BACKEND_CACHE, command='build')
-        print("data", data)
-        loc = validate_index(len(data['ind']), ind, command='build')
-        print("loc", loc)
-        return data['name'][loc]
+    def set_context_by_context(self, current_context):
+        context_info = self.list()
+        for context in context_info:
+            if context['context'] == current_context:
+                self._set_active_context(current_context)
+                self.state_service.write()
+                return True
+        return False
+
+    def set_context_by_index(self, index):
+        context_info = self.list()
+        current_context = self.get_context_by_index(context_info, index)
+        if current_context:
+            self._set_active_context(current_context)
+            self.state_service.write()
+            return True
+        return False
 
     @staticmethod
     def _set_build_dir(provider, env):
@@ -134,10 +149,11 @@ class BackendFacade:
         try:
             self.state_service.set_section(current_context, BACKEND, url=url, token=uuid.uuid4())
             self.state_service.set_section(current_context, INFRASTRUCTURE, kubeconfig=kubeconfig)
-        except KeyError:
-            pass
+        except Exception as e:
+            handle_specific_exception(e)
+            handle_exception(e)
 
-
+        self.create_context()
         self.state_service.write()
 
     def destroy(self, provider, env, verbose=False):
@@ -198,6 +214,7 @@ class BackendFacade:
             available_contexts = self.state_service.get(CONTEXTS, 'environments')
         except KeyError:
             available_contexts = ''
+            
         updated_contexts = available_contexts + current_context if not available_contexts else \
             available_contexts + ',' + current_context
         self.state_service.set(CONTEXTS, environments=updated_contexts)

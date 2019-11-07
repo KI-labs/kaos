@@ -148,7 +148,7 @@ def list_all(backend: BackendFacade):
         available_contexts = backend.list()
         if len(available_contexts) > 0:
             backend.cache(available_contexts)
-            table = render_table(available_contexts, include_ind=True)
+            table = render_table(available_contexts, include_ind=False)
             click.echo(table)
 
     except Exception as e:
@@ -161,24 +161,29 @@ def list_all(backend: BackendFacade):
 @build.command(name='set', short_help='Set active build context')
 @click.option('-c', '--context', type=str, help='set to a specific deployed context', cls=NotRequiredIf,
               not_required_if='ind')
-@click.option('-i', '--ind', type=int, help='available contexts index', cls=NotRequiredIf,
+@click.option('-i', '--ind', type=str, help='set to a specific deployed index', cls=NotRequiredIf,
               not_required_if='context')
 @pass_obj(BackendFacade)
 def set_active_context(backend: BackendFacade, context, ind):
     """
     Set current model environment workspace.
     """
-
     try:
         # ensure arguments are correctly defined
-        print("before validating inputs")
         validate_inputs([context, ind], ['context', 'ind'])
-        print("after validating inputs")
         # selection by index
-        if ind is not None:
-            print("before context")
-            context = backend.set_context_by_ind(ind)
-            print("after context")
+        if context:
+            set = backend.set_context_by_context(context)
+            if not set:
+                click.echo('Context {} invalid. It is not one of the existing deployments in {} '
+                           .format(click.style(context, bold=True, fg='red'), click.style("kaos", bold=True)))
+                sys.exit(1)
+        if ind:
+            set = backend.set_context_by_index(ind)
+            if not set:
+                click.echo('Index {} invalid. It is not one of the existing deployments in {} '
+                           .format(click.style(context, bold=True, fg='red'), click.style("kaos", bold=True)))
+                sys.exit(1)
 
     except Exception as e:
         handle_specific_exception(e)
