@@ -2,7 +2,7 @@ import os
 import sys
 
 import click
-from kaos_cli.constants import AWS, GCP, DOCKER, MINIKUBE
+from kaos_cli.constants import AWS, GCP, DOCKER, MINIKUBE, KAOS_TF_PATH
 from kaos_cli.exceptions.handle_exceptions import handle_specific_exception, handle_exception
 from kaos_cli.facades.backend_facade import BackendFacade, is_cloud_provider
 
@@ -46,8 +46,8 @@ def deploy(backend: BackendFacade, cloud, env, force, verbose, yes, local_backen
     """
     Deploy kaos backend infrastructure based on selected provider.
     """
-
-    is_created = backend.is_created()
+    dir_build = os.path.join(KAOS_TF_PATH, f"{cloud}/{env}" if cloud not in [DOCKER, MINIKUBE] else f"{cloud}")
+    is_created = backend.is_created(dir_build)
 
     if is_created and not force:
         click.echo('{} - {} backend is already built.'.format(click.style("Aborting", bold=True, fg='red'),
@@ -96,7 +96,7 @@ def deploy(backend: BackendFacade, cloud, env, force, verbose, yes, local_backen
         # was already built then skip the warning; otherwise, warn
         # the user that the port is already taken by another service
         # and issue a sys exit
-        if not (force and backend.is_created()):
+        if not (force and backend.is_created(dir_build)):
             click.echo(
                 "{} - Network port {} is used but is needed for building {} backend in {}".format(
                     click.style("Warning", bold=True, fg='yellow'),
@@ -107,7 +107,7 @@ def deploy(backend: BackendFacade, cloud, env, force, verbose, yes, local_backen
     
     try:
 
-        backend.build(cloud, env, local_backend=local_backend, verbose=verbose)
+        backend.build(cloud, env, dir_build, local_backend=local_backend, verbose=verbose)
 
         if verbose:
             click.echo("\n{} - Endpoint successfully set to {}".format(
@@ -173,14 +173,14 @@ def set_active_context(backend: BackendFacade, context, ind):
         validate_inputs([context, ind], ['context', 'ind'])
         # selection by index
         if context:
-            set = backend.set_context_by_context(context)
-            if not set:
+            is_context_set = backend.set_context_by_context(context)
+            if not is_context_set:
                 click.echo('Context {} invalid. It is not one of the existing deployments in {} '
                            .format(click.style(context, bold=True, fg='red'), click.style("kaos", bold=True)))
                 sys.exit(1)
         if ind:
-            set = backend.set_context_by_index(ind)
-            if not set:
+            is_context_set = backend.set_context_by_index(ind)
+            if not is_context_set:
                 click.echo('Index {} invalid. It is not one of the existing deployments in {} '
                            .format(click.style(context, bold=True, fg='red'), click.style("kaos", bold=True)))
                 sys.exit(1)

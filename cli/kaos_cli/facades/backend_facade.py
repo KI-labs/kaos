@@ -60,7 +60,6 @@ class BackendFacade:
     def list(self):
         try:
             contexts = self.state_service.get(CONTEXTS, 'environments')
-            # list_contexts = contexts.split(',')
             contexts_info = self.jsonify_context_list(contexts)
             return contexts_info
 
@@ -125,8 +124,7 @@ class BackendFacade:
                                  f"{provider}/{env}" if provider not in [DOCKER, MINIKUBE] else f"{provider}")
         return dir_build
 
-    def build(self, provider, env, local_backend=False, verbose=False):
-        dir_build = self._set_build_dir(provider, env)
+    def build(self, provider, env, dir_build, local_backend=False, verbose=False):
         build_dir(dir_build)
         extra_vars = self._get_vars(provider, dir_build)
         self.tf_service.cd_dir(dir_build)
@@ -139,11 +137,11 @@ class BackendFacade:
 
         url, kubeconfig = self._parse_config(dir_build)
 
-        current_context = provider if provider in [DOCKER, MINIKUBE] else provider + '_' + env
+        current_context = provider if provider in [DOCKER, MINIKUBE] else f"{provider}_{env}"
 
         self.state_service.set(DEFAULT, user=USER)
 
-        self._set_context_list(current_context)
+        self._update_context_list(current_context)
         self._set_active_context(current_context)
         self.state_service.set(current_context)
 
@@ -154,7 +152,6 @@ class BackendFacade:
             handle_specific_exception(e)
             handle_exception(e)
 
-        self.create_context()
         self.state_service.write()
 
     def destroy(self, provider, env, verbose=False):
@@ -168,15 +165,15 @@ class BackendFacade:
         directory = self._tf_init(provider, env, local_backend=False, destroying=True)
         current_context = provider if provider in [DOCKER, MINIKUBE] else provider + '_' + env
         self._delete_resources(current_context)
-        self._unset_context_list(current_context)
+        self._set_context_list(current_context)
         self._remove_section(current_context)
         self._deactivate_context()
         self.tf_service.destroy(directory, extra_vars)
         self.tf_service.execute()
         self._remove_build_files(dir_build)
 
-    def is_created(self):
-        return self.state_service.is_created()
+    def is_created(self, dir_build):
+        return self.state_service.is_created(dir_build)
 
     def _remove_build_files(self, dir_build):
         """
@@ -212,36 +209,56 @@ class BackendFacade:
 
     def _set_context_list(self, current_context):
         try:
-            available_contexts = self.state_service.get(CONTEXTS, 'environments')
+            contexts = self.state_service.get(CONTEXTS, 'environments')
         except KeyError:
-            available_contexts = ''
-            
-        updated_contexts = available_contexts + current_context if not available_contexts else \
-            available_contexts + ',' + current_context
+            contexts = ''
+
+        updated_contexts = []
+
+        if isinstance(contexts, list):
+            contexts.append(current_context)
+            updated_contexts = contexts
+        elif isinstance(contexts, str) or not contexts:
+            # There is only one context or no context in available contexts
+            if contexts:
+                # exactly one available context
+                updated_contexts.append(contexts)
+                updated_contexts.append(current_context)
+            else:
+                # no available context
+                updated_contexts.append(current_context)
+
         self.state_service.set(CONTEXTS, environments=updated_contexts)
 
     def _unset_context_list(self, current_context):
-        available_contexts = self.state_service.get(CONTEXTS, 'environments')
-        context_list = available_contexts.split(',')
-        if len(context_list) <= 1:
-            updated_context_list = []
-        else:
-            try:
-                context_list.remove(current_context)
-            except ValueError:
-                updated_context_list = context_list
-        updated_contexts = ','.join(updated_context_list)
+        try:
+            contexts = self.state_service.get(CONTEXTS, 'environments')
+        except KeyError:
+            contexts = ''
+
+        updated_contexts = []
+
+        if isinstance(contexts, list):
+            contexts.remove(current_context)
+            updated_contexts = contexts
+
+        # If the available contexts is exactly equal to one or none, then simply update empty list
         self.state_service.set(CONTEXTS, environments=updated_contexts)
 
     def _set_active_context(self, current_context):
         self.state_service.set(ACTIVE, environment=current_context)
 
     def _remove_section(self, current_context):
-        empty_section = {}
-        self.state_service.set(current_context, empty_section)
+        config = self.state_service.config
+        try:
+            del config[current_context]
+        except KeyError:
+            pass
+        self.state_service.config = config
 
     def _deactivate_context(self):
         self.state_service.set(ACTIVE, environment=None)
+        self.state_service.write()
 
     @staticmethod
     def cache(builds):

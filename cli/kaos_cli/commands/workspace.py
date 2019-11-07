@@ -34,7 +34,6 @@ def list_workspaces(facade: WorkspaceFacade):
     """
     try:
         workspaces = facade.list()
-        print("workspaces", workspaces)
         if len(workspaces) > 0:
 
             facade.cache(workspaces)

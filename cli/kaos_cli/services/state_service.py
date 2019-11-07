@@ -33,8 +33,8 @@ class StateService:
         del self.config[context][section]
 
     @staticmethod
-    def is_created():
-        return os.path.exists(KAOS_STATE_DIR)
+    def is_created(dir_build):
+        return os.path.exists(dir_build)
 
     @staticmethod
     def create():
