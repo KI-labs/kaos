@@ -53,8 +53,8 @@ Successfully built kaos [dev] environment
 
 A kaos configuration file is always present in the current directory under `./kaos/config`. The following file is automatically created after running `kaos build`.
 
-{% code-tabs %}
-{% code-tabs-item title="./kaos/config" %}
+{% tabs %}
+{% tab title="./kaos/config" %}
 ```text
 [DEFAULT]
 user = 
@@ -63,8 +63,8 @@ user =
 url = http://XYZ.amazonaws.com:80/api/
 token =
 ```
-{% endcode-tabs-item %}
-{% endcode-tabs %}
+{% endtab %}
+{% endtabs %}
 
 {% hint style="success" %}
 The endpoint running at`http://XYZ.amazonaws.com:80/api` can now be **shared** with Data Scientists!
