@@ -20,7 +20,7 @@ Train, serve and predict in your **own** running cluster with [**8 commands!**](
 
 * Check the [**Changelog**](miscellaneous/changelog.md) for release information
 * Visit the [**Public Roadmap**](miscellaneous/roadmap.md) to see what's coming next
-* Bugs, issues and contributions should be created on [**GitHub**](https://github.com/KI-labs/kaos/issues/new/choose)\*\*\*\*
+* Bugs, issues and contributions should be created on [**GitHub**](https://github.com/KI-labs/kaos/issues/new/choose)
 
 ## Community
 
