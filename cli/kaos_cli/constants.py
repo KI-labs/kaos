@@ -97,3 +97,4 @@ INFRASTRUCTURE = "infrastructure"
 PACHYDERM = 'pachyderm'
 CONTEXTS = 'contexts'
 ACTIVE = 'active'
+REMOTE = 'remote'

@@ -2,7 +2,7 @@ import json
 import os
 
 import requests
-from kaos_cli.constants import BACKEND, PACHYDERM, SERVE_CACHE
+from kaos_cli.constants import BACKEND, PACHYDERM, SERVE_CACHE, ACTIVE, DEFAULT
 from kaos_cli.exceptions.exceptions import NoServingJobsError, RequestError
 from kaos_cli.services.state_service import StateService
 from kaos_cli.utils.helpers import build_dir, upload_with_progress_bar
@@ -16,12 +16,16 @@ class ServeFacade:
         self.state_service = state
 
     @property
+    def active_context(self):
+        return self.state_service.get(ACTIVE, 'environment')
+
+    @property
     def url(self):
-        return self.state_service.get(BACKEND, 'url')
+        return self.state_service.get_section(self.active_context, BACKEND, 'url')
 
     @property
     def user(self):
-        return self.state_service.get(BACKEND, 'user')
+        return self.state_service.get(DEFAULT, 'user')
 
     @property
     def workspace(self):

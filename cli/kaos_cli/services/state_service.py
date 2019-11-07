@@ -32,18 +32,6 @@ class StateService:
     def remove_section(self, context, section):
         del self.config[context][section]
 
-    # @staticmethod
-    # def create_config_spec():
-    #     print("Outside")
-    #     if not os.path.exists(CONFIG_SPEC):
-    #         print("Inside")
-    #         config = ConfigParser()
-    #         config['DEFAULT'] = DEFAULTS
-    #         config['CONTEXTS'] = {"environments": ""}
-    #         with open(CONFIG_SPEC, 'w') as configfile:
-    #             config.write(configfile)
-    #         return CONFIG_SPEC
-
     @staticmethod
     def is_created():
         return os.path.exists(KAOS_STATE_DIR)

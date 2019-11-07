@@ -6,7 +6,7 @@ from distutils.dir_util import copy_tree
 
 import requests
 from kaos_cli.constants import DOCKER, MINIKUBE, PROVIDER_DICT, AWS, BACKEND, INFRASTRUCTURE, GCP, LOCAL_CONFIG_DICT, \
-    KAOS_TF_PATH, CONTEXTS, ACTIVE, BACKEND_CACHE, DEFAULT, USER
+    KAOS_TF_PATH, CONTEXTS, ACTIVE, BACKEND_CACHE, DEFAULT, USER, REMOTE
 from kaos_cli.exceptions.exceptions import HostnameError
 from kaos_cli.services.state_service import StateService
 from kaos_cli.services.terraform_service import TerraformService
@@ -53,6 +53,7 @@ class BackendFacade:
         if not self.state_service.is_created():
             self.state_service.create()
         self.state_service.set(BACKEND, url=url, token=token)
+        self.state_service.set_section(REMOTE, BACKEND, url=url, token=token)
 
         self.state_service.write()
 
