@@ -181,7 +181,7 @@ class BackendFacade:
         """
         self.state_service.provider_delete(dir_build)
         if not self.state_service.list_providers():
-            self.state_service.full_delete()
+            self.state_service.full_delete(dir_build)
 
     def _delete_resources(self, context):
         if self.state_service.has_section(context, BACKEND):

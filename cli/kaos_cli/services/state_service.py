@@ -50,8 +50,8 @@ class StateService:
         shutil.rmtree(dir_build, ignore_errors=True)
 
     @staticmethod
-    def full_delete():
-        shutil.rmtree(KAOS_STATE_DIR, ignore_errors=True)
+    def full_delete(dir_build):
+        shutil.rmtree(dir_build, ignore_errors=True)
 
     def write(self):
         with open(CONFIG_PATH, 'wb') as f:
