@@ -64,7 +64,7 @@ class BackendFacade:
             return contexts_info
 
         except KeyError:
-            return None
+            return []
 
     @staticmethod
     def get_context_info(context, index):
@@ -85,7 +85,7 @@ class BackendFacade:
     @staticmethod
     def get_context_by_index(context_info, index):
         for context in context_info:
-            if context['index'] == int(index):
+            if context['index'] == index:
                 return context['context']
 
     def jsonify_context_list(self, contexts):
@@ -141,7 +141,7 @@ class BackendFacade:
 
         self.state_service.set(DEFAULT, user=USER)
 
-        self._update_context_list(current_context)
+        self._set_context_list(current_context)
         self._set_active_context(current_context)
         self.state_service.set(current_context)
 

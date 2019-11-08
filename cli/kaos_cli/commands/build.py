@@ -5,6 +5,7 @@ import click
 from kaos_cli.constants import AWS, GCP, DOCKER, MINIKUBE, KAOS_TF_PATH
 from kaos_cli.exceptions.handle_exceptions import handle_specific_exception, handle_exception
 from kaos_cli.facades.backend_facade import BackendFacade, is_cloud_provider
+from typing import Optional
 
 from kaos_cli.utils.custom_classes import CustomHelpOrder, NotRequiredIf
 from kaos_cli.utils.decorators import build_env_check, pass_obj
@@ -42,7 +43,7 @@ def build():
               help='locally store terraform state [cloud only]', required=False)
 @build_env_check
 @pass_obj(BackendFacade)
-def deploy(backend: BackendFacade, cloud, env, force, verbose, yes, local_backend):
+def deploy(backend: BackendFacade, cloud: str, env: str, force: bool, verbose: bool, yes: bool, local_backend: bool):
     """
     Deploy kaos backend infrastructure based on selected provider.
     """
@@ -146,10 +147,15 @@ def list_all(backend: BackendFacade):
     """
     try:
         available_contexts = backend.list()
-        if len(available_contexts) > 0:
+
+        if available_contexts:
             backend.cache(available_contexts)
             table = render_table(available_contexts, include_ind=False)
             click.echo(table)
+        else:
+            click.echo("{} - No active builds found. Please run {} to deploy an environment".format(
+                click.style("Warning", bold=True, fg='yellow'),
+                click.style('kaos build deploy', bold=True, fg='green')))
 
     except Exception as e:
         handle_specific_exception(e)
@@ -161,10 +167,10 @@ def list_all(backend: BackendFacade):
 @build.command(name='set', short_help='Set active build context')
 @click.option('-c', '--context', type=str, help='set to a specific deployed context', cls=NotRequiredIf,
               not_required_if='ind')
-@click.option('-i', '--ind', type=str, help='set to a specific deployed index', cls=NotRequiredIf,
+@click.option('-i', '--ind', type=int, help='set to a specific deployed index', cls=NotRequiredIf,
               not_required_if='context')
 @pass_obj(BackendFacade)
-def set_active_context(backend: BackendFacade, context, ind):
+def set_active_context(backend: BackendFacade, context: Optional[str] = None, ind: Optional[int] = None):
     """
     Set current model environment workspace.
     """
