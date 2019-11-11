@@ -25,6 +25,10 @@ case ${i} in
     DOCKER_FILE="${i#*=}"
     shift # past argument=value
     ;;
+     -r=*|--region=*)
+    REGION="${i#*=}"
+    shift # past argument=value
+    ;;
     *)
           # unknown option
     ;;
@@ -41,11 +45,6 @@ DOCKER_FILE=${DOCKER_FILE:-${DOCKER_CONTEXT}/Dockerfile}
 echo "==========================="
 echo "| Configure GCP region... |"
 echo "==========================="
-REGION=$(gcloud config get-value compute/region)
-if [[ -z "$REGION" ]]
-    then
-        REGION="eu"
-fi
 echo "+${REGION} being used"
 
 # build docker image locally
