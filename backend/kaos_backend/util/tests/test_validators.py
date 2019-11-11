@@ -87,7 +87,7 @@ def test_validate_bundle_structure_missing_dockerfile_in_directory():
             temp.close()
 
 def test_validate_bundle_structure_missing_model_directory():
-    with pytest.raises(InvalidBundleError, match=""):
+    with pytest.raises(InvalidBundleError, match="Missing model directory in source-code bundle"):
         with TemporaryDirectory() as temp_dir:
             base_dir = tempfile.mkdtemp(dir=temp_dir)
             filename = os.path.join(base_dir, "Dockerfile")
