@@ -95,7 +95,7 @@ export TF_VAR_project_location=<str> # (for example: us-west1-a)
 export TF_VAR_project_region=<str> # (for example: us)
 ```
 
-* `project_location` specifies the location of cluster and network.
+* `project_location` specifies the location of cluster and network
 * `project_region` specifies the location of storage and docker repository 
 
 ### Build
