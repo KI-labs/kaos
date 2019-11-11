@@ -31,6 +31,10 @@ class BundleValidator:
 
     MODEL = "model"
 
+    TRAIN = "train"
+
+    SHEBANG = "#!/usr/bin/env python3"
+
     @classmethod
     def is_empty(cls, directory: str) -> bool:
         return all(len(files) == 0 for root, _, files in os.walk(directory))
@@ -44,6 +48,15 @@ class BundleValidator:
     def validate_model_directory(cls, dirs):
         if "model" not in dirs:
             raise InvalidBundleError("Missing model directory in source-code bundle")
+
+    @classmethod
+    def validate_train_file_is_executable(cls, train_file):
+        f = open(train_file)
+        first_line = f.readline()
+        if cls.SHEBANG not in first_line:
+            raise InvalidBundleError("The train file cannot be executed. \n"
+                  "Please add the line '#!/usr/bin/xenv python3' "
+                  "in the beginning of the train file to make it executable")
 
     @classmethod
     def validate_dockerfile(cls, files):
@@ -77,10 +90,13 @@ class BundleValidator:
                     cls.validate_dockerfile(files)
                     cls.validate_model_directory(dirs)
                     model_dir = os.path.join(bundle_root, cls.MODEL)
+                    train_file = os.path.join(model_dir, cls.TRAIN)
+                    cls.validate_train_file_is_executable(train_file)
 
                 if root == model_dir:
                     for f in req_files:
                         cls.validate_file(f, files)
+
 
     @classmethod
     def validate_inference_bundle_structure(cls, directory: str):

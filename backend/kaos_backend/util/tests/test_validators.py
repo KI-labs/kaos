@@ -86,15 +86,23 @@ def test_validate_bundle_structure_missing_dockerfile_in_directory():
             BundleValidator.validate_bundle_structure(temp_dir, [])
             temp.close()
 
-
 def test_validate_bundle_structure_missing_model_directory():
-    with pytest.raises(InvalidBundleError, match="Missing model directory in source-code bundle"):
+    with pytest.raises(InvalidBundleError, match=""):
         with TemporaryDirectory() as temp_dir:
             base_dir = tempfile.mkdtemp(dir=temp_dir)
             filename = os.path.join(base_dir, "Dockerfile")
             create_file(filename)
             BundleValidator.validate_bundle_structure(temp_dir, [])
 
+def test_validate_bundle_structure_missing_shebang_line_in_train():
+    with pytest.raises(InvalidBundleError, match="The train file cannot be executed. \n"
+                                                 "Please add the line '#!/usr/bin/xenv python3' "
+                                                 "in the beginning of the train file to make it executable"):
+        with TemporaryDirectory() as temp_dir:
+            base_dir = tempfile.mkdtemp(dir=temp_dir)
+            train_file = os.path.join(base_dir, "model", "train")
+            create_file(train_file)
+            BundleValidator.validate_bundle_structure(temp_dir, [])
 
 @pytest.mark.parametrize("files_include,file_exclude", inference_test_cases)
 def test_validate_inference_bundle_structure_missing_some_file(files_include, file_exclude):
