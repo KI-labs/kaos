@@ -88,7 +88,7 @@ export TF_VAR_api_cpu_limit=<float> (default: 1.5)
 
 ### Cluster Location
 
-To control cluster and other resources location following variables are available.
+The following variables are available to control cluster and resource location.
 
 ```bash
 export TF_VAR_project_location=<str> # (for example: us-west1-a)
