@@ -97,9 +97,9 @@ def test_validate_bundle_structure_missing_model_directory():
 
 
 def test_validate_bundle_structure_missing_shebang_line_in_train():
-    with pytest.raises(InvalidBundleError, match="The train file cannot be executed. \n"
-                                                 "Please add the line '#!/usr/bin/xenv python3' "
-                                                 "in the beginning of the train file to make it executable"):
+    with pytest.raises(InvalidBundleError,
+                       match="The train file cannot be executed. Please add the line '#!/usr/bin/xenv python3' "
+                             "in the beginning of the train file to make it executable"):
         with TemporaryDirectory() as temp_dir:
             base_dir = tempfile.mkdtemp(dir=temp_dir)
             train_file = os.path.join(base_dir, "model", "train")
