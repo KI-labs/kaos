@@ -82,6 +82,7 @@ module "ml_platform" {
   api_cpu_request = var.api_cpu_request
   api_cpu_limit = var.api_cpu_limit
 
+  token = var.token
   pachyderm_tag = var.pachyderm_tag
 
   data = {

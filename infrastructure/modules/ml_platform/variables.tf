@@ -147,4 +147,6 @@ variable "api_cpu_request" {
 variable "api_cpu_limit" {
 }
 
+variable "token" {
+}
 

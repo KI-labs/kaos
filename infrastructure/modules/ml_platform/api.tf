@@ -126,6 +126,11 @@ resource "kubernetes_deployment" "api" {
             value = var.ambassador_service_type == "LoadBalancer" ? kubernetes_service.ambassador.load_balancer_ingress[0].ip : kubernetes_service.ambassador.spec[0].cluster_ip
           }
 
+          env {
+            name  = "TOKEN"
+            value = var.token
+          }
+
           resources {
             limits {
               memory = var.api_memory_limit
