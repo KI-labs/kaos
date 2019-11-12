@@ -7,7 +7,7 @@ from typing import List
 from io import StringIO
 
 import docker
-import python_pachyderm.client.pps.pps_pb2 as proto
+import python_pachyderm.proto.pps.pps_pb2 as proto
 from flask import current_app as app
 from kaos_backend.clients.pachyderm import PachydermClient
 from kaos_backend.constants import BUILD_IMAGE, BUILD_NOTEBOOK_PIPELINE_PREFIX, BUILD_SERVE_PIPELINE_PREFIX, \
@@ -875,7 +875,7 @@ class JobService:
 
         # build dynamic output_branch
         output_branch = self.build_output_branch(image_name, data_name, hyper_name)
-        self.client.pfs_client.create_branch(repo_name=pipeline_name, branch_name=output_branch)
+        self.client.pclient.create_branch(repo_name=pipeline_name, branch_name=output_branch)
 
         data_input = proto.Input(pfs=proto.PFSInput(glob=f"/{data_name}",
                                                     repo=data_repo,
@@ -931,7 +931,7 @@ class JobService:
             app.logger.debug(pipeline_def["output_branch"])
 
             if not self.client.check_branch_exists(repo=pipeline_name, branch=pipeline_def["output_branch"]):
-                self.client.pfs_client.create_branch(repo_name=pipeline_name, branch_name=pipeline_def["output_branch"])
+                self.client.pclient.create_branch(repo_name=pipeline_name, branch_name=pipeline_def["output_branch"])
 
             # format according to create_pipeline
             data_input = proto.Input(pfs=proto.PFSInput(glob=pipeline_def["data_glob"],
