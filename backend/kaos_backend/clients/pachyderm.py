@@ -173,7 +173,7 @@ class PachydermClient:
             delimiter = "LINE" if split_by_lines else None
             app.logger.debug("putting blob split: %s; commit: %s", split_by_lines, c)
             self.pclient.put_file_bytes(c, path, blob,
-                                           overwrite_index=0, delimiter=delimiter)
+                                        overwrite_index=0, delimiter=delimiter)
 
     @handle_pachyderm_error
     def put_dir_base(self, repo: str, path: str, upload_f: callable, desc=None):
@@ -198,8 +198,8 @@ class PachydermClient:
             app.logger.debug("@%s: upload files at path %s with commit id %s on repo %s",
                              PachydermClient.__name__, path, commit_id, repo_name)
             self.pclient.put_file_bytes(commit, os.path.join(prefix, os.path.relpath(file, path)),
-                                           open(file, "rb").read(),
-                                           overwrite_index=0)
+                                        open(file, "rb").read(),
+                                        overwrite_index=0)
 
         return self.put_dir_base(repo, source_path, upload_files, desc)
 
@@ -210,7 +210,7 @@ class PachydermClient:
         for obj in objs:
             obj_path = obj.file.path
             x = self.pclient.get_file(f"{repo}/{commit}",
-                                         path=obj_path)
+                                      path=obj_path)
             if remove_prefix:
                 obj_path = os.path.relpath(obj_path, path)
             # TODO -> attach <output_branch> when saving model (for consistency)
@@ -226,7 +226,7 @@ class PachydermClient:
                          path, commit)
 
         file = self.pclient.get_file(f"{repo}/{commit}",
-                                        path=path)
+                                     path=path)
         stream = bitstring.BitStream()
 
         for chunk in file:
