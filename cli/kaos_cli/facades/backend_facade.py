@@ -60,7 +60,9 @@ class BackendFacade:
     def build(self, provider, env, local_backend=False, verbose=False):
         dir_build = self._set_build_dir(provider, env)
         build_dir(dir_build)
-        extra_vars = self._get_vars(provider, dir_build)
+        token = uuid.uuid4()
+
+        extra_vars = self._get_vars(provider, dir_build, token)
         self.tf_service.cd_dir(dir_build)
 
         self.tf_service.set_verbose(verbose)
@@ -71,7 +73,7 @@ class BackendFacade:
 
         url, kubeconfig = self._parse_config(dir_build)
 
-        self.state_service.set(BACKEND, url=url, token=uuid.uuid4())
+        self.state_service.set(BACKEND, url=url, token=token)
         self.state_service.set(INFRASTRUCTURE, kubeconfig=kubeconfig)
         self.state_service.write()
 
@@ -149,8 +151,8 @@ class BackendFacade:
         return url, kubeconfig
 
     @staticmethod
-    def _get_vars(provider, dir_build):
-        extra_vars = f"--var config_dir={dir_build} "
+    def _get_vars(provider, dir_build, token=None):
+        extra_vars = f"--var config_dir={dir_build} --var token={token}"
 
         if provider == AWS:
             KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
