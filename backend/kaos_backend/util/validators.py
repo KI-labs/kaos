@@ -31,9 +31,9 @@ class BundleValidator:
 
     MODEL = "model"
 
-    TRAIN = "train"
+    MODE = ""
 
-    SHEBANG = "#!/usr/bin/env python3"
+    SHEBANG = "#!"
 
     @classmethod
     def is_empty(cls, directory: str) -> bool:
@@ -50,13 +50,12 @@ class BundleValidator:
             raise InvalidBundleError("Missing model directory in source-code bundle")
 
     @classmethod
-    def validate_train_file_is_executable(cls, train_file):
-        f = open(train_file)
+    def validate_is_file_executable(cls, executable_file):
+        f = open(executable_file)
         first_line = f.readline()
         if cls.SHEBANG not in first_line:
-            raise InvalidBundleError("The train file cannot be executed. \n"
-                  "Please add the line '#!/usr/bin/xenv python3' "
-                  "in the beginning of the train file to make it executable")
+            raise InvalidBundleError(f"The {cls.MODE} file cannot be executed. \n"
+                  "Please ensure that first line begins with the shebang '#!' to make it an executable")
 
     @classmethod
     def validate_dockerfile(cls, files):
@@ -90,17 +89,17 @@ class BundleValidator:
                     cls.validate_dockerfile(files)
                     cls.validate_model_directory(dirs)
                     model_dir = os.path.join(bundle_root, cls.MODEL)
-                    train_file = os.path.join(model_dir, cls.TRAIN)
-                    cls.validate_train_file_is_executable(train_file)
+                    executable_file = os.path.join(model_dir, cls.MODE)
+                    cls.validate_is_file_executable(executable_file)
 
                 if root == model_dir:
                     for f in req_files:
                         cls.validate_file(f, files)
 
-
     @classmethod
     def validate_inference_bundle_structure(cls, directory: str):
         req_files = cls.REQUIRED_INFERENCE_FILES
+        cls.MODE = "serve"
         cls.validate_bundle_structure(directory, req_files)
 
     @classmethod
@@ -110,15 +109,19 @@ class BundleValidator:
     @classmethod
     def validate_train_bundle_structure(cls, directory):
         req_files = cls.REQUIRED_TRAINING_FILES
+        cls.MODE = "train"
         cls.validate_bundle_structure(directory, req_files)
 
+    @classmethod
+    def validate_source_bundle_structure(cls, directory):
+        req_files = cls.REQUIRED_TRAINING_FILES
+        cls.validate_bundle_structure(directory, req_files)
 
 def validate_cpu_request(cpu):
     if cpu and MAX_CPU:
         cpu = float(cpu)
         if cpu > MAX_CPU:
             raise CPURequestError(f" CPU request {cpu} too high. Maximum allowed is {MAX_CPU}.")
-
 
 def validate_memory_request(memory):
     validate_memory_string(memory)
@@ -130,13 +133,11 @@ def validate_memory_request(memory):
         if memory_request > memory_limit:
             raise MemoryRequestError(f'Memory request {memory} too high. Maximum allowed is {memory_gb}.')
 
-
 def memory_to_bytes(memory):
     for k, v in TO_BYTES.items():
         if memory.endswith(k):
             return v * float(memory.replace(k, ""))
     return float(memory)
-
 
 def validate_memory_string(memory):
     """
@@ -154,11 +155,9 @@ def validate_memory_string(memory):
         if not m:
             raise MemoryRequestError(f'Incorrect memory request {memory}\n\nPlease check memory specs: {SOURCE_URL}')
 
-
 def validate_gpu_request(gpu):
     if gpu > MAX_GPU:
         raise GPURequestError("GPUs are not enabled")
-
 
 def validate_resources(function):
     """
