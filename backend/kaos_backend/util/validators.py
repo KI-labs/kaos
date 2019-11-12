@@ -54,8 +54,9 @@ class BundleValidator:
         f = open(executable_file)
         first_line = f.readline()
         if cls.SHEBANG not in first_line:
-            raise InvalidBundleError(f"The {cls.MODE} file cannot be executed. \n"
-                  "Please ensure that first line begins with the shebang '#!' to make it an executable")
+            raise InvalidBundleError(f"The {cls.MODE} file cannot be executed. "
+                                     f"Please ensure that first line begins with the shebang '#!' "
+                                     f"to make it an executable")
 
     @classmethod
     def validate_dockerfile(cls, files):
@@ -117,11 +118,13 @@ class BundleValidator:
         req_files = cls.REQUIRED_TRAINING_FILES
         cls.validate_bundle_structure(directory, req_files)
 
+
 def validate_cpu_request(cpu):
     if cpu and MAX_CPU:
         cpu = float(cpu)
         if cpu > MAX_CPU:
             raise CPURequestError(f" CPU request {cpu} too high. Maximum allowed is {MAX_CPU}.")
+
 
 def validate_memory_request(memory):
     validate_memory_string(memory)
@@ -133,11 +136,13 @@ def validate_memory_request(memory):
         if memory_request > memory_limit:
             raise MemoryRequestError(f'Memory request {memory} too high. Maximum allowed is {memory_gb}.')
 
+
 def memory_to_bytes(memory):
     for k, v in TO_BYTES.items():
         if memory.endswith(k):
             return v * float(memory.replace(k, ""))
     return float(memory)
+
 
 def validate_memory_string(memory):
     """
@@ -155,9 +160,11 @@ def validate_memory_string(memory):
         if not m:
             raise MemoryRequestError(f'Incorrect memory request {memory}\n\nPlease check memory specs: {SOURCE_URL}')
 
+
 def validate_gpu_request(gpu):
     if gpu > MAX_GPU:
         raise GPURequestError("GPUs are not enabled")
+
 
 def validate_resources(function):
     """
