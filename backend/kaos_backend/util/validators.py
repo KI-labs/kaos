@@ -31,7 +31,7 @@ class BundleValidator:
 
     MODEL = "model"
 
-    MODE = ""
+    MODE = None
 
     SHEBANG = "#!"
 
@@ -90,8 +90,9 @@ class BundleValidator:
                     cls.validate_dockerfile(files)
                     cls.validate_model_directory(dirs)
                     model_dir = os.path.join(bundle_root, cls.MODEL)
-                    executable_file = os.path.join(model_dir, cls.MODE)
-                    cls.validate_is_file_executable(executable_file)
+                    if cls.MODE:
+                        executable_file = os.path.join(model_dir, cls.MODE)
+                        cls.validate_is_file_executable(executable_file)
 
                 if root == model_dir:
                     for f in req_files:
