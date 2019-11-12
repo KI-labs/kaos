@@ -96,14 +96,23 @@ def test_validate_bundle_structure_missing_model_directory():
             BundleValidator.validate_bundle_structure(temp_dir, [])
 
 
-def test_validate_bundle_structure_missing_shebang_line_in_train():
+def test_validate_test_bundle_missing_executable_file():
     with pytest.raises(InvalidBundleError,
-                       match="The train file cannot be executed. Please add the line '#!/usr/bin/xenv python3' "
-                             "in the beginning of the train file to make it executable"):
+                       match="The train file cannot be executed. Please ensure that first line begins with the shebang '#!' to make it an executable"):
         with TemporaryDirectory() as temp_dir:
             base_dir = tempfile.mkdtemp(dir=temp_dir)
             train_file = os.path.join(base_dir, "model", "train")
             create_file(train_file)
+            BundleValidator.validate_bundle_structure(temp_dir, [])
+
+
+def test_validate_serve_bundle_missing_executable_file():
+    with pytest.raises(InvalidBundleError,
+                       match="The serve file cannot be executed. Please ensure that first line begins with the shebang '#!' to make it an executable"):
+        with TemporaryDirectory() as temp_dir:
+            base_dir = tempfile.mkdtemp(dir=temp_dir)
+            serve_file = os.path.join(base_dir, "model", "serve")
+            create_file(serve_file)
             BundleValidator.validate_bundle_structure(temp_dir, [])
 
 
