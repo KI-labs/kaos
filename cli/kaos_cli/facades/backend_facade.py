@@ -136,6 +136,7 @@ class BackendFacade:
         self.tf_service.execute()
 
         url, kubeconfig = self._parse_config(dir_build)
+        # url, kubeconfig = "", ""
 
         current_context = provider if provider in [DOCKER, MINIKUBE] else f"{provider}_{env}"
 
@@ -165,12 +166,13 @@ class BackendFacade:
         directory = self._tf_init(provider, env, local_backend=False, destroying=True)
         current_context = provider if provider in [DOCKER, MINIKUBE] else provider + '_' + env
         self._delete_resources(current_context)
-        self._set_context_list(current_context)
+        self._unset_context_list(current_context)
         self._remove_section(current_context)
         self._deactivate_context()
         self.tf_service.destroy(directory, extra_vars)
         self.tf_service.execute()
         self._remove_build_files(dir_build)
+        self.state_service.write()
 
     def is_created(self, dir_build):
         return self.state_service.is_created(dir_build)
