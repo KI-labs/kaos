@@ -1,8 +1,11 @@
 import os
 import re
 
+from flask import request
+
 from kaos_backend.constants import MAX_CPU, MAX_GPU, MAX_MEMORY
-from kaos_backend.exceptions.exceptions import InvalidBundleError, MemoryRequestError, GPURequestError, CPURequestError
+from kaos_backend.exceptions.exceptions import InvalidBundleError, MemoryRequestError, GPURequestError, CPURequestError, \
+    AuthorizationError
 
 SOURCE_URL = "https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#meaning-of-memory"
 
@@ -158,4 +161,22 @@ def validate_resources(function):
         validate_memory_request(memory)
         return function(*args, **kwargs)
 
+    return wrapper
+
+
+def validate_request(function):
+    """
+    Validate the token in the header
+    """
+
+    def wrapper(*args, **kwargs):
+        token = os.getenv("TOKEN")
+        if 'Token' not in request.headers:
+            raise AuthorizationError("Token not present in the request")
+        req_token = request.headers['Token']
+        if req_token != token:
+            raise AuthorizationError("Unauthorized Token")
+        return function(*args, **kwargs)
+
+    wrapper.__name__ = function.__name__
     return wrapper

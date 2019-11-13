@@ -27,12 +27,16 @@ class ServeFacade:
     def workspace(self):
         return self.state_service.get(PACHYDERM, 'workspace')
 
+    @property
+    def token(self):
+        return self.state_service.get(BACKEND, 'token')
+
     def list(self):
         base_url = self.url
         name = self.workspace
 
         # GET /inference/<name>
-        r = requests.get(f"{base_url}/inference/{name}")
+        r = requests.get(f"{base_url}/inference/{name}", headers={"Token": self.token})
         if r.status_code >= 300:
             raise NoServingJobsError()
         return Response.from_dict(r.json()).response
@@ -45,7 +49,7 @@ class ServeFacade:
         kwargs['user'] = user
         with open(c, 'rb') as data:
             r = upload_with_progress_bar(data, f"{base_url}/inference/{name}/{model_id}", kwargs,
-                                         "  Uploading source bundle")
+                                         "  Uploading source bundle", self.token)
 
         if r.status_code < 300:
             return r.json()
@@ -63,7 +67,7 @@ class ServeFacade:
         prov_dir = build_dir(out_dir, name, 'provenance')
 
         # GET /inference/<name>/<endpoint>/provenance
-        r = requests.get(f"{base_url}/inference/{name}/{endpoint}/provenance")
+        r = requests.get(f"{base_url}/inference/{name}/{endpoint}/provenance", headers={"Token": self.token})
 
         if r.status_code < 300:
             out_fid = os.path.join(prov_dir, f"{endpoint}")
@@ -79,7 +83,7 @@ class ServeFacade:
         name = self.workspace
 
         # GET /inference/<name>/<endpoint>/bundle
-        r = requests.get(f"{base_url}/inference/{name}/{endpoint}/bundle")
+        r = requests.get(f"{base_url}/inference/{name}/{endpoint}/bundle", headers={"Token": self.token})
         if r.status_code >= 300:
             raise RequestError(r.text)
         return name, r.content
@@ -88,7 +92,7 @@ class ServeFacade:
         base_url = self.url
 
         # GET /inference/<endpoint>/logs
-        r = requests.get(f"{base_url}/inference/{endpoint}/logs")
+        r = requests.get(f"{base_url}/inference/{endpoint}/logs", headers={"Token": self.token})
 
         if r.status_code < 300:
             return r.json()
@@ -112,7 +116,7 @@ class ServeFacade:
         name = self.workspace
 
         # GET /train/<name>/<job_id>/logs
-        r = requests.get(f"{base_url}/inference/{name}/build/{job_id}/logs")
+        r = requests.get(f"{base_url}/inference/{name}/build/{job_id}/logs", headers={"Token": self.token})
 
         if r.status_code < 300:
             return r.json()
@@ -133,7 +137,7 @@ class ServeFacade:
     def delete(self, endpoint):
         base_url = self.url
         # DELETE /inference/<endpoint>
-        r = requests.delete(f"{base_url}/inference/{endpoint}")
+        r = requests.delete(f"{base_url}/inference/{endpoint}", headers={"Token": self.token})
 
         # invalidate notebook cache
         invalidate_cache(SERVE_CACHE)

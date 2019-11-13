@@ -27,6 +27,10 @@ class WorkspaceFacade:
     def workspace(self):
         return self.state_service.get(PACHYDERM, 'workspace')
 
+    @property
+    def token(self):
+        return self.state_service.get(BACKEND, 'token')
+
     def create(self, name):
         base_url = self.url
         user = self.user
@@ -38,7 +42,7 @@ class WorkspaceFacade:
             raise WorkspaceExistsError(name)
 
         # POST /workspace/<name>
-        r = requests.post(f"{base_url}/workspace/{name}", params={"user": user})
+        r = requests.post(f"{base_url}/workspace/{name}", params={"user": user}, headers={"Token": self.token})
 
         if r.status_code < 300:
             # set workspace to state
@@ -57,7 +61,7 @@ class WorkspaceFacade:
         name = self.workspace
 
         # GET /workspace/<name>
-        r = requests.get(f"{base_url}/workspace/{name}")
+        r = requests.get(f"{base_url}/workspace/{name}", headers={"Token": self.token})
 
         if r.status_code < 300:
             return r.json()
@@ -72,7 +76,7 @@ class WorkspaceFacade:
         name = self.workspace
 
         # DELETE /workspace/<name>
-        r = requests.delete(f"{base_url}/workspace/{name}")
+        r = requests.delete(f"{base_url}/workspace/{name}", headers={"Token": self.token})
         if r.status_code >= 300:
             raise RequestError(r.text)
 
@@ -88,7 +92,7 @@ class WorkspaceFacade:
         base_url = self.url
 
         # GET /workspace
-        r = requests.get(f"{base_url}/workspace")
+        r = requests.get(f"{base_url}/workspace", headers={"Token": self.token})
         if r.status_code >= 300:
             raise RequestError(r.text)
 

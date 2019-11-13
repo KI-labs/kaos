@@ -1,8 +1,8 @@
 from kaos_backend.exceptions.exceptions import BadRequestMethodError, NotebookAlreadyExistsError, JobNotFoundError, \
     ModelNotFoundError, PipelineInStandby, PipelineNotFoundError, MetricNotFound, \
     CommitNotFoundError, IncompleteDatumError, UnfinishedCommitError, PachydermError, JobNotRunningError, \
-    PageError, InvalidBundleError, AlienProvenanceError, GPURequestError, MemoryRequestError, CPURequestError
-
+    PageError, InvalidBundleError, AlienProvenanceError, GPURequestError, MemoryRequestError, CPURequestError, \
+    AuthorizationError
 
 from kaos_model.api import Error
 
@@ -83,3 +83,8 @@ def register_application_exception(app):
     @app.errorhandler(UnfinishedCommitError)
     def handle_unfinished_commit_error(error):
         return make_error_response(500, error_code="UNFINISHED_COMMIT", message=error.message)
+
+    @app.errorhandler(AuthorizationError)
+    def handle_authorization_error(error):
+        # TODO: Fix the error.message not getting picked up
+        return make_error_response(401, error_code="AUTHORIZATION FAILURE", message="Invalid Authorization")

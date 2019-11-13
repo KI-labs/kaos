@@ -150,10 +150,14 @@ def workspace_check(func):
 
         # get base_url
         base_url = config.get('backend', 'url')
+        token = config.get('backend', 'token')
         current_workspace = config.get('pachyderm', 'workspace')
 
         # GET all workspaces: /workspace
-        r = requests.get(f"{base_url}/workspace")
+        r = requests.get(f"{base_url}/workspace", headers={"Token": token})
+        if r.status_code == 401:
+            click.echo("Unauthorized token")
+            sys.exit(1)
         data = r.json()
         workspaces_list = [v for v in data['names']]
 

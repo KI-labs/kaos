@@ -1,9 +1,11 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, make_response
 
 from kaos_backend.controllers.workspace import WorkspaceController
 from kaos_backend.util.flask import jsonify
 
 from kaos_model.api import Response
+
+from kaos_backend.util.validators import validate_request
 
 
 def build_workspace_blueprint(controller: WorkspaceController):
@@ -11,11 +13,13 @@ def build_workspace_blueprint(controller: WorkspaceController):
 
     @blueprint.route("/workspace", methods=["GET"])
     @jsonify
+    @validate_request
     def list_workspace():
         return controller.list_workspaces()
 
     @blueprint.route("/workspace/<workspace>", methods=["POST"])
     @jsonify
+    @validate_request
     def create_workspace(workspace):
         # TODO: check through controller.check_workspace_available
         user = request.args.get('user', 'default').replace('.', '')
@@ -23,6 +27,7 @@ def build_workspace_blueprint(controller: WorkspaceController):
 
     @blueprint.route("/workspace/<workspace>", methods=["GET"])
     @jsonify
+    @validate_request
     def describe_workspace(workspace):
         return Response(
             response=controller.describe_workspace(workspace)
@@ -30,6 +35,7 @@ def build_workspace_blueprint(controller: WorkspaceController):
 
     @blueprint.route("/workspace/<workspace>", methods=["DELETE"])
     @jsonify
+    @validate_request
     def kill_workspace(workspace):
         return controller.kill_workspace(workspace)
 
