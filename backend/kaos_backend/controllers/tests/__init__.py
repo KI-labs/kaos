@@ -39,8 +39,12 @@ def create_job_service(mocker, workspaces=None):
 
 
 def create_test_file(dirname, filename):
-    f = open(os.path.join(dirname, filename), "w")
-    f.write("this is fake")
+    if filename in ['train', 'serve']:
+        f = open(os.path.join(dirname, filename), "w")
+        f.write("#!")
+    else:
+        f = open(os.path.join(dirname, filename), "w")
+        f.write("this is fake")
     f.close()
     return f
 

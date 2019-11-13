@@ -21,6 +21,7 @@ TO_BYTES = {
 
 
 class BundleValidator:
+
     REQUIRED_INFERENCE_FILES = ["__init__.py",
                                 "serve",
                                 "web-requirements.txt"]
@@ -30,8 +31,6 @@ class BundleValidator:
                                "train"]
 
     MODEL = "model"
-
-    MODE = None
 
     SHEBANG = "#!"
 
@@ -48,15 +47,6 @@ class BundleValidator:
     def validate_model_directory(cls, dirs):
         if "model" not in dirs:
             raise InvalidBundleError("Missing model directory in source-code bundle")
-
-    @classmethod
-    def validate_is_file_executable(cls, executable_file):
-        f = open(executable_file)
-        first_line = f.readline()
-        if cls.SHEBANG not in first_line:
-            raise InvalidBundleError(f"The {cls.MODE} file cannot be executed. "
-                                     f"Please ensure that first line begins with the shebang '#!' "
-                                     f"to make it an executable")
 
     @classmethod
     def validate_dockerfile(cls, files):
@@ -76,7 +66,7 @@ class BundleValidator:
             raise InvalidBundleError(f"Missing file {f} in model directory of source-code bundle")
 
     @classmethod
-    def validate_bundle_structure(cls, directory, req_files):
+    def validate_bundle_structure(cls, directory, req_files, mode):
         cls.validate_empty(directory)
         bundle_root, model_dir = None, None
         for root, dirs, files in os.walk(directory):
@@ -90,34 +80,58 @@ class BundleValidator:
                     cls.validate_dockerfile(files)
                     cls.validate_model_directory(dirs)
                     model_dir = os.path.join(bundle_root, cls.MODEL)
-                    if cls.MODE:
-                        executable_file = os.path.join(model_dir, cls.MODE)
-                        cls.validate_is_file_executable(executable_file)
 
                 if root == model_dir:
                     for f in req_files:
                         cls.validate_file(f, files)
 
+                    if mode:
+                        for file in files:
+                            if file == mode:
+                                file_path = os.path.join(model_dir, mode)
+                                cls.validate_is_file_executable(file_path, mode)
+
+    @classmethod
+    def validate_is_file_executable(cls, executable_file, mode):
+        f = open(executable_file)
+        first_line = f.readline()
+        if cls.SHEBANG not in first_line:
+            raise InvalidBundleError(f"The {mode} file cannot be executed. "
+                                     f"Please ensure that first line begins with the shebang '#!' "
+                                     f"to make it an executable")
+
     @classmethod
     def validate_inference_bundle_structure(cls, directory: str):
         req_files = cls.REQUIRED_INFERENCE_FILES
-        cls.MODE = "serve"
-        cls.validate_bundle_structure(directory, req_files)
+        mode = 'serve'
+        cls.validate_bundle_structure(directory, req_files, mode=mode)
 
     @classmethod
     def validate_notebook_bundle_structure(cls, directory):
-        cls.validate_bundle_structure(directory, [])
+        cls.validate_bundle_structure(directory, [], mode=None)
 
     @classmethod
     def validate_train_bundle_structure(cls, directory):
         req_files = cls.REQUIRED_TRAINING_FILES
-        cls.MODE = "train"
-        cls.validate_bundle_structure(directory, req_files)
+        mode = 'train'
+        cls.validate_bundle_structure(directory, req_files, mode=mode)
 
     @classmethod
     def validate_source_bundle_structure(cls, directory):
         req_files = cls.REQUIRED_TRAINING_FILES
-        cls.validate_bundle_structure(directory, req_files)
+        cls.validate_bundle_structure(directory, req_files, mode=None)
+
+    # @classmethod
+    # def validate_is_serve_executable(cls, model_dir: str):
+    #     mode = "serve"
+    #     executable_file = os.path.join(model_dir, mode)
+    #     cls.validate_file_executable(executable_file, mode)
+    #
+    # @classmethod
+    # def validate_is_train_executable(cls, model_dir: str):
+    #     mode = "train"
+    #     executable_file = os.path.join(model_dir, mode)
+    #     cls.validate_file_executable(executable_file, mode)
 
 
 def validate_cpu_request(cpu):
