@@ -1,10 +1,8 @@
-from flask import Blueprint, request, make_response
+from flask import Blueprint, request
+from kaos_model.api import Response
 
 from kaos_backend.controllers.workspace import WorkspaceController
 from kaos_backend.util.flask import jsonify
-
-from kaos_model.api import Response
-
 from kaos_backend.util.validators import validate_request
 
 
