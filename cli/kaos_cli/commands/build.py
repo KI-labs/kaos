@@ -184,12 +184,47 @@ def set_active_context(backend: BackendFacade, context: Optional[str] = None, in
                 click.echo('Context {} invalid. It is not one of the existing deployments in {} '
                            .format(click.style(context, bold=True, fg='red'), click.style("kaos", bold=True)))
                 sys.exit(1)
-        if ind:
-            is_context_set = backend.set_context_by_index(ind)
+            click.echo("{} - Successfully set to context - {}".
+                       format(click.style("Info", bold=True, fg='green'), click.style(context, bold=True, fg='green')))
+        if ind or ind == 0:
+            is_context_set, context = backend.set_context_by_index(ind)
             if not is_context_set:
                 click.echo('Index {} invalid. It is not one of the existing deployments in {} '
                            .format(click.style(context, bold=True, fg='red'), click.style("kaos", bold=True)))
                 sys.exit(1)
+            click.echo("{} - Successfully set to context - {}".
+                       format(click.style("Info", bold=True, fg='green'), click.style(context, bold=True, fg='green')))
+
+    except Exception as e:
+        handle_specific_exception(e)
+        handle_exception(e)
+
+
+# build active
+# =============
+@build.command(name='active', short_help='Display current/active context')
+@pass_obj(BackendFacade)
+def set_active_context(backend: BackendFacade):
+    """
+    Set current model environment workspace.
+    """
+    try:
+        active_context = backend.get_active_context()
+
+        if active_context:
+            click.echo("{} - Active context is - {}".
+                       format(click.style("Info", bold=True, fg='green'), click.style(active_context, bold=True, fg='green')))
+        else:
+            available_contexts = backend.list()
+            if available_contexts:
+                click.echo("{} - No {} context set. Set an active context using `{}`".
+                           format(click.style("Warning", bold=True, fg='yellow'),
+                                  click.style("active", bold=True, fg='green'),
+                                  click.style("kaos build set", bold=True, fg='white')))
+            else:
+                click.echo("{} - No active builds found. Please run {} to deploy an environment".format(
+                    click.style("Warning", bold=True, fg='yellow'),
+                    click.style('kaos build deploy', bold=True, fg='green')))
 
     except Exception as e:
         handle_specific_exception(e)

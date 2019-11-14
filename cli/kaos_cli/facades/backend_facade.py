@@ -66,6 +66,14 @@ class BackendFacade:
         except KeyError:
             return []
 
+    def get_active_context(self):
+        try:
+            active_context = self.state_service.get(ACTIVE, 'environment')
+            return active_context
+
+        except KeyError:
+            return None
+
     @staticmethod
     def get_context_info(context, index):
         try:
@@ -115,8 +123,8 @@ class BackendFacade:
         if current_context:
             self._set_active_context(current_context)
             self.state_service.write()
-            return True
-        return False
+            return True, current_context
+        return False, current_context
 
     @staticmethod
     def _set_build_dir(provider, env):
@@ -136,7 +144,6 @@ class BackendFacade:
         self.tf_service.execute()
 
         url, kubeconfig = self._parse_config(dir_build)
-        # url, kubeconfig = "", ""
 
         current_context = provider if provider in [DOCKER, MINIKUBE] else f"{provider}_{env}"
 
