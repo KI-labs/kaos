@@ -1,11 +1,15 @@
-[[source]]
-name = "pypi"
-url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
+kaos-integration-tests = {editable = true, path = "./testing/integration"}
+kaos-backend = {editable = true, path = "./backend"}
 
 [packages]
+kaos-model = {editable = true, path = "./model"}
+kaos = {editable = true, path = "./cli"}
 
 [requires]
-python_version = "2.7"
+python_version = "3.7"
+
+[pipenv]
+allow_prereleases = true

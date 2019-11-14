@@ -121,18 +121,6 @@ class BundleValidator:
         req_files = cls.REQUIRED_TRAINING_FILES
         cls.validate_bundle_structure(directory, req_files, mode=None)
 
-    # @classmethod
-    # def validate_is_serve_executable(cls, model_dir: str):
-    #     mode = "serve"
-    #     executable_file = os.path.join(model_dir, mode)
-    #     cls.validate_file_executable(executable_file, mode)
-    #
-    # @classmethod
-    # def validate_is_train_executable(cls, model_dir: str):
-    #     mode = "train"
-    #     executable_file = os.path.join(model_dir, mode)
-    #     cls.validate_file_executable(executable_file, mode)
-
 
 def validate_cpu_request(cpu):
     if cpu and MAX_CPU:

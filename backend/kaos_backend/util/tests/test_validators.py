@@ -104,8 +104,7 @@ def test_validate_bundle_structure_missing_model_directory():
             BundleValidator.validate_bundle_structure(temp_dir, [], mode=None)
 
 
-@pytest.mark.parametrize("files_include,file_exclude", training_test_cases)
-def test_validate_train_bundle_missing_executable_file(files_include, file_exclude):
+def test_validate_train_bundle_missing_executable_file():
     with pytest.raises(InvalidBundleError,
                        match="The train file cannot be executed. "
                              "Please ensure that first line begins with the shebang '#!' to make it an executable"):
@@ -116,16 +115,15 @@ def test_validate_train_bundle_missing_executable_file(files_include, file_exclu
             model_dir = os.path.join(base_dir, "model")
             os.mkdir(model_dir)
             mode = "train"
-            for f in files_include:
+            for f in REQ_TRAINING_FILES:
                 create_file(os.path.join(model_dir, f))
 
             train_file = os.path.join(model_dir, mode)
-            make_executable_file(train_file)
+            create_file(train_file)
             BundleValidator.validate_bundle_structure(temp_dir, [], mode=mode)
 
 
-@pytest.mark.parametrize("files_include,file_exclude", inference_test_cases)
-def test_validate_serve_bundle_missing_executable_file(files_include, file_exclude):
+def test_validate_serve_bundle_missing_executable_file():
     with pytest.raises(InvalidBundleError,
                        match="The serve file cannot be executed. "
                              "Please ensure that first line begins with the shebang '#!' to make it an executable"):
@@ -136,11 +134,11 @@ def test_validate_serve_bundle_missing_executable_file(files_include, file_exclu
             model_dir = os.path.join(base_dir, "model")
             os.mkdir(model_dir)
             mode = "serve"
-            for f in files_include:
+            for f in REQ_INFERENCE_FILES:
                 create_file(os.path.join(model_dir, f))
 
             serve_file = os.path.join(model_dir, mode)
-            make_executable_file(serve_file)
+            create_file(serve_file)
             BundleValidator.validate_bundle_structure(temp_dir, [], mode=mode)
 
 
