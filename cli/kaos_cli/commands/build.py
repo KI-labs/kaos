@@ -2,7 +2,7 @@ import os
 import sys
 
 import click
-from kaos_cli.constants import AWS, GCP, DOCKER, MINIKUBE, KAOS_TF_PATH
+from kaos_cli.constants import AWS, GCP, DOCKER, MINIKUBE, KAOS_TF_PATH, TF_STATE
 from kaos_cli.exceptions.handle_exceptions import handle_specific_exception, handle_exception
 from kaos_cli.facades.backend_facade import BackendFacade, is_cloud_provider
 from typing import Optional
@@ -47,8 +47,9 @@ def deploy(backend: BackendFacade, cloud: str, env: str, force: bool, verbose: b
     """
     Deploy kaos backend infrastructure based on selected provider.
     """
-    dir_build = os.path.join(KAOS_TF_PATH, f"{cloud}/{env}" if cloud not in [DOCKER, MINIKUBE] else f"{cloud}")
-    is_created = backend.is_created(dir_build)
+    dir_build = os.path.join(KAOS_TF_PATH, f"/{cloud}/{env}" if cloud not in [DOCKER, MINIKUBE] else f"/{cloud}")
+    context_tfstate_file = os.path.join(dir_build, f"/{TF_STATE}")
+    is_created = backend.is_created(context_tfstate_file)
 
     if is_created and not force:
         click.echo('{} - {} backend is already built.'.format(click.style("Aborting", bold=True, fg='red'),
