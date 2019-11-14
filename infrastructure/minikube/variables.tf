@@ -8,7 +8,7 @@ variable "api_tag" {
 
 variable "pachyderm_tag" {
   type    = "string"
-  default = "1.9.3"
+  default = "1.9.8"
 }
 
 variable "pull_backend_image_policy" {

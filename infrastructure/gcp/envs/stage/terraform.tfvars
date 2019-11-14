@@ -35,6 +35,6 @@ network_name = "vnet"
 bucket_name = "store"
 
 //ml-platform
-pachyderm_tag = "1.9.3"
+pachyderm_tag = "1.9.8"
 
 worker_groups_type = "cpu_only"
