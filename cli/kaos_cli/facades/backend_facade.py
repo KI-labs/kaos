@@ -11,7 +11,7 @@ from kaos_cli.exceptions.exceptions import HostnameError
 from kaos_cli.services.state_service import StateService
 from kaos_cli.services.terraform_service import TerraformService
 from kaos_cli.utils.environment import check_environment
-from kaos_cli.utils.helpers import build_dir
+from kaos_cli.utils.helpers import build_dir, if_dir_exists
 from kaos_cli.utils.validators import validate_build_dir
 from kaos_cli.exceptions.handle_exceptions import handle_specific_exception, handle_exception
 
@@ -133,7 +133,11 @@ class BackendFacade:
         return dir_build
 
     def build(self, provider, env, dir_build, local_backend=False, verbose=False):
-        build_dir(dir_build)
+        # If dir_build already created in the previous deploy
+        is_dir_build = if_dir_exists(dir_build)
+        if not is_dir_build:
+            build_dir(dir_build)
+
         extra_vars = self._get_vars(provider, dir_build)
         self.tf_service.cd_dir(dir_build)
 

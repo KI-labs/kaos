@@ -12,10 +12,8 @@ from kaos_cli.utils.decorators import build_env_check, pass_obj
 from kaos_cli.utils.validators import validate_build_env, validate_unused_port, validate_inputs
 from kaos_cli.utils.rendering import render_table
 
-
 # BUILD group
 # =============
-
 @click.group(name='build', cls=CustomHelpOrder,
              short_help=' {} and its {} '.format(
                  click.style('build', bold=True), click.style('sub-commands', bold=True)))
@@ -47,7 +45,7 @@ def deploy(backend: BackendFacade, cloud: str, env: str, force: bool, verbose: b
     """
     Deploy kaos backend infrastructure based on selected provider.
     """
-    dir_build = os.path.join(KAOS_TF_PATH, f"/{cloud}/{env}" if cloud not in [DOCKER, MINIKUBE] else f"/{cloud}")
+    dir_build = os.path.join(KAOS_TF_PATH, f"{cloud}/{env}" if cloud not in [DOCKER, MINIKUBE] else f"{cloud}")
     context_tfstate_file = os.path.join(dir_build, f"/{TF_STATE}")
     is_created = backend.is_created(context_tfstate_file)
 
