@@ -67,17 +67,33 @@ def build_env_check(func):
         provider = kwargs["cloud"]
 
         if provider == "DOCKER":
+
+            # Docker Desktop is running WITH single-node kubernetes cluster
             cmd = "kubectl get services --context docker-for-desktop"
             exitcode, out, err = run_cmd(cmd)
-            if "command not found" in str(err):
-                click.echo("{} - Docker Desktop not found. Please install any one of them and then retry build".format(
-                    click.style("Warning", bold=True, fg='yellow')))
-                sys.exit(1)
-            if "Unable to connect to the server" in str(err):
+            error_codes = ["Unable to connect to the server",
+                           "did you specify the right host or port?"]
+            if any([e in str(err) for e in error_codes]):
                 click.echo(
-                    "{} - Kubernetes cluster is not enabled in the Docker Desktop or is not running. "
-                    "Please ensure that a local k8 is running and then retry build".format(
-                        click.style("Warning", bold=True, fg='yellow')))
+                    "{} - Docker Desktop with Kubernetes is currently {}\n\n"
+                    "Please {} Docker Desktop and {} Kubernetes".format(
+                        click.style("Warning", bold=True, fg='yellow'),
+                        click.style("disabled", bold=True, fg='red'),
+                        click.style("start", bold=True, fg='green'),
+                        click.style("enable", bold=True, fg='green')))
+                sys.exit(1)
+
+            # Docker Desktop context is set
+            cmd = "kubectl config current-context"
+            exitcode, out, err = run_cmd(cmd)
+            docker_contexts = ["docker-desktop", "docker-for-desktop"]
+            if out.decode("utf-8").rstrip() not in docker_contexts:
+                click.echo(
+                    "{} - Cluster context {} set to Docker Desktop\n\n"
+                    "Please run {}".format(
+                        click.style("Warning", bold=True, fg='yellow'),
+                        click.style("not", bold=True, fg='red'),
+                        click.style("kubectl config use-context docker-desktop", bold=True, fg='green')))
                 sys.exit(1)
 
         required_envs = list(filter(lambda e: not os.environ.get(e, None), ENV_DICT[provider]))

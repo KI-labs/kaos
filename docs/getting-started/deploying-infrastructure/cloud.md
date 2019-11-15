@@ -86,6 +86,20 @@ export TF_VAR_api_cpu_request=<float> (default: 0.5)
 export TF_VAR_api_cpu_limit=<float> (default: 1.5)
 ```
 
+### Cluster Location
+
+The following variables are available to control cluster and resource location.
+
+```bash
+export TF_VAR_project_location=<str> # (for example: us-west1-a)
+export TF_VAR_project_region=<str> # (for example: us)
+```
+
+* `project_location` specifies the location of cluster and network
+* `project_region` specifies the location of storage and docker repository 
+
+### Build
+
 A successful build of kaos within GCP requires a \(service\) account with the following roles:
 
 * Compute Network Admin
