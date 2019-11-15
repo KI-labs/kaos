@@ -29,21 +29,6 @@ def build_dir(*path_parts):
     return out_dir
 
 
-def if_dir_exists(path):
-    """
-    Utility for checking if a directory path already exists
-
-    Args:
-        path (str): directory/path
-
-    Returns:
-        dir_exists (bool): return True if dir exists
-
-    """
-
-    return os.path.exists(path)
-
-
 def verbose_run(verbose, cmd):
     """
     Function for running a subprocess call with streamed verbose output

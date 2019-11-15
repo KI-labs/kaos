@@ -6,13 +6,13 @@ from distutils.dir_util import copy_tree
 
 import requests
 from kaos_cli.constants import DOCKER, MINIKUBE, PROVIDER_DICT, AWS, BACKEND, INFRASTRUCTURE, GCP, LOCAL_CONFIG_DICT, \
-    KAOS_TF_PATH, CONTEXTS, ACTIVE, BACKEND_CACHE, DEFAULT, USER, REMOTE
+    CONTEXTS, ACTIVE, BACKEND_CACHE, DEFAULT, USER, REMOTE
 from kaos_cli.exceptions.exceptions import HostnameError
 from kaos_cli.services.state_service import StateService
 from kaos_cli.services.terraform_service import TerraformService
 from kaos_cli.utils.environment import check_environment
-from kaos_cli.utils.helpers import build_dir, if_dir_exists
-from kaos_cli.utils.validators import validate_build_dir
+from kaos_cli.utils.helpers import build_dir
+from kaos_cli.utils.validators import EnvironmentState
 from kaos_cli.exceptions.handle_exceptions import handle_specific_exception, handle_exception
 
 
@@ -126,20 +126,13 @@ class BackendFacade:
             return True, current_context
         return False, current_context
 
-    @staticmethod
-    def _set_build_dir(provider, env):
-        dir_build = os.path.join(KAOS_TF_PATH,
-                                 f"{provider}/{env}" if provider not in [DOCKER, MINIKUBE] else f"{provider}")
-        return dir_build
+    def build(self, provider, env, local_backend=False, verbose=False):
+        env_state = EnvironmentState.validate_build_states(provider, env)
+        if not env_state.if_build_dir_exists:
+            build_dir(env_state.build_dir)
 
-    def build(self, provider, env, dir_build, local_backend=False, verbose=False):
-        # If dir_build already created in the previous deploy
-        is_dir_build = if_dir_exists(dir_build)
-        if not is_dir_build:
-            build_dir(dir_build)
-
-        extra_vars = self._get_vars(provider, dir_build)
-        self.tf_service.cd_dir(dir_build)
+        extra_vars = self._get_vars(provider, env_state.build_dir)
+        self.tf_service.cd_dir(env_state.build_dir)
 
         self.tf_service.set_verbose(verbose)
         directory = self._tf_init(provider, env, local_backend, destroying=False)
@@ -147,46 +140,53 @@ class BackendFacade:
         self.tf_service.apply(directory, extra_vars)
         self.tf_service.execute()
 
-        url, kubeconfig = self._parse_config(dir_build)
+        # check if the deployed successfully
+        # Refresh environment states after terraform service operations
+        env_state = EnvironmentState.validate_build_states(provider, env)
 
-        current_context = provider if provider in [DOCKER, MINIKUBE] else f"{provider}_{env}"
+        if env_state.if_tfstate_exists:
+            url, kubeconfig = self._parse_config(env_state.build_dir)
 
-        self.state_service.set(DEFAULT, user=USER)
+            current_context = provider if provider in [DOCKER, MINIKUBE] else f"{provider}_{env}"
 
-        self._set_context_list(current_context)
-        self._set_active_context(current_context)
-        self.state_service.set(current_context)
+            self.state_service.set(DEFAULT, user=USER)
 
-        try:
-            self.state_service.set_section(current_context, BACKEND, url=url, token=uuid.uuid4())
-            self.state_service.set_section(current_context, INFRASTRUCTURE, kubeconfig=kubeconfig)
-        except Exception as e:
-            handle_specific_exception(e)
-            handle_exception(e)
+            self._set_context_list(current_context)
+            self._set_active_context(current_context)
+            self.state_service.set(current_context)
 
-        self.state_service.write()
+            try:
+                self.state_service.set_section(current_context, BACKEND, url=url, token=uuid.uuid4())
+                self.state_service.set_section(current_context, INFRASTRUCTURE, kubeconfig=kubeconfig)
+            except Exception as e:
+                handle_specific_exception(e)
+                handle_exception(e)
 
-    def destroy(self, provider, env, verbose=False):
-        dir_build = self._set_build_dir(provider, env)
-        validate_build_dir(dir_build)
+            self.state_service.write()
+            return True, env_state
 
-        extra_vars = self._get_vars(provider, dir_build)
-        self.tf_service.cd_dir(dir_build)
+        return False, env_state
+
+    def destroy(self, env_state, verbose=False):
+        extra_vars = self._get_vars(env_state.cloud, env_state.build_dir)
+        self.tf_service.cd_dir(env_state.build_dir)
 
         self.tf_service.set_verbose(verbose)
-        directory = self._tf_init(provider, env, local_backend=False, destroying=True)
-        current_context = provider if provider in [DOCKER, MINIKUBE] else provider + '_' + env
+        directory = self._tf_init(env_state.cloud, env_state.env, local_backend=False, destroying=True)
+        current_context = env_state.cloud if env_state.cloud in [DOCKER, MINIKUBE] \
+            else env_state.cloud + '_' + env_state.env
         self._delete_resources(current_context)
         self._unset_context_list(current_context)
         self._remove_section(current_context)
         self._deactivate_context()
         self.tf_service.destroy(directory, extra_vars)
         self.tf_service.execute()
-        self._remove_build_files(dir_build)
+        self._remove_build_files(env_state.build_dir)
         self.state_service.write()
-
-    def is_created(self, dir_build):
-        return self.state_service.is_created(dir_build)
+        # check if the infra is destroyed successfully
+        # Refresh environment states after terraform service operations
+        env_state = EnvironmentState.validate_build_states(env_state.cloud, env_state.env)
+        return env_state
 
     def _remove_build_files(self, dir_build):
         """

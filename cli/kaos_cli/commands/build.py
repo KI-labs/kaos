@@ -2,15 +2,16 @@ import os
 import sys
 
 import click
-from kaos_cli.constants import AWS, GCP, DOCKER, MINIKUBE, KAOS_TF_PATH, TF_STATE
+from kaos_cli.constants import AWS, GCP, DOCKER, MINIKUBE
 from kaos_cli.exceptions.handle_exceptions import handle_specific_exception, handle_exception
 from kaos_cli.facades.backend_facade import BackendFacade, is_cloud_provider
 from typing import Optional
 
 from kaos_cli.utils.custom_classes import CustomHelpOrder, NotRequiredIf
 from kaos_cli.utils.decorators import build_env_check, pass_obj
-from kaos_cli.utils.validators import validate_build_env, validate_unused_port, validate_inputs
+from kaos_cli.utils.validators import validate_unused_port, validate_inputs, EnvironmentState
 from kaos_cli.utils.rendering import render_table
+
 
 # BUILD group
 # =============
@@ -45,39 +46,38 @@ def deploy(backend: BackendFacade, cloud: str, env: str, force: bool, verbose: b
     """
     Deploy kaos backend infrastructure based on selected provider.
     """
-    dir_build = os.path.join(KAOS_TF_PATH, f"{cloud}/{env}" if cloud not in [DOCKER, MINIKUBE] else f"{cloud}")
-    context_tfstate_file = os.path.join(dir_build, f"/{TF_STATE}")
-    is_created = backend.is_created(context_tfstate_file)
 
-    if is_created and not force:
+    env_state = EnvironmentState.validate_build_states(cloud, env)
+
+    if env_state.if_tfstate_exists and not force:
         click.echo('{} - {} backend is already built.'.format(click.style("Aborting", bold=True, fg='red'),
                                                               click.style("kaos", bold=True)))
         sys.exit(1)
 
-    elif is_created and force:
+    elif env_state.if_tfstate_exists and force:
         click.echo('{} - Performing {} build of the backend'.format(
             click.style("Warning", bold=True, fg='yellow'),
             click.style("force", bold=True)))
 
-    # validate ENV
-    env = validate_build_env(cloud, env)
+    # set env variable appropriately
+    env_state.set_build_env()
 
     if not yes:
         # confirm creation of backend
-        if env:
+        if env_state.env:
             click.confirm(
                 '{} - Are you sure about building {} [{}] backend in {}?'.format(
                     click.style("Warning", bold=True, fg='yellow'),
                     click.style('kaos', bold=True),
-                    click.style(env, bold=True, fg='blue'),
-                    click.style(cloud, bold=True, fg='red')),
+                    click.style(env_state.env, bold=True, fg='blue'),
+                    click.style(env_state.cloud, bold=True, fg='red')),
                 abort=True)
         else:
             click.confirm(
                 '{} - Are you sure about building {} backend in {}?'.format(
                     click.style("Warning", bold=True, fg='yellow'),
                     click.style('kaos', bold=True),
-                    click.style(cloud, bold=True, fg='red')),
+                    click.style(env_state.cloud, bold=True, fg='red')),
                 abort=True)
 
     if local_backend:
@@ -85,51 +85,63 @@ def deploy(backend: BackendFacade, cloud: str, env: str, force: bool, verbose: b
             click.style("Info", bold=True, fg='green'),
             click.style("local", bold=True)))
 
-    if local_backend and cloud in [DOCKER, MINIKUBE]:
+    if local_backend and env_state.cloud in [DOCKER, MINIKUBE]:
         click.echo('{} - local backend (-l/--local_backend) has no effect for {}'.format(
             click.style("Info", bold=True, fg='green'),
-            click.style(cloud, bold=True, fg='red')))
+            click.style(env_state.cloud, bold=True, fg='red')))
 
     # validate unused port for DOCKER
-    if cloud == DOCKER and not validate_unused_port(80):
+    if env_state.cloud == DOCKER and not validate_unused_port(80):
         # If the force build flag was set to True and the kaos backend 
         # was already built then skip the warning; otherwise, warn
         # the user that the port is already taken by another service
         # and issue a sys exit
-        if not (force and backend.is_created(dir_build)):
+        if not (force and env_state.if_tfstate_exists):
             click.echo(
                 "{} - Network port {} is used but is needed for building {} backend in {}".format(
                     click.style("Warning", bold=True, fg='yellow'),
                     click.style("80", bold=True),
                     click.style("kaos", bold=True),
-                    click.style(cloud, bold=True, fg='red')))
+                    click.style(env_state.cloud, bold=True, fg='red')))
             sys.exit(1)
     
     try:
 
-        backend.build(cloud, env, dir_build, local_backend=local_backend, verbose=verbose)
+        is_built_successfully, env_state = backend.build(env_state.cloud,
+                                                         env_state.env,
+                                                         local_backend=local_backend,
+                                                         verbose=verbose)
 
-        if verbose:
-            click.echo("\n{} - Endpoint successfully set to {}".format(
-                click.style("Info", bold=True, fg='green'),
-                click.style(backend.url, bold=True, fg='green')))
+        if is_built_successfully:
+            if verbose:
+                click.echo("\n{} - Endpoint successfully set to {}".format(
+                    click.style("Info", bold=True, fg='green'),
+                    click.style(backend.url, bold=True, fg='green')))
 
-        if is_cloud_provider(cloud):
-            kubeconfig = os.path.abspath(backend.kubeconfig)
-            click.echo("\n{} - To interact with the Kubernetes cluster:\n {}"
-                       .format(click.style("Info", bold=True, fg='green'),
-                               click.style("export KUBECONFIG=" + kubeconfig,
-                                           bold=True, fg='red')))
+            if is_cloud_provider(env_state.cloud):
+                kubeconfig = os.path.abspath(backend.kubeconfig)
+                click.echo("\n{} - To interact with the Kubernetes cluster:\n {}"
+                           .format(click.style("Info", bold=True, fg='green'),
+                                   click.style("export KUBECONFIG=" + kubeconfig,
+                                               bold=True, fg='red')))
 
-        if env:
-            click.echo("{} - Successfully built {} [{}] environment".format(
-                click.style("Info", bold=True, fg='green'),
-                click.style('kaos', bold=True),
-                click.style(env, bold=True, fg='blue')))
+            if env:
+                click.echo("{} - Successfully built {} [{}] environment".format(
+                    click.style("Info", bold=True, fg='green'),
+                    click.style('kaos', bold=True),
+                    click.style(env_state.env, bold=True, fg='blue')))
+            else:
+                click.echo("{} - Successfully built {} environment".format(
+                    click.style("Info", bold=True, fg='green'),
+                    click.style('kaos', bold=True)))
+
         else:
-            click.echo("{} - Successfully built {} environment".format(
-                click.style("Info", bold=True, fg='green'),
-                click.style('kaos', bold=True)))
+            click.echo("{} - Deployment Unsuccessful while creating {} [{} {}] environment".format(
+                click.style("Error", bold=True, fg='red'),
+                click.style('kaos', bold=True),
+                click.style(env_state.cloud, bold=True, fg='red'),
+                click.style(env_state.env, bold=True, fg='red'))),
+            sys.exit(1)
 
     except Exception as e:
         handle_specific_exception(e)
@@ -212,7 +224,8 @@ def set_active_context(backend: BackendFacade):
 
         if active_context:
             click.echo("{} - Active context is - {}".
-                       format(click.style("Info", bold=True, fg='green'), click.style(active_context, bold=True, fg='green')))
+                       format(click.style("Info", bold=True, fg='green'),
+                              click.style(active_context, bold=True, fg='green')))
         else:
             available_contexts = backend.list()
             if available_contexts:
@@ -247,40 +260,52 @@ def destroy(backend: BackendFacade, cloud, env, verbose, yes):
     """
     Destroy kaos backend infrastructure based on selected provider.
     """
+    env_state = EnvironmentState.validate_build_states(cloud, env)
 
-    # validate ENV
-    env = validate_build_env(cloud, env)
+    # set env variable appropriately
+    env_state.set_build_env()
+
+    # Ensure that appropriate warnings are displayed
+    env_state.display_warning()
 
     if not yes:
         # confirm creation of backend
-        if env:
+        if env_state.env:
             click.confirm(
                 '{} - Are you sure about destroying {} [{}] backend in {}?'.format(
                     click.style("Warning", bold=True, fg='yellow'),
                     click.style('kaos', bold=True),
-                    click.style(env, bold=True, fg='blue'),
-                    click.style(cloud, bold=True, fg='red')),
+                    click.style(env_state.env, bold=True, fg='blue'),
+                    click.style(env_state.cloud, bold=True, fg='red')),
                 abort=True)
         else:
             click.confirm(
                 '{} - Are you sure about destroying {} backend in {}?'.format(
                     click.style("Warning", bold=True, fg='yellow'),
                     click.style('kaos', bold=True),
-                    click.style(cloud, bold=True, fg='red')),
+                    click.style(env_state.cloud, bold=True, fg='red')),
                 abort=True)
     try:
 
-        backend.destroy(cloud, env, verbose=verbose)
+        env_state = backend.destroy(env_state, verbose=verbose)
 
-        if env:
-            click.echo(
-                "{} - Successfully destroyed {} [{}] environment".format(click.style("Info", bold=True, fg='green'),
-                                                                         click.style('kaos', bold=True),
-                                                                         click.style(env, bold=True, fg='blue')))
+        if not env_state.tf_state_path:
+            if env_state.env:
+                click.echo(
+                    "{} - Successfully destroyed {} [{}] environment".format(click.style("Info", bold=True, fg='green'),
+                                                                             click.style('kaos', bold=True),
+                                                                             click.style(env_state.env, bold=True, fg='blue')))
+            else:
+                click.echo(
+                    "{} - Successfully destroyed {} environment".format(click.style("Info", bold=True, fg='green'),
+                                                                        click.style('kaos', bold=True)))
         else:
-            click.echo(
-                "{} - Successfully destroyed {} environment".format(click.style("Info", bold=True, fg='green'),
-                                                                    click.style('kaos', bold=True)))
+            click.echo("{} - Destroy operation unsuccessful for {} [{} {}] environment".format(
+                click.style("Error", bold=True, fg='red'),
+                click.style('kaos', bold=True),
+                click.style(env_state.cloud, bold=True, fg='red'),
+                click.style(env_state.env, bold=True, fg='red'))),
+            sys.exit(1)
 
     except Exception as e:
         handle_specific_exception(e)
