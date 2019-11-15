@@ -46,7 +46,7 @@ resource "null_resource" "build_push_tag" {
   }
 
   provisioner "local-exec" {
-    command = "sh ${var.scripts_dir}/gcp/build_push_tag.sh -c=${element(var.docker_contexts, count.index)} -f=${element(var.docker_files, count.index)} -i=${element(var.image_names, count.index)} -t=${element(var.image_tags, count.index)} -p=${var.project_name}"
+    command = "sh ${var.scripts_dir}/gcp/build_push_tag.sh -c=${element(var.docker_contexts, count.index)} -f=${element(var.docker_files, count.index)} -i=${element(var.image_names, count.index)} -t=${element(var.image_tags, count.index)} -p=${var.project_name} -r=${var.region}"
   }
 
   depends_on = [null_resource.login_registry]

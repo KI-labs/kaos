@@ -23,10 +23,6 @@ done
 echo "==========================="
 echo "| Configure GCP region... |"
 echo "==========================="
-if [[ -z "$REGION" ]]
-    then
-        REGION="eu"
-fi
 echo "+${REGION} being used"
 
 echo "========================================"
