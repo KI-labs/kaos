@@ -186,6 +186,8 @@ class BackendFacade:
         # check if the infra is destroyed successfully
         # Refresh environment states after terraform service operations
         env_state = EnvironmentState.initialize(env_state.cloud, env_state.env)
+        # set env variable appropriately
+        env_state.set_build_env()
         return env_state
 
     def _remove_build_files(self, dir_build):

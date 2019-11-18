@@ -289,7 +289,7 @@ def destroy(backend: BackendFacade, cloud, env, verbose, yes):
 
         env_state = backend.destroy(env_state, verbose=verbose)
 
-        if not env_state.tf_state_path:
+        if not env_state.if_tfstate_exists:
             if env_state.env:
                 click.echo(
                     "{} - Successfully destroyed {} [{}] environment".format(click.style("Info", bold=True, fg='green'),
@@ -300,12 +300,19 @@ def destroy(backend: BackendFacade, cloud, env, verbose, yes):
                     "{} - Successfully destroyed {} environment".format(click.style("Info", bold=True, fg='green'),
                                                                         click.style('kaos', bold=True)))
         else:
-            click.echo("{} - Destroy operation unsuccessful for {} [{} {}] environment".format(
-                click.style("Error", bold=True, fg='red'),
-                click.style('kaos', bold=True),
-                click.style(env_state.cloud, bold=True, fg='red'),
-                click.style(env_state.env, bold=True, fg='red'))),
-            sys.exit(1)
+            if env_state.env:
+                click.echo("{} - Destroy operation unsuccessful for {} [{} {}] environment".format(
+                    click.style("Error", bold=True, fg='red'),
+                    click.style('kaos', bold=True),
+                    click.style(env_state.cloud, bold=True, fg='red'),
+                    click.style(env_state.env, bold=True, fg='red'))),
+                sys.exit(1)
+            else:
+                click.echo("{} - Destroy operation unsuccessful for {} [{}] environment".format(
+                    click.style("Error", bold=True, fg='red'),
+                    click.style('kaos', bold=True),
+                    click.style(env_state.cloud, bold=True, fg='red'))),
+                sys.exit(1)
 
     except Exception as e:
         handle_specific_exception(e)
