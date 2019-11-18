@@ -147,9 +147,13 @@ def workspace_check(func):
                 click.style("kaos workspace set", bold=True, fg='green')))
             sys.exit(1)
 
+        # get active context
+        active_context = config['active']['environment']
+
         # get base_url
-        base_url = config.get('backend', 'url')
-        current_workspace = config.get('pachyderm', 'workspace')
+        base_url = config[active_context]['backend']['url']
+
+        current_workspace = config['pachyderm']['workspace']
 
         # GET all workspaces: /workspace
         r = requests.get(f"{base_url}/workspace")
