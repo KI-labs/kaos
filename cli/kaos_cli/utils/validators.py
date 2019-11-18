@@ -24,7 +24,7 @@ class EnvironmentState:
         self.if_tfstate_exists = None
 
     @classmethod
-    def validate_build_states(cls, cloud, env) -> "EnvironmentState":
+    def initialize(cls, cloud, env) -> "EnvironmentState":
         env_state = cls()
         env_state.cloud = cloud
         env_state.env = env
@@ -38,7 +38,7 @@ class EnvironmentState:
         env_state.tf_state_path = tf_state_path
         return env_state
 
-    def display_warning(self) -> "EnvironmentState":
+    def validate_if_tfstate_exits(self) -> "EnvironmentState":
         """
         Ensure existence of kaos backend dir (tf_path) and throw appropriate warnings if it does not exist
         """
@@ -65,20 +65,16 @@ class EnvironmentState:
         Simple method to ensure the right env is set for local v cloud kaos build
         """
 
-        try:
-            if self.env and self.cloud in [DOCKER, MINIKUBE]:
-                click.echo("{} - {} (-e/--env) is not applicable for {} deployment".format(
-                    click.style("Warning", bold=True, fg='yellow'),
-                    click.style("ENV", bold=True),
-                    click.style(self.cloud, bold=True, fg='red')))
-                self.env = None
-            elif self.cloud in [DOCKER, MINIKUBE]:
-                self.env = None
-            else:
-                self.env = 'prod' if not self.env else self.env  # default = prod
-        except KeyError:
-            click.echo('{} - Key Error'.format(click.style("Aborting", bold=True, fg='red')))
-            sys.exit(1)
+        if self.env and self.cloud in [DOCKER, MINIKUBE]:
+            click.echo("{} - {} (-e/--env) is not applicable for {} deployment".format(
+                click.style("Warning", bold=True, fg='yellow'),
+                click.style("ENV", bold=True),
+                click.style(self.cloud, bold=True, fg='red')))
+            self.env = None
+        elif self.cloud in [DOCKER, MINIKUBE]:
+            self.env = None
+        else:
+            self.env = 'prod' if not self.env else self.env  # default = prod
 
 
 def validate_index(n: int, ind: int, command: str):

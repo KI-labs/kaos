@@ -47,7 +47,7 @@ def deploy(backend: BackendFacade, cloud: str, env: str, force: bool, verbose: b
     Deploy kaos backend infrastructure based on selected provider.
     """
 
-    env_state = EnvironmentState.validate_build_states(cloud, env)
+    env_state = EnvironmentState.initialize(cloud, env)
 
     if env_state.if_tfstate_exists and not force:
         click.echo('{} - {} backend is already built.'.format(click.style("Aborting", bold=True, fg='red'),
@@ -260,13 +260,13 @@ def destroy(backend: BackendFacade, cloud, env, verbose, yes):
     """
     Destroy kaos backend infrastructure based on selected provider.
     """
-    env_state = EnvironmentState.validate_build_states(cloud, env)
+    env_state = EnvironmentState.initialize(cloud, env)
 
     # set env variable appropriately
     env_state.set_build_env()
 
     # Ensure that appropriate warnings are displayed
-    env_state.display_warning()
+    env_state.validate_if_tfstate_exits()
 
     if not yes:
         # confirm creation of backend

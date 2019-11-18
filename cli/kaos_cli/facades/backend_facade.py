@@ -127,7 +127,7 @@ class BackendFacade:
         return False, current_context
 
     def build(self, provider, env, local_backend=False, verbose=False):
-        env_state = EnvironmentState.validate_build_states(provider, env)
+        env_state = EnvironmentState.initialize(provider, env)
         if not env_state.if_build_dir_exists:
             build_dir(env_state.build_dir)
 
@@ -142,7 +142,7 @@ class BackendFacade:
 
         # check if the deployed successfully
         # Refresh environment states after terraform service operations
-        env_state = EnvironmentState.validate_build_states(provider, env)
+        env_state = EnvironmentState.initialize(provider, env)
 
         if env_state.if_tfstate_exists:
             url, kubeconfig = self._parse_config(env_state.build_dir)
@@ -185,7 +185,7 @@ class BackendFacade:
         self.state_service.write()
         # check if the infra is destroyed successfully
         # Refresh environment states after terraform service operations
-        env_state = EnvironmentState.validate_build_states(env_state.cloud, env_state.env)
+        env_state = EnvironmentState.initialize(env_state.cloud, env_state.env)
         return env_state
 
     def _remove_build_files(self, dir_build):
