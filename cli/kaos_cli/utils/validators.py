@@ -192,6 +192,5 @@ def validate_unused_port(port: int, host: str = '0.0.0.0') -> bool:
             s.bind((host, port))
             return True
         except socket.error:
-            # Changed below
-            return True
+            return False
 
