@@ -189,22 +189,28 @@ def set_active_context(backend: BackendFacade, context: Optional[str] = None, in
         # ensure arguments are correctly defined
         validate_inputs([context, ind], ['context', 'ind'])
         # selection by index
-        if context:
-            is_context_set = backend.set_context_by_context(context)
-            if not is_context_set:
-                click.echo('Context {} invalid. It is not one of the existing deployments in {} '
-                           .format(click.style(context, bold=True, fg='red'), click.style("kaos", bold=True)))
-                sys.exit(1)
-            click.echo("{} - Successfully set to context - {}".
-                       format(click.style("Info", bold=True, fg='green'), click.style(context, bold=True, fg='green')))
-        if ind or ind == 0:
-            is_context_set, context = backend.set_context_by_index(ind)
-            if not is_context_set:
-                click.echo('Index {} invalid. It is not one of the existing deployments in {} '
-                           .format(click.style(context, bold=True, fg='red'), click.style("kaos", bold=True)))
-                sys.exit(1)
-            click.echo("{} - Successfully set to context - {}".
-                       format(click.style("Info", bold=True, fg='green'), click.style(context, bold=True, fg='green')))
+        available_contexts = backend.list()
+        if available_contexts:
+            if context:
+                is_context_set = backend.set_context_by_context(context)
+                if not is_context_set:
+                    click.echo('Context {} invalid. It is not one of the existing deployments in {} '
+                               .format(click.style(context, bold=True, fg='red'), click.style("kaos", bold=True)))
+                    sys.exit(1)
+                click.echo("{} - Successfully set to context - {}".
+                           format(click.style("Info", bold=True, fg='green'), click.style(context, bold=True, fg='green')))
+            if ind or ind == 0:
+                is_context_set, context = backend.set_context_by_index(ind)
+                if not is_context_set:
+                    click.echo('Index {} invalid. It is not one of the existing deployments in {} '
+                               .format(click.style(str(ind), bold=True, fg='red'), click.style("kaos", bold=True)))
+                    sys.exit(1)
+                click.echo("{} - Successfully set to context - {}".
+                           format(click.style("Info", bold=True, fg='green'), click.style(context, bold=True, fg='green')))
+        else:
+            click.echo("{} - No active builds found. Please run {} to deploy an environment".
+                       format(click.style("Warning", bold=True, fg='yellow'),
+                              click.style('kaos build deploy', bold=True, fg='green')))
 
     except Exception as e:
         handle_specific_exception(e)
@@ -215,7 +221,7 @@ def set_active_context(backend: BackendFacade, context: Optional[str] = None, in
 # =============
 @build.command(name='active', short_help='Display current/active context')
 @pass_obj(BackendFacade)
-def set_active_context(backend: BackendFacade):
+def get_active_context(backend: BackendFacade):
     """
     Set current model environment workspace.
     """
