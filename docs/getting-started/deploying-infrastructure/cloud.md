@@ -1,7 +1,7 @@
 # Cloud
 
 {% hint style="warning" %}
-Cluster makeup \(instance type and size\) **must** be defined before running `kaos build`
+Cluster makeup \(instance type and size\) **must** be defined before running `kaos build deploy`
 {% endhint %}
 
 Check [AWS](https://aws.amazon.com/ec2/instance-types/) or [GCP](https://cloud.google.com/compute/docs/machine-types) for more details on the available instance types in your respective compute region.
@@ -49,7 +49,7 @@ export AWS_DEFAULT_REGION=#########
 kaos can be built and destroyed within **AWS** with the following commands.
 
 ```bash
-kaos build -c AWS -v
+kaos build deploy -c AWS -v
 kaos destroy -c AWS -v
 ```
 
@@ -123,7 +123,7 @@ export GOOGLE_APPLICATION_CREDENTIALS="</path/to/credential.json>"
 kaos can be built and destroyed within **GCP** with the following commands.
 
 ```bash
-kaos build -c GCP -v
+kaos build deploy -c GCP -v
 kaos destroy -c GCP -v
 ```
 
