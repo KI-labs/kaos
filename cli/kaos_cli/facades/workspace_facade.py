@@ -75,15 +75,14 @@ class WorkspaceFacade:
         base_url = self.url
         name = self.workspace
 
-        print("in delete")
-
         # DELETE /workspace/<name>
         r = requests.delete(f"{base_url}/workspace/{name}")
         if r.status_code >= 300:
             raise RequestError(r.text)
 
         # unset workspace (since killed)
-        self.state_service.remove(PACHYDERM, workspace=name)
+        name = ""
+        self.state_service.set(PACHYDERM, workspace=name)
         self.state_service.write()
 
         # invalidate workspace cache
@@ -119,8 +118,8 @@ class WorkspaceFacade:
     @staticmethod
     def get_workspace_by_ind(ind):
         data = validate_cache(WORKSPACE_CACHE, command='workspace')
-        loc = validate_index(len(data['ind']), ind, command='workspace')
-        return data['name'][loc]
+        loc = validate_index(len(data), ind, command='workspace')
+        return data[loc]['name']
 
     def find_similar_workspaces(self, name):
         workspaces = self.list(as_dict=False)['names']
