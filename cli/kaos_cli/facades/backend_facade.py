@@ -6,13 +6,14 @@ from distutils.dir_util import copy_tree
 
 import requests
 from kaos_cli.constants import DOCKER, MINIKUBE, PROVIDER_DICT, AWS, BACKEND, INFRASTRUCTURE, GCP, LOCAL_CONFIG_DICT, \
-    KAOS_TF_PATH
+    CONTEXTS, ACTIVE, BACKEND_CACHE, DEFAULT, USER, REMOTE
 from kaos_cli.exceptions.exceptions import HostnameError
 from kaos_cli.services.state_service import StateService
 from kaos_cli.services.terraform_service import TerraformService
 from kaos_cli.utils.environment import check_environment
 from kaos_cli.utils.helpers import build_dir
-from kaos_cli.utils.validators import validate_build_dir
+from kaos_cli.utils.validators import EnvironmentState
+from kaos_cli.exceptions.handle_exceptions import handle_specific_exception, handle_exception
 
 
 def is_cloud_provider(cloud):
@@ -22,7 +23,6 @@ def is_cloud_provider(cloud):
 class BackendFacade:
     """
     This class should handle all backend related configuration and settings.
-
     """
 
     def __init__(self, state_service: StateService, terraform_service: TerraformService):
@@ -30,38 +30,109 @@ class BackendFacade:
         self.tf_service = terraform_service
 
     @property
+    def active_context(self):
+        return self.state_service.get(ACTIVE, 'environment')
+
+    @property
     def url(self):
-        return self.state_service.get(BACKEND, 'url')
+        return self.state_service.get_section(self.active_context, BACKEND, 'url')
 
     @property
     def user(self):
-        return self.state_service.get(BACKEND, 'user')
+        return self.state_service.get(DEFAULT, 'user')
 
     @property
     def token(self):
-        return self.state_service.get(BACKEND, 'token')
+        return self.state_service.get_section(self.active_context, BACKEND, 'token')
 
     @property
     def kubeconfig(self):
-        return self.state_service.get(INFRASTRUCTURE, 'kubeconfig')
+        return self.state_service.get_section(self.active_context, INFRASTRUCTURE, 'kubeconfig')
 
     def init(self, url, token):
         if not self.state_service.is_created():
             self.state_service.create()
         self.state_service.set(BACKEND, url=url, token=token)
+        self.state_service.set_section(REMOTE, BACKEND, url=url, token=token)
+
         self.state_service.write()
 
+    def list(self):
+        try:
+            contexts = self.state_service.get(CONTEXTS, 'environments')
+            contexts_info = self.jsonify_context_list(contexts)
+            return contexts_info
+
+        except KeyError:
+            return []
+
+    def get_active_context(self):
+        try:
+            active_context = self.state_service.get(ACTIVE, 'environment')
+            return active_context
+
+        except KeyError:
+            return None
+
     @staticmethod
-    def _set_build_dir(provider, env):
-        dir_build = os.path.join(KAOS_TF_PATH,
-                                 f"{provider}/{env}" if provider not in [DOCKER, MINIKUBE] else f"{provider}")
-        return dir_build
+    def get_context_info(context, index):
+        try:
+            cloud, env = context.split('_')
+        except ValueError:
+            cloud = context
+            env = None
+        env = "local" if not env else env
+        info = {
+            "index": index,
+            "context": context,
+            "provider": cloud,
+            "env": env
+        }
+        return info
+
+    @staticmethod
+    def get_context_by_index(context_info, index):
+        for context in context_info:
+            if context['index'] == index:
+                return context['context']
+
+    def jsonify_context_list(self, contexts):
+        contexts_info = []
+        index = 0
+        if isinstance(contexts, list):
+            for context in contexts:
+                contexts_info.append(self.get_context_info(context, index))
+                index = index + 1
+
+        elif isinstance(contexts, str):
+            contexts_info.append(self.get_context_info(contexts, index))
+        return contexts_info
+
+    def set_context_by_context(self, current_context):
+        context_info = self.list()
+        for context in context_info:
+            if context['context'] == current_context:
+                self._set_active_context(current_context)
+                self.state_service.write()
+                return True
+        return False
+
+    def set_context_by_index(self, index):
+        context_info = self.list()
+        current_context = self.get_context_by_index(context_info, index)
+        if current_context:
+            self._set_active_context(current_context)
+            self.state_service.write()
+            return True, current_context
+        return False, current_context
 
     def build(self, provider, env, local_backend=False, verbose=False):
-        dir_build = self._set_build_dir(provider, env)
-        build_dir(dir_build)
-        extra_vars = self._get_vars(provider, dir_build)
-        self.tf_service.cd_dir(dir_build)
+        env_state = EnvironmentState.initialize(provider, env)
+        if not env_state.if_build_dir_exists:
+            build_dir(env_state.build_dir)
+
+        extra_vars = self._get_vars(provider, env_state.build_dir)
+        self.tf_service.cd_dir(env_state.build_dir)
 
         self.tf_service.set_verbose(verbose)
         directory = self._tf_init(provider, env, local_backend, destroying=False)
@@ -69,28 +140,55 @@ class BackendFacade:
         self.tf_service.apply(directory, extra_vars)
         self.tf_service.execute()
 
-        url, kubeconfig = self._parse_config(dir_build)
+        # check if the deployed successfully
+        # Refresh environment states after terraform service operations
+        env_state = EnvironmentState.initialize(provider, env)
 
-        self.state_service.set(BACKEND, url=url, token=uuid.uuid4())
-        self.state_service.set(INFRASTRUCTURE, kubeconfig=kubeconfig)
-        self.state_service.write()
+        if env_state.if_tfstate_exists:
+            url, kubeconfig = self._parse_config(env_state.build_dir)
 
-    def destroy(self, provider, env, verbose=False):
-        dir_build = self._set_build_dir(provider, env)
-        validate_build_dir(dir_build)
+            current_context = provider if provider in [DOCKER, MINIKUBE] else f"{provider}_{env}"
 
-        extra_vars = self._get_vars(provider, dir_build)
-        self.tf_service.cd_dir(dir_build)
+            self.state_service.set(DEFAULT, user=USER)
+
+            self._set_context_list(current_context)
+            self._set_active_context(current_context)
+            self.state_service.set(current_context)
+
+            try:
+                self.state_service.set_section(current_context, BACKEND, url=url, token=uuid.uuid4())
+                self.state_service.set_section(current_context, INFRASTRUCTURE, kubeconfig=kubeconfig)
+            except Exception as e:
+                handle_specific_exception(e)
+                handle_exception(e)
+
+            self.state_service.write()
+            return True, env_state
+
+        return False, env_state
+
+    def destroy(self, env_state, verbose=False):
+        extra_vars = self._get_vars(env_state.cloud, env_state.build_dir)
+        self.tf_service.cd_dir(env_state.build_dir)
 
         self.tf_service.set_verbose(verbose)
-        directory = self._tf_init(provider, env, local_backend=False, destroying=True)
-        self._delete_resources()
+        directory = self._tf_init(env_state.cloud, env_state.env, local_backend=False, destroying=True)
+        current_context = env_state.cloud if env_state.cloud in [DOCKER, MINIKUBE] \
+            else env_state.cloud + '_' + env_state.env
+        self._delete_resources(current_context)
+        self._unset_context_list(current_context)
+        self._remove_section(current_context)
+        self._deactivate_context()
         self.tf_service.destroy(directory, extra_vars)
         self.tf_service.execute()
-        self._remove_build_files(dir_build)
-
-    def is_created(self):
-        return self.state_service.is_created()
+        self._remove_build_files(env_state.build_dir)
+        self.state_service.write()
+        # check if the infra is destroyed successfully
+        # Refresh environment states after terraform service operations
+        env_state = EnvironmentState.initialize(env_state.cloud, env_state.env)
+        # set env variable appropriately
+        env_state.set_build_env()
+        return env_state
 
     def _remove_build_files(self, dir_build):
         """
@@ -98,10 +196,10 @@ class BackendFacade:
         """
         self.state_service.provider_delete(dir_build)
         if not self.state_service.list_providers():
-            self.state_service.full_delete()
+            self.state_service.full_delete(dir_build)
 
-    def _delete_resources(self):
-        if self.state_service.has_section(BACKEND):
+    def _delete_resources(self, context):
+        if self.state_service.has_section(context, BACKEND):
             requests.delete(f"{self.url}/internal/resources")
 
     def _tf_init(self, provider, env, local_backend, destroying=False):
@@ -123,6 +221,64 @@ class BackendFacade:
         else:
             self.tf_service.init(directory)
         return directory
+
+    def _set_context_list(self, current_context):
+        try:
+            contexts = self.state_service.get(CONTEXTS, 'environments')
+        except KeyError:
+            contexts = ''
+
+        updated_contexts = []
+
+        if isinstance(contexts, list):
+            contexts.append(current_context)
+            updated_contexts = contexts
+        elif isinstance(contexts, str) or not contexts:
+            # There is only one context or no context in available contexts
+            if contexts:
+                # exactly one available context
+                updated_contexts.append(contexts)
+                updated_contexts.append(current_context)
+            else:
+                # no available context
+                updated_contexts.append(current_context)
+
+        self.state_service.set(CONTEXTS, environments=updated_contexts)
+
+    def _unset_context_list(self, current_context):
+        try:
+            contexts = self.state_service.get(CONTEXTS, 'environments')
+        except KeyError:
+            contexts = ''
+
+        updated_contexts = []
+
+        if isinstance(contexts, list):
+            contexts.remove(current_context)
+            updated_contexts = contexts
+
+        # If the available contexts is exactly equal to one or none, then simply update empty list
+        self.state_service.set(CONTEXTS, environments=updated_contexts)
+
+    def _set_active_context(self, current_context):
+        self.state_service.set(ACTIVE, environment=current_context)
+
+    def _remove_section(self, current_context):
+        config = self.state_service.config
+        try:
+            del config[current_context]
+        except KeyError:
+            pass
+        self.state_service.config = config
+
+    def _deactivate_context(self):
+        self.state_service.set(ACTIVE, environment=None)
+        self.state_service.write()
+
+    @staticmethod
+    def cache(builds):
+        with open(BACKEND_CACHE, 'w') as fp:
+            json.dump(builds, fp)
 
     @staticmethod
     def _parse_config(dir_build):

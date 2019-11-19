@@ -40,7 +40,7 @@ jobs:
         # install cli & build kaos
         - export KAOS_HOME=`pwd`
         - cd cli && pip3 install -e . && kaos && cd ../testing/integration
-        - kaos build -c MINIKUBE -fvy
+        - kaos build deploy -c MINIKUBE -fvy
         - ls -la .
         - cat .kaos/config
         - export AMBASSAROR_POD_NAME=`kubectl get pods | awk '{print $1}' | sed -n -e '/^ambassador/p'`

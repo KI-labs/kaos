@@ -44,6 +44,10 @@ The recommended **development** installation of kaos is done automatically withi
 $ git clone https://github.com/KI-labs/kaos.git
 $ pipenv install --dev && pipenv shell
 ```
+If a new dependency is added to the setup, then the existing pipenv can be updated by simply running
+```bash
+$ pipenv update
+```
 
 A successful installation will yield the following when inspecting all requirements within pipenv.
 
