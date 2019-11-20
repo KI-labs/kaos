@@ -6,6 +6,9 @@ import kaos_cli
 KAOS_STATE_DIR = os.path.abspath("./.kaos")
 KAOS_INSTALLATION_DIR = os.path.dirname(kaos_cli.__file__)
 
+#Config spec path
+CONFIG_SPEC = os.path.abspath("./config_spec")
+
 # Project name
 PROJECT = os.environ.get("PROJECT", "kaos")
 CONFIG_PATH = os.path.join(KAOS_STATE_DIR, "config")
@@ -18,6 +21,7 @@ WORKSPACE_CACHE = os.path.join(KAOS_STATE_DIR, ".workspace.cache")
 NOTEBOOK_CACHE = os.path.join(KAOS_STATE_DIR, ".notebook.cache")
 TRAIN_CACHE = os.path.join(KAOS_STATE_DIR, ".train.cache")
 SERVE_CACHE = os.path.join(KAOS_STATE_DIR, ".serve.cache")
+BACKEND_CACHE = os.path.join(KAOS_STATE_DIR, ".backend.cache")
 
 KAOS_HOME = os.getenv("KAOS_HOME", "")
 
@@ -41,6 +45,9 @@ MINIKUBE = "MINIKUBE"
 AWS = "AWS"
 AZ = "AZ"
 GCP = "GCP"
+
+# environments in config
+ENVIRONMENTS = 'environments'
 
 LOCAL_CONFIG_DICT = dict(AWS=AWS_LOCAL_BACKEND_PATH,
                          AZ=AZURE_LOCAL_BACKEND_PATH,
@@ -83,6 +90,11 @@ METADATA_JSON = "metadata.json"
 DEFAULTS = {
     "user": os.environ.get("USER", "kaos")
 }
+USER = os.environ.get("USER", "kaos")
+DEFAULT = 'default'
 BACKEND = 'backend'
 INFRASTRUCTURE = "infrastructure"
 PACHYDERM = 'pachyderm'
+CONTEXTS = 'contexts'
+ACTIVE = 'active'
+REMOTE = 'remote'

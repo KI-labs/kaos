@@ -1,32 +1,40 @@
 import glob
 import os
 import shutil
-from configparser import ConfigParser, ExtendedInterpolation
+from configobj import ConfigObj
 
-from kaos_cli.constants import KAOS_STATE_DIR, DEFAULTS, CONFIG_PATH, KAOS_TF_PATH
+from kaos_cli.constants import KAOS_STATE_DIR, CONFIG_PATH, KAOS_TF_PATH
 
 
 class StateService:
 
     def __init__(self, config=None):
-        self.config = config or ConfigParser(defaults=DEFAULTS, interpolation=ExtendedInterpolation())
-        self.config.read(CONFIG_PATH)
+        self.config = config or ConfigObj(CONFIG_PATH)
 
     def set(self, section, **kwargs):
         self.config[section] = kwargs
 
     def get(self, section, param):
-        return self.config.get(section, param)
+        return self.config[section][param]
 
-    def has_section(self, section):
-        return self.config.has_section(section)
+    def set_section(self, context, section, **kwargs):
+        self.config[context][section] = kwargs
 
-    def remove_section(self, section):
-        self.config.remove_section(section)
+    def get_section(self, context, section, param):
+        return self.config[context][section][param]
+
+    def has_section(self, context, section):
+        return self.config[context][section]
+
+    def remove(self, section):
+        del self.config[section]
+
+    def remove_section(self, context, section):
+        del self.config[context][section]
 
     @staticmethod
-    def is_created():
-        return os.path.exists(KAOS_STATE_DIR)
+    def is_created(dir_build):
+        return os.path.exists(dir_build)
 
     @staticmethod
     def create():
@@ -42,9 +50,9 @@ class StateService:
         shutil.rmtree(dir_build, ignore_errors=True)
 
     @staticmethod
-    def full_delete():
-        shutil.rmtree(KAOS_STATE_DIR, ignore_errors=True)
+    def full_delete(dir_build):
+        shutil.rmtree(dir_build, ignore_errors=True)
 
     def write(self):
-        with open(CONFIG_PATH, 'w') as f:
+        with open(CONFIG_PATH, 'wb') as f:
             self.config.write(f)
