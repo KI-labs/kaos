@@ -35,14 +35,14 @@ The output from `kaos init` indicates that the user is **successfully connected 
 {% endtab %}
 
 {% tab title="Superhero" %}
-kaos is **not** functional until its infrastructure has been deployed via `kaos build`. Refer to [Deploying Infrastructure](deploying-infrastructure/#local) for additional instructions.
+kaos is **not** functional until its infrastructure has been deployed via `kaos build deploy`. Refer to [Deploying Infrastructure](deploying-infrastructure/#local) for additional instructions.
 
 {% hint style="danger" %}
 Note that the ENV `KAOS_HOME` is **required irrespective of cloud provider.**
 {% endhint %}
 
 ```text
-$ kaos build -c DOCKER -vf
+$ kaos build deploy -c DOCKER -vf
 
 Warning - Performing force build of the backend
 Warning - Are you sure about building kaos backend in DOCKER? [y/N]
@@ -56,7 +56,7 @@ Info - Successfully built kaos environment
 ```
 
 {% hint style="success" %}
-The output from `kaos build` is a **successfully running endpoint**. Note that this endpoint can be shared for collaborative development!
+The output from `kaos build deploy` is a **successfully running endpoint**. Note that this endpoint can be shared for collaborative development!
 {% endhint %}
 
 Further info on sharing a running endpoint is detailed [here](../usage/high-level-usage/infrastructure-deployment.md#sharing-running-endpoint).
