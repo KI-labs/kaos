@@ -1,4 +1,5 @@
 import click
+import sys
 
 from kaos_cli.exceptions.handle_exceptions import handle_specific_exception, handle_exception
 from kaos_cli.facades.workspace_facade import WorkspaceFacade
@@ -196,22 +197,21 @@ def kill_workspace(facade: WorkspaceFacade):
     """
     Kill all resources running in a workspace.
     """
-    try:
 
-        name = facade.current()
-
-        # confirm kill
-        click.confirm('{} - Are you sure about killing all {} resources?'.format(
+    name = facade.current()
+    # confirm kill
+    if not click.confirm('{} - Are you sure about killing all {} resources?'.format(
             click.style("Warning", bold=True, fg='yellow'),
             click.style(name, bold=True, fg='red')),
-            abort=True)
-
+            abort=False):
+        click.echo("{} - Workspace {} kill operation aborted. Re-initiate using `{}` if required".format(
+            click.style("Info", bold=True, fg='white'),
+            click.style(name, bold=True, fg='green'),
+            click.style("kaos workspace kill", bold=True, fg='green')))
+        sys.exit(1)
+    else:
         name = facade.delete()
 
         click.echo('{} - Successfully killed all {} resources'.format(
             click.style("Info", bold=True, fg='green'),
             click.style(name, bold=True, fg='green')))
-
-    except Exception as e:
-        handle_specific_exception(e)
-        handle_exception(e)
