@@ -50,7 +50,7 @@ class BackendFacade:
         return self.state_service.get_section(self.active_context, INFRASTRUCTURE, 'kubeconfig')
 
     def init(self, url, token):
-        if not self.state_service.is_created():
+        if not self.state_service.is_created(KAOS_STATE_DIR):
             self.state_service.create()
         self.state_service.set(BACKEND, url=url, token=token)
         self.state_service.set_section(REMOTE, BACKEND, url=url, token=token)
