@@ -56,9 +56,8 @@ class BackendFacade:
 
         try:
             self.state_service.set_section(REMOTE, BACKEND, url=url, token=token)
-        except Exception as e:
-            handle_specific_exception(e)
-            handle_exception(e)
+        except KeyError:
+            return None
 
         self.state_service.write()
 
