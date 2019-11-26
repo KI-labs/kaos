@@ -53,7 +53,12 @@ class BackendFacade:
         if not self.state_service.is_created(KAOS_STATE_DIR):
             self.state_service.create()
         self.state_service.set(BACKEND, url=url, token=token)
-        self.state_service.set_section(REMOTE, BACKEND, url=url, token=token)
+
+        try:
+            self.state_service.set_section(REMOTE, BACKEND, url=url, token=token)
+        except Exception as e:
+            handle_specific_exception(e)
+            handle_exception(e)
 
         self.state_service.write()
 
