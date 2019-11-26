@@ -10,6 +10,7 @@ def test_validate_input():
     with pytest.raises(MissingArgumentError):
         validate_inputs([None, None], ["a, b"])
 
+
 @mock.patch('socket.socket')
 def test_validate_unused_port_returns_true_when_port_is_unused(socket_mock):
     # Arrange
@@ -25,6 +26,7 @@ def test_validate_unused_port_returns_true_when_port_is_unused(socket_mock):
     # Assert
     assert is_available is True
     mocked_socket_obj.bind.assert_called_once_with((host_arg, port_arg))
+
 
 @mock.patch('socket.socket')
 def test_validate_unused_port_returns_false_when_port_is_already_in_use(socket_mock):

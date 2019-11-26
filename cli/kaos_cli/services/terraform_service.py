@@ -13,8 +13,9 @@ class Command:
         self.history.append(cmd)
 
     def execute(self):
-        self.run_cmd(";".join(self.history))
+        exitcode, out, err = self.run_cmd(";".join(self.history))
         self.clear()
+        return exitcode, out, err
 
     def clear(self):
         self.history = []
