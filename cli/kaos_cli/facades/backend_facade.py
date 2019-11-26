@@ -53,15 +53,16 @@ class BackendFacade:
         if not self.state_service.is_created(KAOS_STATE_DIR):
             self.state_service.create()
 
+        self.state_service.set(DEFAULT, user=USER)
         self.state_service.set(BACKEND, url=url, token=token)
-
-        print("Before setting section")
+        self._set_context_list(REMOTE)
+        self._set_active_context(REMOTE)
+        self.state_service.set(REMOTE)
         try:
             self.state_service.set_section(REMOTE, BACKEND, url=url, token=token)
         except Exception as e:
                 handle_specific_exception(e)
                 handle_exception(e)
-        print("Continue to write config")
         self.state_service.write()
 
     def is_created(self):
