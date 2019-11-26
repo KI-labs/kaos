@@ -224,6 +224,89 @@ class TestTerraformService(TestCase):
         # Assert
         self.assertEqual(tf_service.cmd.history, command_history)
 
+    def test_tf_service_apply(self):
+
+        # Arrange
+        command = Command()
+        tf_service = TerraformService(cmd=command)
+
+        extra_vars = 'prod'
+        directory = os.path.join(os.getcwd(), KAOS_STATE_DIR)
+        command_history = [f"terraform apply --var-file={directory}/terraform.tfvars {extra_vars} "
+                           f"--auto-approve {directory}"]
+
+        # Act
+        tf_service.apply(directory, extra_vars)
+
+        # Assert
+        self.assertEqual(tf_service.cmd.history, command_history)
+
+    def test_tf_service_destroy(self):
+
+        # Arrange
+        command = Command()
+        tf_service = TerraformService(cmd=command)
+
+        extra_vars = 'prod'
+        directory = os.path.join(os.getcwd(), KAOS_STATE_DIR)
+        command_history = [f"terraform destroy --var-file={directory}/terraform.tfvars {extra_vars} --auto-approve "
+                           f"{directory}"]
+
+        # Act
+        tf_service.destroy(directory, extra_vars)
+
+        # Assert
+        self.assertEqual(tf_service.cmd.history, command_history)
+
+    def test_tf_service_destroy(self):
+
+        # Arrange
+        command = Command()
+        tf_service = TerraformService(cmd=command)
+
+        extra_vars = 'prod'
+        directory = os.path.join(os.getcwd(), KAOS_STATE_DIR)
+        command_history = [f"terraform destroy --var-file={directory}/terraform.tfvars {extra_vars} --auto-approve "
+                           f"{directory}"]
+
+        # Act
+        tf_service.destroy(directory, extra_vars)
+
+        # Assert
+        self.assertEqual(tf_service.cmd.history, command_history)
+
+    @parameterized.expand(command_execute_data)
+    def test_tf_service_execute(self, command_execute_data):
+
+        # Arrange
+        command = Command()
+
+        # Act
+        for cmd in command_execute_data:
+            command.append(cmd)
+            tf_service = TerraformService(cmd=command)
+            exitcode, out, err = tf_service.execute()
+
+            # Assert
+            self.assertEqual(exitcode, 0)
+
+    def test_tf_service_cd_dir(self):
+
+        # Arrange
+        command = Command()
+        tf_service = TerraformService(cmd=command)
+
+        directory = os.path.join(os.getcwd(), KAOS_STATE_DIR)
+        command_history = [f"cd {directory}"]
+
+        # Act
+        tf_service.cd_dir(directory)
+
+        # Assert
+        self.assertEqual(tf_service.cmd.history, command_history)
+
+
+
 
 
 

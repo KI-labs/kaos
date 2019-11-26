@@ -54,7 +54,8 @@ class TerraformService:
                         f"{extra_vars} --auto-approve {directory}")
 
     def execute(self):
-        self.cmd.execute()
+        exitcode, out, err = self.cmd.execute()
+        return exitcode, out, err
 
     def cd_dir(self, build_dir):
         self.cmd.append(f'cd {build_dir}')
