@@ -114,11 +114,13 @@ def deploy(backend: BackendFacade, cloud: str, env: str, force: bool, verbose: b
 
         if is_built_successfully:
             if verbose:
+                print("after build 1")
                 click.echo("\n{} - Endpoint successfully set to {}".format(
                     click.style("Info", bold=True, fg='green'),
                     click.style(backend.url, bold=True, fg='green')))
 
             if is_cloud_provider(env_state.cloud):
+                print("after build 2")
                 kubeconfig = os.path.abspath(backend.kubeconfig)
                 click.echo("\n{} - To interact with the Kubernetes cluster:\n {}"
                            .format(click.style("Info", bold=True, fg='green'),
@@ -271,8 +273,10 @@ def destroy(backend: BackendFacade, cloud, env, verbose, yes):
     # set env variable appropriately
     env_state.set_build_env()
 
+    print("1")
+
     # Ensure that appropriate warnings are displayed
-    env_state.validate_if_tfstate_exits()
+    # env_state.validate_if_tfstate_exits()
 
     if not yes:
         # confirm creation of backend
@@ -293,10 +297,12 @@ def destroy(backend: BackendFacade, cloud, env, verbose, yes):
                 abort=True)
     try:
 
+        print("2")
         env_state = backend.destroy(env_state, verbose=verbose)
 
         if not env_state.if_tfstate_exists:
             if env_state.env:
+                print("here 1")
                 click.echo(
                     "{} - Successfully destroyed {} [{}] environment".format(click.style("Info", bold=True, fg='green'),
                                                                              click.style('kaos', bold=True),

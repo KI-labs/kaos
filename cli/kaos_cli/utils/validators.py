@@ -36,6 +36,8 @@ class EnvironmentState:
         env_state.if_tfstate_exists = os.path.exists(tf_state_path)
         env_state.build_dir = build_dir
         env_state.tf_state_path = tf_state_path
+        print("env_1", env_state.tf_state_path)
+        print('env_2', env_state.if_tfstate_exists)
         return env_state
 
     def validate_if_tfstate_exits(self) -> "EnvironmentState":

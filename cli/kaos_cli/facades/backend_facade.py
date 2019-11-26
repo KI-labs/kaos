@@ -136,50 +136,57 @@ class BackendFacade:
 
         self.tf_service.set_verbose(verbose)
         directory = self._tf_init(provider, env, local_backend, destroying=False)
+        print("directory", directory)
         self.tf_service.plan(directory, extra_vars)
         self.tf_service.apply(directory, extra_vars)
-        self.tf_service.execute()
+        output = self.tf_service.execute()
+        print("output", output)
 
         # check if the deployed successfully
         # Refresh environment states after terraform service operations
-        env_state = EnvironmentState.initialize(provider, env)
+        # env_state = EnvironmentState.initialize(provider, env)
+        # print("env_state.if_tfstate_exists", env_state.if_tfstate_exists)
 
-        if env_state.if_tfstate_exists:
-            url, kubeconfig = self._parse_config(env_state.build_dir)
+        # Print need to change below
+        # if env_state.if_tfstate_exists:
+        url, kubeconfig = self._parse_config(env_state.build_dir)
 
-            current_context = provider if provider in [DOCKER, MINIKUBE] else f"{provider}_{env}"
+        current_context = provider if provider in [DOCKER, MINIKUBE] else f"{provider}_{env}"
 
-            self.state_service.set(DEFAULT, user=USER)
+        self.state_service.set(DEFAULT, user=USER)
 
-            self._set_context_list(current_context)
-            self._set_active_context(current_context)
-            self.state_service.set(current_context)
+        self._set_context_list(current_context)
+        self._set_active_context(current_context)
+        self.state_service.set(current_context)
+        self.state_service.set_section(current_context, BACKEND, url=url, token=uuid.uuid4())
+        self.state_service.set_section(current_context, INFRASTRUCTURE, kubeconfig=kubeconfig)
 
-            try:
-                self.state_service.set_section(current_context, BACKEND, url=url, token=uuid.uuid4())
-                self.state_service.set_section(current_context, INFRASTRUCTURE, kubeconfig=kubeconfig)
-            except Exception as e:
-                handle_specific_exception(e)
-                handle_exception(e)
+        self.state_service.write()
+        return True, env_state
 
-            self.state_service.write()
-            return True, env_state
-
-        return False, env_state
+        # print change this later
+        # return False, env_state
 
     def destroy(self, env_state, verbose=False):
+        print("21")
         extra_vars = self._get_vars(env_state.cloud, env_state.build_dir)
         self.tf_service.cd_dir(env_state.build_dir)
-
+        print("22")
         self.tf_service.set_verbose(verbose)
         directory = self._tf_init(env_state.cloud, env_state.env, local_backend=False, destroying=True)
         current_context = env_state.cloud if env_state.cloud in [DOCKER, MINIKUBE] \
             else env_state.cloud + '_' + env_state.env
+        print("23")
         self._delete_resources(current_context)
+        print("24")
         self._unset_context_list(current_context)
+        print("25")
         self._remove_section(current_context)
+        print("26")
         self._deactivate_context()
+        print("27")
         self.tf_service.destroy(directory, extra_vars)
+        print("28")
         self.tf_service.execute()
         self._remove_build_files(env_state.build_dir)
         self.state_service.write()
@@ -200,7 +207,8 @@ class BackendFacade:
 
     def _delete_resources(self, context):
         if self.state_service.has_section(context, BACKEND):
-            requests.delete(f"{self.url}/internal/resources")
+            print("Uncomment later")
+            # requests.delete(f"{self.url}/internal/resources")
 
     def _tf_init(self, provider, env, local_backend, destroying=False):
         directory = PROVIDER_DICT.get(provider)
