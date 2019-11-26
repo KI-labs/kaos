@@ -54,7 +54,6 @@ class BackendFacade:
             self.state_service.create()
 
         self.state_service.set(DEFAULT, user=USER)
-        self.state_service.set(BACKEND, url=url, token=token)
         self._set_context_list(REMOTE)
         self._set_active_context(REMOTE)
         self.state_service.set(REMOTE)
