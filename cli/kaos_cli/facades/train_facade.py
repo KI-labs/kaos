@@ -31,7 +31,7 @@ class TrainFacade:
 
     @property
     def token(self):
-        return self.state_service.get(BACKEND, 'token')
+        return self.state_service.get_section(self.active_context, BACKEND, 'token')
 
     def list(self):
         base_url = self.url
