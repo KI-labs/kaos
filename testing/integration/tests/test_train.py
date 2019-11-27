@@ -3,7 +3,7 @@ import os
 import subprocess
 import time
 import uuid
-from configparser import ConfigParser, ExtendedInterpolation
+from configobj import ConfigObj
 
 import checksumdir
 import requests
@@ -166,9 +166,8 @@ def train_and_assert(workspace_name, expected_pretrained_jobs):
 
 def test_train(params):
     # Get the token for authorizing with the serve endpoint
-    config = ConfigParser(interpolation=ExtendedInterpolation())
-    config.read(CONFIG_PATH)
-    token = config.get("backend", "token")
+    config = ConfigObj(CONFIG_PATH)
+    token = config["MINIKUBE"]["backend"]["token"]
 
     subprocess.Popen(["kaos workspace list"],
                      shell=True, stdout=subprocess.PIPE).stdout.read()
