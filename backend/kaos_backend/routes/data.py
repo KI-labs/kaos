@@ -2,7 +2,7 @@ from flask import Blueprint, request
 
 from kaos_backend.controllers.data import DataController
 from kaos_backend.util.flask import jsonify
-from kaos_backend.util.validators import validate_request
+from kaos_backend.util.validators import auth_required
 
 
 def build_data_blueprint(controller: DataController):
@@ -10,7 +10,7 @@ def build_data_blueprint(controller: DataController):
 
     @blueprint.route("/data/<workspace>/features", methods=["POST"])
     @jsonify
-    @validate_request
+    @auth_required
     def feature_submit(workspace):
         user = request.args.get('user', 'default').replace('.', '')
         cpu = request.args.get('cpu', None)
@@ -20,7 +20,7 @@ def build_data_blueprint(controller: DataController):
 
     @blueprint.route("/data/<workspace>/manifest", methods=["POST"])
     @jsonify
-    @validate_request
+    @auth_required
     def manifest_submit(workspace):
         user = request.args.get('user', 'default').replace('.', '')
         cpu = request.args.get('cpu', None)
@@ -30,7 +30,7 @@ def build_data_blueprint(controller: DataController):
 
     @blueprint.route("/data/<workspace>/params", methods=["POST"])
     @jsonify
-    @validate_request
+    @auth_required
     def param_submit(workspace):
         user = request.args.get('user', 'default').replace('.', '')
         parallelism = int(request.args.get('parallelism', 1))
@@ -42,7 +42,7 @@ def build_data_blueprint(controller: DataController):
 
     @blueprint.route("/data/<workspace>/notebook", methods=["POST"])
     @jsonify
-    @validate_request
+    @auth_required
     def notebook_submit(workspace):
         user = request.args.get('user', 'default').replace('.', '')
         return controller.put_notebook_data(workspace, user, request.data)

@@ -49,11 +49,11 @@ class BackendFacade:
     def kubeconfig(self):
         return self.state_service.get_section(self.active_context, INFRASTRUCTURE, 'kubeconfig')
 
-    def init(self, url, token):
+    def init(self, url, auth_token):
         if not self.state_service.is_created():
             self.state_service.create()
-        self.state_service.set(BACKEND, url=url, token=token)
-        self.state_service.set_section(REMOTE, BACKEND, url=url, token=token)
+        self.state_service.set(BACKEND, url=url, token=auth_token)
+        self.state_service.set_section(REMOTE, BACKEND, url=url, token=auth_token)
 
         self.state_service.write()
 
@@ -130,8 +130,8 @@ class BackendFacade:
         env_state = EnvironmentState.initialize(provider, env)
         if not env_state.if_build_dir_exists:
             build_dir(env_state.build_dir)
-        token = uuid.uuid4()
-        extra_vars = self._get_vars(provider, env_state.build_dir, token)
+        auth_token = uuid.uuid4()
+        extra_vars = self._get_vars(provider, env_state.build_dir, auth_token)
         self.tf_service.cd_dir(env_state.build_dir)
 
         self.tf_service.set_verbose(verbose)
@@ -156,7 +156,7 @@ class BackendFacade:
             self.state_service.set(current_context)
 
             try:
-                self.state_service.set_section(current_context, BACKEND, url=url, token=token)
+                self.state_service.set_section(current_context, BACKEND, url=url, token=auth_token)
                 self.state_service.set_section(current_context, INFRASTRUCTURE, kubeconfig=kubeconfig)
             except Exception as e:
                 handle_specific_exception(e)
@@ -305,8 +305,8 @@ class BackendFacade:
         return url, kubeconfig
 
     @staticmethod
-    def _get_vars(provider, dir_build, token=None):
-        extra_vars = f"--var config_dir={dir_build} --var token={token}"
+    def _get_vars(provider, dir_build, auth_token=None):
+        extra_vars = f"--var config_dir={dir_build} --var token={auth_token}"
 
         if provider == AWS:
             KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")

@@ -39,7 +39,7 @@ class NotebookFacade:
         name = self.workspace
 
         # GET /notebook/<name>
-        r = requests.get(f"{base_url}/notebook/{name}", headers={"Token": self.token})
+        r = requests.get(f"{base_url}/notebook/{name}", headers={"Authorization": f"Bearer {self.token}"})
         if r.status_code >= 300:
             raise NoNotebookError()
 
@@ -54,7 +54,7 @@ class NotebookFacade:
         kwargs['user'] = user
 
         r = requests.post(f"{base_url}/data/{name}/notebook", data=open(c, 'rb').read(), params=kwargs,
-                          headers={"Token": self.token})
+                          headers={"Authorization": f"Bearer {self.token}"})
 
         if r.status_code >= 300:
             raise RequestError(f"Error while uploading data bundle: {r.text}")
@@ -68,7 +68,7 @@ class NotebookFacade:
         kwargs['user'] = user
 
         r = requests.post(f"{base_url}/notebook/{name}", data=open(c, 'rb').read(), params=kwargs,
-                          headers={"Token": self.token})
+                          headers={"Authorization": f"Bearer {self.token}"})
 
         if r.status_code >= 300:
             raise RequestError(f"Error while uploading source bundle: {r.text}")
@@ -80,7 +80,8 @@ class NotebookFacade:
         user = self.user
 
         kwargs['user'] = user
-        r = requests.post(f"{base_url}/notebook/{name}", params=kwargs, headers={"Token": self.token})
+        r = requests.post(f"{base_url}/notebook/{name}", params=kwargs,
+                          headers={"Authorization": f"Bearer {self.token}"})
 
         if r.status_code >= 300:
             raise RequestError(f"Error while deploying notebook: {r.text}")
@@ -90,7 +91,8 @@ class NotebookFacade:
         name = self.workspace
 
         # GET /notebook/<name>/build/<job_id>/logs
-        r = requests.get(f"{base_url}/notebook/{name}/build/{job_id}/logs", headers={"Token": self.token})
+        r = requests.get(f"{base_url}/notebook/{name}/build/{job_id}/logs",
+                         headers={"Authorization": f"Bearer {self.token}"})
         if r.status_code < 300:
             return r.json()
         elif 400 <= r.status_code < 500:
@@ -112,7 +114,7 @@ class NotebookFacade:
         base_url = self.url
 
         # DELETE /notebook/<name>/<notebook>
-        r = requests.delete(f"{base_url}/notebook/{name}", headers={"Token": self.token})
+        r = requests.delete(f"{base_url}/notebook/{name}", headers={"Authorization": f"Bearer {self.token}"})
 
         if r.status_code >= 300:
             raise RequestError(r.text)

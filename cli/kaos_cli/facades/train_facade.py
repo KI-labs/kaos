@@ -38,7 +38,7 @@ class TrainFacade:
         name = self.workspace
 
         # GET /train/<name>
-        r = requests.get(f"{base_url}/train/{name}", headers={"Token": self.token})
+        r = requests.get(f"{base_url}/train/{name}", headers={"Authorization": f"Bearer {self.token}"})
         if r.status_code < 300:
             return r.json()
         elif 400 <= r.status_code < 500:
@@ -53,7 +53,7 @@ class TrainFacade:
 
         # GET /train/<name>/<job_id>
         r = requests.get(f"{base_url}/train/{name}/{job_id}", params={'sort_by': sort_by, 'page_id': page_id},
-                         headers={"Token": self.token})
+                         headers={"Authorization": f"Bearer {self.token}"})
 
         if r.status_code < 300:
             return r.json()
@@ -72,7 +72,7 @@ class TrainFacade:
         name = self.workspace
 
         # get status of training queue
-        r = requests.get(f"{base_url}/train/{name}/inspect", headers={"Token": self.token})
+        r = requests.get(f"{base_url}/train/{name}/inspect", headers={"Authorization": f"Bearer {self.token}"})
         if r.status_code == 200:
             data = r.json()
         else:
@@ -91,7 +91,7 @@ class TrainFacade:
                              "include_model": include_model,
                              "model_id": model_id
                          },
-                         headers={"Token": self.token})
+                         headers={"Authorization": f"Bearer {self.token}"})
 
         if r.status_code < 300:
             return name, r.content
@@ -109,7 +109,8 @@ class TrainFacade:
         prov_dir = build_dir(out_dir, name, 'provenance')
 
         # GET /train/<name>/<model_id>/provenance
-        r = requests.get(f"{base_url}/train/{name}/{model_id}/provenance", headers={"Token": self.token})
+        r = requests.get(f"{base_url}/train/{name}/{model_id}/provenance",
+                         headers={"Authorization": f"Bearer {self.token}"})
 
         if r.status_code < 300:
             out_fid = os.path.join(prov_dir, f"model-{model_id}")
@@ -125,7 +126,7 @@ class TrainFacade:
         name = self.workspace
 
         # GET /train/<name>/<job_id>/logs
-        r = requests.get(f"{base_url}/train/{name}/{job_id}/logs", headers={"Token": self.token})
+        r = requests.get(f"{base_url}/train/{name}/{job_id}/logs", headers={"Authorization": f"Bearer {self.token}"})
 
         if r.status_code < 300:
             return r.json()
@@ -140,7 +141,7 @@ class TrainFacade:
         workspace = self.workspace
 
         # GET /train/<workspace>/<job_id>
-        r = requests.delete(f"{base_url}/train/{workspace}/{job_id}", headers={"Token": self.token})
+        r = requests.delete(f"{base_url}/train/{workspace}/{job_id}", headers={"Authorization": f"Bearer {self.token}"})
 
         if r.status_code < 300:
             return r.json()
@@ -164,7 +165,7 @@ class TrainFacade:
         name = self.workspace
 
         # GET /train/<name>/<job_id>/logs
-        r = requests.get(f"{base_url}/build/{name}/{job_id}/logs", headers={"Token": self.token})
+        r = requests.get(f"{base_url}/build/{name}/{job_id}/logs", headers={"Authorization": f"Bearer {self.token}"})
 
         if r.status_code >= 300:
             err = Error.from_json(r.json())

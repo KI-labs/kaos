@@ -3,11 +3,11 @@ import os
 import subprocess
 import time
 import uuid
-from configobj import ConfigObj
 
 import checksumdir
 import requests
 from PyPDF2 import PdfFileReader
+from configobj import ConfigObj
 from kaos_cli.constants import CONFIG_PATH
 from utils import hash_file, get_rand_str, parse_train_info, parse_train_list, \
     run_cmd, parse_serve_list, serve_and_assert
@@ -212,7 +212,7 @@ def test_train(params):
     endpoint_name = serving_table[0][2]
     print(f"endpoing name: {endpoint_name}")
     r = requests.post(f"http://localhost:{params['k8s_port']}/{endpoint_name}/invocations",
-                      headers={"Content-Type": "application/json", "Token": token},
+                      headers={"Content-Type": "application/json", "Authorization": f"Bearer {token}"},
                       data=data)
 
     assert r.status_code == 200

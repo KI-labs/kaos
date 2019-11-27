@@ -164,16 +164,19 @@ def validate_resources(function):
     return wrapper
 
 
-def validate_request(function):
+def auth_required(function):
     """
-    Validate the token in the header
+    Authenticate the token in the authorization header
     """
 
     def wrapper(*args, **kwargs):
         token = os.getenv("TOKEN")
-        if 'Token' not in request.headers:
-            raise AuthorizationError("Token not present in the request")
-        req_token = request.headers['Token']
+        if 'Authorization' not in request.headers:
+            raise AuthorizationError("Authorization header not present in the request")
+
+        auth_header = request.headers['Authorization']
+        req_token = auth_header.split("Bearer ")[-1]
+
         if req_token != token:
             raise AuthorizationError("Unauthorized Token")
         return function(*args, **kwargs)
