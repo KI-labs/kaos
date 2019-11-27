@@ -90,7 +90,8 @@ class TrainFacade:
                              "include_data": include_data,
                              "include_model": include_model,
                              "model_id": model_id
-                         })
+                         },
+                         headers={"Token": self.token})
 
         if r.status_code < 300:
             return name, r.content
