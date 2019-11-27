@@ -4,7 +4,7 @@
 
 This involves deploying the underlying infrastructure within the selected compute environment. A running kaos backend \(via an authenticated endpoint\) indicates successful deployment.
 
-The conceptual overview shown below indicates how `kaos build` deploys the entire kaos backend.
+The conceptual overview shown below indicates how `kaos build deploy` deploys the entire kaos backend.
 
 ![](../../.gitbook/assets/kaos_build-1.png)
 
@@ -16,7 +16,7 @@ kaos is **only** available for Data Scientists with a running endpoint!
 
 The kaos deployment portion of the command line interface \(CLI\) consists of the following **two** commands.
 
-* `kaos build`
+* `kaos build deploy`
   * Configure, create and deploy the **kaos** infrastructure backend
 
 {% hint style="info" %}
@@ -34,12 +34,12 @@ The deployed **kaos** infrastructure backend is readily available for sharing wi
 
 ### kaos build
 
-Successfully running `kaos build` will automatically display the current running endpoint on-screen.
+Successfully running `kaos build deploy` will automatically display the current running endpoint on-screen.
 
 In this example, the endpoint is `http://XYZ.amazonaws.com:80/api`.
 
 ```bash
-$ kaos build -c AWS -e dev -vfy
+$ kaos build deploy -c AWS -e dev -vfy
 
 ...
 
@@ -51,7 +51,7 @@ Successfully built kaos [dev] environment
 
 ### kaos config
 
-A kaos configuration file is always present in the current directory under `./kaos/config`. The following file is automatically created after running `kaos build`.
+A kaos configuration file is always present in the current directory under `./kaos/config`. The following file is automatically created after running `kaos build deploy`.
 
 {% tabs %}
 {% tab title="./kaos/config" %}

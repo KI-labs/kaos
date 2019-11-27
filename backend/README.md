@@ -1,6 +1,6 @@
 # kaos
 
-The kaos core is contained within the backend, allowing users to **leverage flexible language agnostic data pipelines.** 
+The kaos core is contained within a cloud-agnostic backend, allowing users to **leverage flexible language agnostic data pipelines.** 
 
 ### Build
 
@@ -9,17 +9,41 @@ The most effective way to build the backend for development is with kaos [CLI](.
 1. Deploy a local cluster ([Docker Desktop](../infrastructure/docker/README.md))
 
 ```bash
-kaos build -c DOCKER -vf
+kaos build deploy -c DOCKER -vf
 ```
 
-2. Make desired changes to the backend (i.e. development)
-
-3. Re-deploy the local cluster **but** only the changes will be "built" (i.e. the new backend image)
+2. Alternatively, backend infrastructure on a cloud platform can also be deployed (AWS shown below)
 ```bash
-kaos build -c DOCKER -vf
+kaos build deploy -c AWS -vf
 ```
 
-4. Kill the existing backend pod in kubernetes to force the pull policy on a new pod
+3. A list of active backend builds already deployed on kaos can be obtained using
+```bash
+kaos build list
+```
+
+4. The current or active backend build can be determined using 
+```bash
+kaos build active
+```
+
+5. Among the available backends, one can select and set a desired backend environment using
+```bash
+kaos build set -c context_name
+```
+*OR*
+```bash
+kaos build set -i index_number
+```
+
+6. Make desired changes to the backend (i.e. development)
+
+7. Re-deploy the local cluster **but** only the changes will be "built" (i.e. the new backend image)
+```bash
+kaos build deploy -c DOCKER -vf
+```
+
+8. Kill the existing backend pod in kubernetes to force the pull policy on a new pod
 ```bash
 kubectl get pod -l app=kaos-backend -o jsonpath="{.items[0].metadata.name}" | xargs -I {} kubectl delete pod {}
 ```

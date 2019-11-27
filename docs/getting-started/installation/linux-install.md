@@ -50,7 +50,7 @@ The kaos command-line utility is used for all interactions. It is rather lightwe
   apt-get install graphviz
   ```
 
-* [**docker**](https://docs.docker.com/install/linux/docker-ce/ubuntu/) for dynamic linking of docker registry \(function of `kaos build`\)
+* [**docker**](https://docs.docker.com/install/linux/docker-ce/ubuntu/) for dynamic linking of docker registry \(function of `kaos build deploy`\)
 
   ```bash
   apt-get install docker

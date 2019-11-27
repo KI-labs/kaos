@@ -57,6 +57,7 @@ Check out our [Official Documentation](https://kaos.ki-labs.com)
 * Visit the [Public Roadmap](https://kaos.ki-labs.com/miscellaneous/roadmap) to see what's coming next
 * Bugs, issues and contributions should be created on [GitHub](https://github.com/KI-labs/kaos/issues/new/choose)
 * Check out the [list](CONTRIBUTORS.md) of people who already contributed
+* Help improve kaos by following our [Contribution Guide](.github/CONTRIBUTING.md)
 
 ##
 ### Contributors

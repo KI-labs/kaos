@@ -1,6 +1,6 @@
 # Workflows
 
-kaos is not functional as an ML platform **until it has been deployed in a user-specified cloud environment** \(i.e. via `kaos build`\). Note that `kaos build` is distinct from the _typical_ ML workflow in kaos since it should be done infrequently and with greater knowledge of underlying infrastructure.
+kaos is not functional as an ML platform **until it has been deployed in a user-specified cloud environment** \(i.e. via `kaos build deploy`\). Note that `kaos build deploy` is distinct from the _typical_ ML workflow in kaos since it should be done infrequently and with greater knowledge of underlying infrastructure.
 
 ## kaos Personas
 
@@ -8,14 +8,14 @@ The separation is purposely designed to split the intended user flows - **build*
 
 {% tabs %}
 {% tab title="System Administrator" %}
-**Deploys** kaos infrastructure and generates a running endpoint via `kaos build`
+**Deploys** kaos infrastructure and generates a running endpoint via `kaos build deploy`
 
 * Refer to [Build](infrastructure-deployment.md) for _high level concepts_ related to kaos deployment
 * Refer to [Deploying Infrastructure](../../getting-started/deploying-infrastructure/) for _low level instructions_ on deploying kaos infrastructure
 {% endtab %}
 
 {% tab title="Superhero" %}
-**Deploys** and **interacts** with kaos via `kaos build`
+**Deploys** and **interacts** with kaos via `kaos build deploy`
 
 * Refer to [Build](infrastructure-deployment.md) and [Interact](ml-deployment/) for _high level concepts_
 * Refer to [Deploying Infrastructure](../../getting-started/deploying-infrastructure/) and [Quick Start](../../getting-started/quick-start.md) for _low level instructions_
