@@ -1,15 +1,11 @@
 import os
-import pytest
 from parameterized import parameterized
-import logging
-import subprocess
 
-from unittest import TestCase, mock
+from unittest import TestCase
 
 from kaos_cli.services.terraform_service import TerraformService
-from kaos_cli.services.tests import create_terraform_service
 from kaos_cli.services.terraform_service import Command
-from kaos_cli.utils.helpers import verbose_run, run_cmd
+from kaos_cli.utils.helpers import verbose_run
 from kaos_cli.constants import KAOS_STATE_DIR
 
 
