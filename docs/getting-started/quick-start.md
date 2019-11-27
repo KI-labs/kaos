@@ -297,19 +297,19 @@ Given the success in building the backend infrastructure for kaos and running th
 >
 > How to **attach data** to a hosted notebook?
 
-### [**Incremental Model Training**](../advanced-workflows/examples/bringing-your-own-model.md)
+### [**Incremental Model Training**](../advanced-workflows/examples/incremental-model-training.md)
 
 > How to work with new and/or additional **data**?
 >
 > How to improve my training **code**?
 
-### [Hyperparameter Optimization](../advanced-workflows/examples/examples.md)
+### [Hyperparameter Optimization](../advanced-workflows/examples/hyperparameter-optimization.md)
 
 > How to perform a **hyperopt** job?
 >
 > How to select the **best** hyperopt job?
 
-### [Debugging](../advanced-workflows/examples/property-value-estimation.md)
+### [Debugging](../advanced-workflows/examples/debugging.md)
 
 > How to retrieve training **logs**?
 >
