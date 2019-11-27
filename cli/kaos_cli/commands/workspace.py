@@ -1,9 +1,10 @@
 import click
+import sys
 
 from kaos_cli.exceptions.handle_exceptions import handle_specific_exception, handle_exception
 from kaos_cli.facades.workspace_facade import WorkspaceFacade
 from kaos_cli.utils.custom_classes import NotRequiredIf, CustomHelpOrder
-from kaos_cli.utils.decorators import init_check, workspace_check, health_check, pass_obj
+from kaos_cli.utils.decorators import init_check, workspace_check, health_check, pass_obj, context_check
 from kaos_cli.utils.rendering import render_table
 from kaos_cli.utils.validators import validate_inputs
 
@@ -25,6 +26,7 @@ def workspace():
 # ==============
 @workspace.command(name='list',
                    short_help='List all available workspaces')
+@context_check
 @health_check
 @pass_obj(WorkspaceFacade)
 def list_workspaces(facade: WorkspaceFacade):
@@ -32,7 +34,6 @@ def list_workspaces(facade: WorkspaceFacade):
     List all available workspaces.
     """
     try:
-
         workspaces = facade.list()
         if len(workspaces) > 0:
 
@@ -59,6 +60,7 @@ def list_workspaces(facade: WorkspaceFacade):
               not_required_if='ind')
 @click.option('-i', '--ind', type=int, help='workspace index', cls=NotRequiredIf,
               not_required_if='name')
+@context_check
 @health_check
 @pass_obj(WorkspaceFacade)
 def set_workspace(facade: WorkspaceFacade, name, ind):
@@ -107,6 +109,7 @@ def set_workspace(facade: WorkspaceFacade, name, ind):
                    short_help='Create a new workspace')
 @click.option('-n', '--name', type=str,
               help='new workspace name')
+@context_check
 @health_check
 @pass_obj(WorkspaceFacade)
 def create_workspace(facade: WorkspaceFacade, name):
@@ -130,6 +133,7 @@ def create_workspace(facade: WorkspaceFacade, name):
 # =============
 @workspace.command(name='current',
                    short_help='Return name of {} workspace'.format(click.style('current', bold=True)))
+@context_check
 @health_check
 @workspace_check
 @pass_obj(WorkspaceFacade)
@@ -160,6 +164,7 @@ def print_list(name, entries):
 # ==============
 @workspace.command(name='info',
                    short_help='Identify available resources in {} workspace'.format(click.style('current', bold=True)))
+@context_check
 @health_check
 @workspace_check
 @pass_obj(WorkspaceFacade)
@@ -184,6 +189,7 @@ def workspace_info(facade: WorkspaceFacade):
 @workspace.command(name='kill',
                    short_help='{}'.format(
                        click.style('Remove all available resources in current workspace', bold=True, fg='red')))
+@context_check
 @health_check
 @workspace_check
 @pass_obj(WorkspaceFacade)
@@ -191,22 +197,21 @@ def kill_workspace(facade: WorkspaceFacade):
     """
     Kill all resources running in a workspace.
     """
-    try:
 
-        name = facade.current()
-
-        # confirm kill
-        click.confirm('{} - Are you sure about killing all {} resources?'.format(
+    name = facade.current()
+    # confirm kill
+    if not click.confirm('{} - Are you sure about killing all {} resources?'.format(
             click.style("Warning", bold=True, fg='yellow'),
             click.style(name, bold=True, fg='red')),
-            abort=True)
-
+            abort=False):
+        click.echo("{} - Workspace {} kill operation aborted. Re-initiate using `{}` if required".format(
+            click.style("Info", bold=True, fg='white'),
+            click.style(name, bold=True, fg='green'),
+            click.style("kaos workspace kill", bold=True, fg='green')))
+        sys.exit(1)
+    else:
         name = facade.delete()
 
         click.echo('{} - Successfully killed all {} resources'.format(
             click.style("Info", bold=True, fg='green'),
             click.style(name, bold=True, fg='green')))
-
-    except Exception as e:
-        handle_specific_exception(e)
-        handle_exception(e)

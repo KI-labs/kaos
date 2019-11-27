@@ -35,9 +35,9 @@
 * [Examples](advanced-workflows/examples/README.md)
   * [Killing a training job](advanced-workflows/examples/killing-a-training-job.md)
   * [Deploying a Notebook](advanced-workflows/examples/deploying-a-notebook.md)
-  * [Incremental Model Training](advanced-workflows/examples/bringing-your-own-model.md)
-  * [Hyperparameter Optimization](advanced-workflows/examples/examples.md)
-  * [Debugging](advanced-workflows/examples/property-value-estimation.md)
+  * [Incremental Model Training](advanced-workflows/examples/incremental-model-training.md)
+  * [Hyperparameter Optimization](advanced-workflows/examples/hyperparameter-optimization.md)
+  * [Debugging](advanced-workflows/examples/debugging.md)
   * [Reproducibility](advanced-workflows/examples/reproducibility.md)
   * [Data Manifest](advanced-workflows/examples/data-manifest.md)
 

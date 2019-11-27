@@ -3,7 +3,7 @@ import re
 from collections import OrderedDict
 
 import requests
-from kaos_cli.constants import WORKSPACE_CACHE, BACKEND, PACHYDERM
+from kaos_cli.constants import WORKSPACE_CACHE, BACKEND, PACHYDERM, ACTIVE, DEFAULT
 from kaos_cli.exceptions.exceptions import RequestError, WorkspaceExistsError, InvalidWorkspaceError
 from kaos_cli.services.state_service import StateService
 from kaos_cli.utils.validators import find_similar_term, invalidate_cache, validate_cache, validate_index
@@ -16,12 +16,16 @@ class WorkspaceFacade:
         self.state_service = state_service
 
     @property
+    def active_context(self):
+        return self.state_service.get(ACTIVE, 'environment')
+
+    @property
     def url(self):
-        return self.state_service.get(BACKEND, 'url')
+        return self.state_service.get_section(self.active_context, BACKEND, 'url')
 
     @property
     def user(self):
-        return self.state_service.get(BACKEND, 'user')
+        return self.state_service.get(DEFAULT, 'user')
 
     @property
     def workspace(self):
@@ -81,7 +85,8 @@ class WorkspaceFacade:
             raise RequestError(r.text)
 
         # unset workspace (since killed)
-        self.state_service.remove_section(PACHYDERM)
+        name = ""
+        self.state_service.set(PACHYDERM, workspace=name)
         self.state_service.write()
 
         # invalidate workspace cache
@@ -117,8 +122,8 @@ class WorkspaceFacade:
     @staticmethod
     def get_workspace_by_ind(ind):
         data = validate_cache(WORKSPACE_CACHE, command='workspace')
-        loc = validate_index(len(data['ind']), ind, command='workspace')
-        return data['name'][loc]
+        loc = validate_index(len(data), ind, command='workspace')
+        return data[loc]['name']
 
     def find_similar_workspaces(self, name):
         workspaces = self.list(as_dict=False)['names']

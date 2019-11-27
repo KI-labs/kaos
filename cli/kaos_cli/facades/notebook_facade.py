@@ -2,7 +2,7 @@ import json
 import os
 
 import requests
-from kaos_cli.constants import BACKEND, PACHYDERM, NOTEBOOK_CACHE
+from kaos_cli.constants import BACKEND, PACHYDERM, NOTEBOOK_CACHE, ACTIVE, DEFAULT
 from kaos_cli.exceptions.exceptions import NoNotebookError, RequestError
 from kaos_cli.utils.helpers import build_dir
 from kaos_cli.utils.validators import invalidate_cache, validate_cache, validate_index
@@ -15,12 +15,16 @@ class NotebookFacade:
         self.state_service = state
 
     @property
+    def active_context(self):
+        return self.state_service.get(ACTIVE, 'environment')
+
+    @property
     def url(self):
-        return self.state_service.get(BACKEND, 'url')
+        return self.state_service.get_section(self.active_context, BACKEND, 'url')
 
     @property
     def user(self):
-        return self.state_service.get(BACKEND, 'user')
+        return self.state_service.get(DEFAULT, 'user')
 
     @property
     def workspace(self):

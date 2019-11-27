@@ -8,3 +8,4 @@ tqdm==4.32.2
 dataclasses-json==0.2.14
 kaos-model==1.0.0
 requests_toolbelt==0.9.1
+configobj==5.0.6

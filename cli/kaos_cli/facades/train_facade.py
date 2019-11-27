@@ -2,7 +2,7 @@ import json
 import os
 
 import requests
-from kaos_cli.constants import PACHYDERM, BACKEND, TRAIN_CACHE
+from kaos_cli.constants import PACHYDERM, BACKEND, TRAIN_CACHE, ACTIVE, DEFAULT
 from kaos_cli.exceptions.exceptions import RequestError
 from kaos_cli.utils.helpers import build_dir, upload_with_progress_bar
 from kaos_cli.utils.validators import validate_cache, validate_index
@@ -14,12 +14,16 @@ class TrainFacade:
         self.state_service = state_service
 
     @property
+    def active_context(self):
+        return self.state_service.get(ACTIVE, 'environment')
+
+    @property
     def url(self):
-        return self.state_service.get(BACKEND, 'url')
+        return self.state_service.get_section(self.active_context, BACKEND, 'url')
 
     @property
     def user(self):
-        return self.state_service.get(BACKEND, 'user')
+        return self.state_service.get(DEFAULT, 'user')
 
     @property
     def workspace(self):
