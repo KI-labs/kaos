@@ -34,11 +34,11 @@ def client(mocker):
 
 def test_new_notebook(client):
     token = os.getenv("TOKEN")
-    r = client.post("/notebook/new_notebook", headers={"Token": token})
+    r = client.post("/notebook/new_notebook", headers={"Authorization": f"Bearer {token}"})
     assert r.status_code == 200
 
 
 def test_notebook_exists(client):
     token = os.getenv("TOKEN")
-    r = client.post("/notebook/notebook_exists", headers={"Token": token})
+    r = client.post("/notebook/notebook_exists", headers={"Authorization": f"Bearer {token}"})
     assert r.status_code == 409
