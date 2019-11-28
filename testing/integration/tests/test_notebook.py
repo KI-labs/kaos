@@ -9,10 +9,6 @@ TIMEOUT = 150
 
 
 def test_notebook(params):
-    # Get the token for authorizing with the serve endpoint
-    config = ConfigObj(CONFIG_PATH)
-    token = config["MINIKUBE"]["backend"]["token"]
-
     workspace_name = get_rand_str()
     code, stdout, stderr = run_cmd(f"kaos workspace create -n {workspace_name}")
     print(stdout.read())
@@ -34,6 +30,12 @@ def test_notebook(params):
     i = 0
     cond = True
     r = {}
+
+    # Get the token for authorizing with the serve endpoint
+    config = ConfigObj(CONFIG_PATH)
+    token = config["MINIKUBE"]["backend"]["token"]
+    print(f"TOKEN {token}")
+
     while i < TIMEOUT and cond:
         r = requests.get(f"http://localhost:{params['k8s_port']}/{serving_table[0][2]}/lab", allow_redirects=True,
                          headers={"Authorization": f"Bearer {token}"})

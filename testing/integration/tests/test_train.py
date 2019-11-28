@@ -168,6 +168,7 @@ def test_train(params):
     # Get the token for authorizing with the serve endpoint
     config = ConfigObj(CONFIG_PATH)
     token = config["MINIKUBE"]["backend"]["token"]
+    print(f"TOKEN {token}")
 
     subprocess.Popen(["kaos workspace list"],
                      shell=True, stdout=subprocess.PIPE).stdout.read()
