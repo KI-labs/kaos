@@ -13,7 +13,7 @@ from ..constants import KAOS_STATE_DIR, DOCKER, MINIKUBE, KAOS_TF_PATH, TF_STATE
 
 class EnvironmentState:
     """
-    This class is used to validate existence of already built environmnets
+    This class is used to validate existence of already built environments
     """
     def __init__(self):
         self.cloud = None

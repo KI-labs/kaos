@@ -1,4 +1,5 @@
 import os
+import time
 from parameterized import parameterized
 from configobj import ConfigObj
 
@@ -162,8 +163,11 @@ class TestStateService(TestCase):
         # Act
         TestCase.backend.get_section('section', 'subsection', 'param')
 
-    @parameterized.expand(state_service_test_inputs)
-    def test_state_service_write(self, context, param):
+        # Assert
+        self.assertEqual(TestCase.backend.config['section']['subsection'],
+                         TestCase.backend.has_section('section', 'subsection'))
+
+    def test_state_service_write(self):
 
         # Act
         TestCase.backend.write()
@@ -171,9 +175,13 @@ class TestStateService(TestCase):
         # Assert
         self.assertEqual(TestCase.backend.config, ConfigObj(CONFIG_PATH))
 
-    def test_state_service_has_section(self):
+    @parameterized.expand(state_service_test_inputs)
+    def test_state_service_has_section(self, context, param):
 
         # Arrange
+        TestCase.backend.set('section', context=context)
+        TestCase.backend.set_section('section', 'subsection', param=param)
+
         if not TestCase.switch:
             # Act
             TestCase.backend.has_section('section', 'subsection')
@@ -204,6 +212,8 @@ class TestStateService(TestCase):
 
         # Assert
         self.assertTrue(not os.path.exists(CONFIG_PATH))
+
+
 
 
 
