@@ -1,6 +1,7 @@
+import os
+
 import pytest
 from flask import Flask
-import os
 
 from kaos_backend.controllers.notebook import NotebookController
 from kaos_backend.exceptions.exceptions import NotebookAlreadyExistsError
@@ -34,11 +35,11 @@ def client(mocker):
 
 def test_new_notebook(client):
     token = os.getenv("TOKEN")
-    r = client.post("/notebook/new_notebook", headers={"Authorization": f"Bearer {token}"})
+    r = client.post("/notebook/new_notebook", headers={"Token": token})
     assert r.status_code == 200
 
 
 def test_notebook_exists(client):
     token = os.getenv("TOKEN")
-    r = client.post("/notebook/notebook_exists", headers={"Authorization": f"Bearer {token}"})
+    r = client.post("/notebook/notebook_exists", headers={"Token": token})
     assert r.status_code == 409

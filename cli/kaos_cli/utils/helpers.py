@@ -97,7 +97,7 @@ def upload_with_progress_bar(data, url, kwargs, label=None, token=None):
         multipart_monitor = MultipartEncoderMonitor(encoder, lambda monitor: bar.update(monitor.bytes_read - bar.n))
         r = requests.post(url,
                           data=multipart_monitor,
-                          headers={'Content-Type': multipart_monitor.content_type, 'Authorization': f'Bearer {token}'},
+                          headers={'Content-Type': multipart_monitor.content_type, 'Token': token},
                           params=kwargs)
 
     return r

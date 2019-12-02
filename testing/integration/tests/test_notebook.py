@@ -34,11 +34,10 @@ def test_notebook(params):
     # Get the token for authorizing with the serve endpoint
     config = ConfigObj(CONFIG_PATH)
     token = config["MINIKUBE"]["backend"]["token"]
-    print(f"TOKEN {token}")
 
     while i < TIMEOUT and cond:
         r = requests.get(f"http://localhost:{params['k8s_port']}/{serving_table[0][2]}/lab", allow_redirects=True,
-                         headers={"Authorization": f"Bearer {token}"})
+                         headers={"Token": token})
         cond = r.status_code > 200
         time.sleep(10)
         i += 10

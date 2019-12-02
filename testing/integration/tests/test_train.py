@@ -168,7 +168,6 @@ def test_train(params):
     # Get the token for authorizing with the serve endpoint
     config = ConfigObj(CONFIG_PATH)
     token = config["MINIKUBE"]["backend"]["token"]
-    print(f"TOKEN {token}")
 
     subprocess.Popen(["kaos workspace list"],
                      shell=True, stdout=subprocess.PIPE).stdout.read()
@@ -213,7 +212,7 @@ def test_train(params):
     endpoint_name = serving_table[0][2]
     print(f"endpoing name: {endpoint_name}")
     r = requests.post(f"http://localhost:{params['k8s_port']}/{endpoint_name}/invocations",
-                      headers={"Content-Type": "application/json", "Authorization": f"Bearer {token}"},
+                      headers={"Content-Type": "application/json", "Token": token},
                       data=data)
 
     assert r.status_code == 200
