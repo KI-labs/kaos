@@ -144,7 +144,7 @@ class BackendFacade:
         # Refresh environment states after terraform service operations
         env_state = EnvironmentState.initialize(provider, env)
 
-        if env_state.if_tfstate_exists:
+        if env_state.if_build_dir_exists:
             url, kubeconfig = self._parse_config(env_state.build_dir)
 
             current_context = provider if provider in [DOCKER, MINIKUBE] else f"{provider}_{env}"

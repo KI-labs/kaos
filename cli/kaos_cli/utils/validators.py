@@ -38,11 +38,11 @@ class EnvironmentState:
         env_state.tf_state_path = tf_state_path
         return env_state
 
-    def validate_if_tfstate_exits(self) -> "EnvironmentState":
+    def validate_if_build_dir_exits(self) -> "EnvironmentState":
         """
         Ensure existence of kaos backend dir (tf_path) and throw appropriate warnings if it does not exist
         """
-        if not self.if_tfstate_exists:
+        if not self.if_build_dir_exists:
             if self.env:
                     click.echo("{} - {} [{}] backend in {} has not been deployed!".format(
                         click.style("Warning", bold=True, fg='yellow'),
