@@ -61,6 +61,8 @@ def deploy(backend: BackendFacade, cloud: str, env: str, force: bool, verbose: b
 
     # set env variable appropriately
     env_state.set_build_env()
+    cloud = env_state.cloud
+    env = env_state.env
 
     if not yes:
         # confirm creation of backend
@@ -106,7 +108,6 @@ def deploy(backend: BackendFacade, cloud: str, env: str, force: bool, verbose: b
             sys.exit(1)
     
     try:
-
         is_built_successfully, env_state = backend.build(env_state.cloud,
                                                          env_state.env,
                                                          local_backend=local_backend,
@@ -129,7 +130,7 @@ def deploy(backend: BackendFacade, cloud: str, env: str, force: bool, verbose: b
                 click.echo("{} - Successfully built {} [{}] environment".format(
                     click.style("Info", bold=True, fg='green'),
                     click.style('kaos', bold=True),
-                    click.style(env_state.env, bold=True, fg='blue')))
+                    click.style(env, bold=True, fg='blue')))
             else:
                 click.echo("{} - Successfully built {} environment".format(
                     click.style("Info", bold=True, fg='green'),
@@ -139,8 +140,8 @@ def deploy(backend: BackendFacade, cloud: str, env: str, force: bool, verbose: b
             click.echo("{} - Deployment Unsuccessful while creating {} [{} {}] environment".format(
                 click.style("Error", bold=True, fg='red'),
                 click.style('kaos', bold=True),
-                click.style(env_state.cloud, bold=True, fg='red'),
-                click.style(env_state.env, bold=True, fg='red'))),
+                click.style(cloud, bold=True, fg='red'),
+                click.style(env, bold=True, fg='red'))),
             sys.exit(1)
 
     except Exception as e:

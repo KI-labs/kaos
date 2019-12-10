@@ -8,7 +8,7 @@ import click
 import textdistance
 from kaos_cli.exceptions.exceptions import MissingArgumentError
 
-from ..constants import KAOS_STATE_DIR, DOCKER, MINIKUBE, KAOS_TF_PATH, TF_STATE
+from ..constants import KAOS_STATE_DIR, DOCKER, MINIKUBE, KAOS_TF_PATH, TF_STATE, PROVIDER_DICT
 
 
 class EnvironmentState:
@@ -20,6 +20,7 @@ class EnvironmentState:
         self.env = None
         self.build_dir = None
         self.tf_state_path = None
+        self.provider_directory = None
         self.if_build_dir_exists = None
         self.if_tfstate_exists = None
 
@@ -30,12 +31,25 @@ class EnvironmentState:
         env_state.env = env
         env_dir = f"{env_state.cloud}/{env_state.env}" if env_state.cloud not in [DOCKER, MINIKUBE] \
             else f"{env_state.cloud}"
-        build_dir = os.path.join(KAOS_TF_PATH, env_dir)
-        tf_state_path = os.path.join(KAOS_TF_PATH, env_dir, f"{TF_STATE}")
+
+        infra_root = PROVIDER_DICT.get(cloud)
+
+        if is_cloud_provider(cloud):
+            build_dir = f"{infra_root}/__working_{env}"
+            print("build_dir", build_dir)
+            tf_state_path = f"{build_dir}/.terraform/terraform.tfstate"
+            provider_directory = f"{infra_root}/{env}"
+            env_state.provider_directory = provider_directory
+
+        else:
+            build_dir = os.path.join(KAOS_TF_PATH, env_dir)
+            tf_state_path = os.path.join(KAOS_TF_PATH, env_dir, f"{TF_STATE}")
+
         env_state.if_build_dir_exists = os.path.exists(build_dir)
         env_state.if_tfstate_exists = os.path.exists(tf_state_path)
         env_state.build_dir = build_dir
         env_state.tf_state_path = tf_state_path
+
         return env_state
 
     def validate_if_build_dir_exits(self) -> "EnvironmentState":
@@ -193,4 +207,8 @@ def validate_unused_port(port: int, host: str = '0.0.0.0') -> bool:
             return True
         except socket.error:
             return False
+
+
+def is_cloud_provider(cloud):
+    return cloud not in (DOCKER, MINIKUBE)
 

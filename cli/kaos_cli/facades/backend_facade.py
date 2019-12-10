@@ -12,12 +12,8 @@ from kaos_cli.services.state_service import StateService
 from kaos_cli.services.terraform_service import TerraformService
 from kaos_cli.utils.environment import check_environment
 from kaos_cli.utils.helpers import build_dir
-from kaos_cli.utils.validators import EnvironmentState
+from kaos_cli.utils.validators import EnvironmentState, is_cloud_provider
 from kaos_cli.exceptions.handle_exceptions import handle_specific_exception, handle_exception
-
-
-def is_cloud_provider(cloud):
-    return cloud not in (DOCKER, MINIKUBE)
 
 
 class BackendFacade:
@@ -128,58 +124,64 @@ class BackendFacade:
 
     def build(self, provider, env, local_backend=False, verbose=False):
         env_state = EnvironmentState.initialize(provider, env)
-        if not env_state.if_build_dir_exists:
+        print("build_directory", env_state.build_dir)
+        if not os.path.exists(env_state.build_dir):
             build_dir(env_state.build_dir)
 
         extra_vars = self._get_vars(provider, env_state.build_dir)
         self.tf_service.cd_dir(env_state.build_dir)
 
         self.tf_service.set_verbose(verbose)
-        directory = self._tf_init(provider, env, local_backend, destroying=False)
-        self.tf_service.plan(directory, extra_vars)
-        self.tf_service.apply(directory, extra_vars)
+        self._tf_init(env_state, provider, env, local_backend, destroying=False)
+        self.tf_service.plan(env_state.build_dir, extra_vars)
+        self.tf_service.apply(env_state.build_dir, extra_vars)
         self.tf_service.execute()
 
         # check if the deployed successfully
         # Refresh environment states after terraform service operations
         env_state = EnvironmentState.initialize(provider, env)
 
-        if env_state.if_build_dir_exists:
-            url, kubeconfig = self._parse_config(env_state.build_dir)
+        # if env_state.if_build_dir_exists:
+        url, kubeconfig = self._parse_config(env_state.build_dir)
 
-            current_context = provider if provider in [DOCKER, MINIKUBE] else f"{provider}_{env}"
+        current_context = provider if provider in [DOCKER, MINIKUBE] else f"{provider}_{env}"
 
-            self.state_service.set(DEFAULT, user=USER)
+        self.state_service.set(DEFAULT, user=USER)
 
-            self._set_context_list(current_context)
-            self._set_active_context(current_context)
-            self.state_service.set(current_context)
+        self._set_context_list(current_context)
+        self._set_active_context(current_context)
+        self.state_service.set(current_context)
 
-            try:
-                self.state_service.set_section(current_context, BACKEND, url=url, token=uuid.uuid4())
-                self.state_service.set_section(current_context, INFRASTRUCTURE, kubeconfig=kubeconfig)
-            except Exception as e:
-                handle_specific_exception(e)
-                handle_exception(e)
+        try:
+            print("Inside exception")
+            self.state_service.set_section(current_context, BACKEND, url=url, token=uuid.uuid4())
+            self.state_service.set_section(current_context, INFRASTRUCTURE, kubeconfig=kubeconfig)
+            print("Inside exception 2")
+        except Exception as e:
+            handle_specific_exception(e)
+            handle_exception(e)
 
-            self.state_service.write()
-            return True, env_state
+        print("outside exception")
+        self.state_service.write()
+        return True, env_state
 
-        return False, env_state
+        # return False, env_state
 
     def destroy(self, env_state, verbose=False):
         extra_vars = self._get_vars(env_state.cloud, env_state.build_dir)
         self.tf_service.cd_dir(env_state.build_dir)
 
         self.tf_service.set_verbose(verbose)
-        directory = self._tf_init(env_state.cloud, env_state.env, local_backend=False, destroying=True)
+
+        self._tf_init(env_state, env_state.cloud, env_state.env, local_backend=False, destroying=True)
+
         current_context = env_state.cloud if env_state.cloud in [DOCKER, MINIKUBE] \
             else env_state.cloud + '_' + env_state.env
         self._delete_resources(current_context)
         self._unset_context_list(current_context)
         self._remove_section(current_context)
         self._deactivate_context()
-        self.tf_service.destroy(directory, extra_vars)
+        self.tf_service.destroy(env_state.build_dir, extra_vars)
         self.tf_service.execute()
         self._remove_build_files(env_state.build_dir)
         self.state_service.write()
@@ -202,25 +204,25 @@ class BackendFacade:
         if self.state_service.has_section(context, BACKEND):
             requests.delete(f"{self.url}/internal/resources")
 
-    def _tf_init(self, provider, env, local_backend, destroying=False):
-        directory = PROVIDER_DICT.get(provider)
+    def _tf_init(self, env_state, provider, env, local_backend, destroying=False):
+        # directory = PROVIDER_DICT.get(cloud)
         check_environment(provider)
         if is_cloud_provider(provider):
-            provider_directory = f"{directory}/{env}"
-            directory = f"{directory}/__working_{env}"
-            if not destroying or not os.path.isdir(directory):
-                copy_tree(provider_directory, directory)
+            # provider_directory = f"{directory}/{env}"
+            # directory = f"{directory}/__working_{env}"
+            if not destroying or not os.path.isdir(env_state.build_dir):
+                print("here 1")
+                copy_tree(env_state.provider_directory, env_state.build_dir)
             if local_backend:
-                shutil.copy(LOCAL_CONFIG_DICT.get(provider), directory)
+                shutil.copy(LOCAL_CONFIG_DICT.get(provider), env_state.build_dir)
 
             # simply always create the workspace
-            self.tf_service.init(directory)
-            self.tf_service.new_workspace(directory, env)
-            self.tf_service.select_workspace(directory, env)
+            self.tf_service.init(env_state.build_dir)
+            self.tf_service.new_workspace(env_state.build_dir, env)
+            self.tf_service.select_workspace(env_state.build_dir, env)
 
         else:
-            self.tf_service.init(directory)
-        return directory
+            self.tf_service.init(env_state.build_dir)
 
     def _set_context_list(self, current_context):
         try:
