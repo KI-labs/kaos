@@ -54,5 +54,7 @@ class StateService:
         shutil.rmtree(dir_build, ignore_errors=True)
 
     def write(self):
+        if not os.path.exists(KAOS_STATE_DIR):
+            os.mkdir(KAOS_STATE_DIR)
         with open(CONFIG_PATH, 'wb') as f:
             self.config.write(f)

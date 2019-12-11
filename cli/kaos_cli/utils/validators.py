@@ -3,6 +3,7 @@ import os
 import sys
 import socket
 from json import JSONDecodeError
+import shutil
 
 import click
 import textdistance
@@ -32,18 +33,18 @@ class EnvironmentState:
         env_dir = f"{env_state.cloud}/{env_state.env}" if env_state.cloud not in [DOCKER, MINIKUBE] \
             else f"{env_state.cloud}"
 
-        infra_root = PROVIDER_DICT.get(cloud)
+        infra_root = f"{PROVIDER_DICT.get(cloud)}"
 
         if is_cloud_provider(cloud):
             build_dir = f"{infra_root}/__working_{env}"
-            print("build_dir", build_dir)
             tf_state_path = f"{build_dir}/.terraform/terraform.tfstate"
             provider_directory = f"{infra_root}/{env}"
             env_state.provider_directory = provider_directory
 
         else:
-            build_dir = os.path.join(KAOS_TF_PATH, env_dir)
-            tf_state_path = os.path.join(KAOS_TF_PATH, env_dir, f"{TF_STATE}")
+            build_dir = f"{infra_root}"
+            tf_state_path = f"{infra_root}/terraform.tfstate"
+            env_state.provider_directory = infra_root
 
         env_state.if_build_dir_exists = os.path.exists(build_dir)
         env_state.if_tfstate_exists = os.path.exists(tf_state_path)
@@ -52,11 +53,11 @@ class EnvironmentState:
 
         return env_state
 
-    def validate_if_build_dir_exits(self) -> "EnvironmentState":
+    def validate_if_tf_state_exits(self) -> "EnvironmentState":
         """
         Ensure existence of kaos backend dir (tf_path) and throw appropriate warnings if it does not exist
         """
-        if not self.if_build_dir_exists:
+        if not self.if_tfstate_exists:
             if self.env:
                     click.echo("{} - {} [{}] backend in {} has not been deployed!".format(
                         click.style("Warning", bold=True, fg='yellow'),
@@ -89,6 +90,13 @@ class EnvironmentState:
             self.env = None
         else:
             self.env = 'prod' if not self.env else self.env  # default = prod
+
+    def remove_terraform_files(self) -> "EnvironmentState":
+        """
+        Simple method to remove existing terraform state for existing deployments
+        """
+        tf_dir_path = f"{self.build_dir}/.terraform"
+        shutil.rmtree(tf_dir_path, ignore_errors=True)
 
 
 def validate_index(n: int, ind: int, command: str):

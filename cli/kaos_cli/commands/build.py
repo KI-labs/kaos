@@ -49,15 +49,16 @@ def deploy(backend: BackendFacade, cloud: str, env: str, force: bool, verbose: b
 
     env_state = EnvironmentState.initialize(cloud, env)
 
-    if env_state.if_build_dir_exists and not force:
+    if env_state.if_tfstate_exists and not force:
         click.echo('{} - {} backend is already built.'.format(click.style("Aborting", bold=True, fg='red'),
                                                               click.style("kaos", bold=True)))
         sys.exit(1)
 
-    elif env_state.if_build_dir_exists and force:
+    elif env_state.if_tfstate_exists and force:
         click.echo('{} - Performing {} build of the backend'.format(
             click.style("Warning", bold=True, fg='yellow'),
             click.style("force", bold=True)))
+        env_state.remove_terraform_files()
 
     # set env variable appropriately
     env_state.set_build_env()
@@ -273,7 +274,7 @@ def destroy(backend: BackendFacade, cloud, env, verbose, yes):
     env_state.set_build_env()
 
     # Ensure that appropriate warnings are displayed
-    env_state.validate_if_build_dir_exits()
+    env_state.validate_if_tf_state_exits()
 
     if not yes:
         # confirm creation of backend
@@ -296,7 +297,7 @@ def destroy(backend: BackendFacade, cloud, env, verbose, yes):
 
         env_state = backend.destroy(env_state, verbose=verbose)
 
-        if not env_state.if_build_dir_exists:
+        if not env_state.if_tfstate_exists:
             if env_state.env:
                 click.echo(
                     "{} - Successfully destroyed {} [{}] environment".format(click.style("Info", bold=True, fg='green'),

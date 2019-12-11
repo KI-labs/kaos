@@ -5,7 +5,7 @@ import uuid
 from distutils.dir_util import copy_tree
 
 import requests
-from kaos_cli.constants import DOCKER, MINIKUBE, PROVIDER_DICT, AWS, BACKEND, INFRASTRUCTURE, GCP, LOCAL_CONFIG_DICT, \
+from kaos_cli.constants import DOCKER, MINIKUBE, AWS, BACKEND, INFRASTRUCTURE, GCP, LOCAL_CONFIG_DICT, \
     CONTEXTS, ACTIVE, BACKEND_CACHE, DEFAULT, USER, REMOTE
 from kaos_cli.exceptions.exceptions import HostnameError
 from kaos_cli.services.state_service import StateService
@@ -124,7 +124,6 @@ class BackendFacade:
 
     def build(self, provider, env, local_backend=False, verbose=False):
         env_state = EnvironmentState.initialize(provider, env)
-        print("build_directory", env_state.build_dir)
         if not os.path.exists(env_state.build_dir):
             build_dir(env_state.build_dir)
 
@@ -141,31 +140,29 @@ class BackendFacade:
         # Refresh environment states after terraform service operations
         env_state = EnvironmentState.initialize(provider, env)
 
-        # if env_state.if_build_dir_exists:
-        url, kubeconfig = self._parse_config(env_state.build_dir)
+        if env_state.if_tfstate_exists:
+            url, kubeconfig = self._parse_config(env_state.build_dir)
 
-        current_context = provider if provider in [DOCKER, MINIKUBE] else f"{provider}_{env}"
+            current_context = provider if provider in [DOCKER, MINIKUBE] else f"{provider}_{env}"
 
-        self.state_service.set(DEFAULT, user=USER)
+            self.state_service.set(DEFAULT, user=USER)
 
-        self._set_context_list(current_context)
-        self._set_active_context(current_context)
-        self.state_service.set(current_context)
+            self._set_context_list(current_context)
+            self._set_active_context(current_context)
+            self.state_service.set(current_context)
 
-        try:
-            print("Inside exception")
-            self.state_service.set_section(current_context, BACKEND, url=url, token=uuid.uuid4())
-            self.state_service.set_section(current_context, INFRASTRUCTURE, kubeconfig=kubeconfig)
-            print("Inside exception 2")
-        except Exception as e:
-            handle_specific_exception(e)
-            handle_exception(e)
+            try:
+                self.state_service.set_section(current_context, BACKEND, url=url, token=uuid.uuid4())
+                self.state_service.set_section(current_context, INFRASTRUCTURE, kubeconfig=kubeconfig)
+            except Exception as e:
+                handle_specific_exception(e)
+                handle_exception(e)
 
-        print("outside exception")
-        self.state_service.write()
-        return True, env_state
+            self.state_service.write()
 
-        # return False, env_state
+            return True, env_state
+
+        return False, env_state
 
     def destroy(self, env_state, verbose=False):
         extra_vars = self._get_vars(env_state.cloud, env_state.build_dir)
@@ -177,6 +174,7 @@ class BackendFacade:
 
         current_context = env_state.cloud if env_state.cloud in [DOCKER, MINIKUBE] \
             else env_state.cloud + '_' + env_state.env
+
         self._delete_resources(current_context)
         self._unset_context_list(current_context)
         self._remove_section(current_context)
@@ -205,13 +203,9 @@ class BackendFacade:
             requests.delete(f"{self.url}/internal/resources")
 
     def _tf_init(self, env_state, provider, env, local_backend, destroying=False):
-        # directory = PROVIDER_DICT.get(cloud)
         check_environment(provider)
         if is_cloud_provider(provider):
-            # provider_directory = f"{directory}/{env}"
-            # directory = f"{directory}/__working_{env}"
             if not destroying or not os.path.isdir(env_state.build_dir):
-                print("here 1")
                 copy_tree(env_state.provider_directory, env_state.build_dir)
             if local_backend:
                 shutil.copy(LOCAL_CONFIG_DICT.get(provider), env_state.build_dir)
@@ -222,6 +216,7 @@ class BackendFacade:
             self.tf_service.select_workspace(env_state.build_dir, env)
 
         else:
+            copy_tree(env_state.provider_directory, env_state.build_dir)
             self.tf_service.init(env_state.build_dir)
 
     def _set_context_list(self, current_context):
@@ -233,17 +228,20 @@ class BackendFacade:
         updated_contexts = []
 
         if isinstance(contexts, list):
-            contexts.append(current_context)
+            if current_context not in contexts:
+                contexts.append(current_context)
             updated_contexts = contexts
         elif isinstance(contexts, str) or not contexts:
-            # There is only one context or no context in available contexts
-            if contexts:
-                # exactly one available context
-                updated_contexts.append(contexts)
-                updated_contexts.append(current_context)
-            else:
-                # no available context
-                updated_contexts.append(current_context)
+            # check if current context is the same as existing context
+            if current_context != contexts:
+                # There is only one context or no context in available contexts
+                if contexts:
+                    # exactly one available context
+                    updated_contexts.append(contexts)
+                    updated_contexts.append(current_context)
+                else:
+                    # no available context
+                    updated_contexts.append(current_context)
 
         self.state_service.set(CONTEXTS, environments=updated_contexts)
 
