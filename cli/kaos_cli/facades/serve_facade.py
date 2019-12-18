@@ -40,7 +40,7 @@ class ServeFacade:
         name = self.workspace
 
         # GET /inference/<name>
-        r = requests.get(f"{base_url}/inference/{name}", headers={"X-Authorization-Token": self.token})
+        r = requests.get(f"{base_url}/inference/{name}", headers={"X-Token": self.token})
         if r.status_code >= 300:
             raise NoServingJobsError()
         return Response.from_dict(r.json()).response
@@ -72,7 +72,7 @@ class ServeFacade:
 
         # GET /inference/<name>/<endpoint>/provenance
         r = requests.get(f"{base_url}/inference/{name}/{endpoint}/provenance",
-                         headers={"X-Authorization-Token": self.token})
+                         headers={"X-Token": self.token})
 
         if r.status_code < 300:
             out_fid = os.path.join(prov_dir, f"{endpoint}")
@@ -89,7 +89,7 @@ class ServeFacade:
 
         # GET /inference/<name>/<endpoint>/bundle
         r = requests.get(f"{base_url}/inference/{name}/{endpoint}/bundle",
-                         headers={"X-Authorization-Token": self.token})
+                         headers={"X-Token": self.token})
         if r.status_code >= 300:
             raise RequestError(r.text)
         return name, r.content
@@ -98,7 +98,7 @@ class ServeFacade:
         base_url = self.url
 
         # GET /inference/<endpoint>/logs
-        r = requests.get(f"{base_url}/inference/{endpoint}/logs", headers={"X-Authorization-Token": self.token})
+        r = requests.get(f"{base_url}/inference/{endpoint}/logs", headers={"X-Token": self.token})
 
         if r.status_code < 300:
             return r.json()
@@ -123,7 +123,7 @@ class ServeFacade:
 
         # GET /train/<name>/<job_id>/logs
         r = requests.get(f"{base_url}/inference/{name}/build/{job_id}/logs",
-                         headers={"X-Authorization-Token": self.token})
+                         headers={"X-Token": self.token})
 
         if r.status_code < 300:
             return r.json()
@@ -144,7 +144,7 @@ class ServeFacade:
     def delete(self, endpoint):
         base_url = self.url
         # DELETE /inference/<endpoint>
-        r = requests.delete(f"{base_url}/inference/{endpoint}", headers={"X-Authorization-Token": self.token})
+        r = requests.delete(f"{base_url}/inference/{endpoint}", headers={"X-Token": self.token})
 
         # invalidate notebook cache
         invalidate_cache(SERVE_CACHE)

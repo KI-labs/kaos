@@ -40,7 +40,7 @@ def test_notebook(params):
 
     while i < TIMEOUT and cond:
         r = requests.get(f"http://localhost:{params['k8s_port']}/{serving_table[0][2]}/lab", allow_redirects=True,
-                         headers={"X-Authorization-Token": token})
+                         headers={"X-Token": token})
         cond = r.status_code > 200
         time.sleep(10)
         i += 10

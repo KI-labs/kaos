@@ -215,7 +215,7 @@ def test_train(params):
     endpoint_name = serving_table[0][2]
     print(f"endpoing name: {endpoint_name}")
     r = requests.post(f"http://localhost:{params['k8s_port']}/{endpoint_name}/invocations",
-                      headers={"Content-Type": "application/json", "X-Authorization-Token": token},
+                      headers={"Content-Type": "application/json", "X-Token": token},
                       data=data)
 
     assert r.status_code == 200

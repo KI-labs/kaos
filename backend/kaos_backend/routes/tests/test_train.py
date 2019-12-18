@@ -39,23 +39,23 @@ def client(mocker):
 
 def test_train_info_existing_job(client):
     token = os.getenv("TOKEN")
-    r = client.get("/train/asdf/existing_job", headers={"X-Authorization-Token": token})
+    r = client.get("/train/asdf/existing_job", headers={"X-Token": token})
     assert r.status_code == 200
 
 
 def test_train_info_no_job(client):
     token = os.getenv("TOKEN")
-    r = client.get("/train/asdf/nonexistent_job", headers={"X-Authorization-Token": token})
+    r = client.get("/train/asdf/nonexistent_job", headers={"X-Token": token})
     assert r.status_code == 404
 
 
 def test_train_info_no_metric(client):
     token = os.getenv("TOKEN")
-    r = client.get("/train/asdf/job_no_metric", headers={"X-Authorization-Token": token})
+    r = client.get("/train/asdf/job_no_metric", headers={"X-Token": token})
     assert r.status_code == 404
 
 
 def test_train_info_incomplete_datum(client):
     token = os.getenv("TOKEN")
-    r = client.get("/train/asdf/incomplete_datum", headers={"X-Authorization-Token": token})
+    r = client.get("/train/asdf/incomplete_datum", headers={"X-Token": token})
     assert r.status_code == 500
