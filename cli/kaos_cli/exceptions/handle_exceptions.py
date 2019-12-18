@@ -61,6 +61,13 @@ def _(e):
     click.echo(e.message, err=True)
 
 
+@handle_specific_exception.register(KeyError)
+def _(e):
+    click.echo("{} - Ignoring {}. Creating a new section in config".format(
+        click.style("Info", bold=True, fg='yellow'),
+        click.style(str(e), bold=True, fg='green')))
+
+
 @handle_specific_exception.register(IndexError)
 def _(e):
     click.echo(str(e), err=True)
