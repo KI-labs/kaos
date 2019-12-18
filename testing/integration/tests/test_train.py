@@ -167,7 +167,10 @@ def train_and_assert(workspace_name, expected_pretrained_jobs):
 def test_train(params):
     # Get the token for authorizing with the serve endpoint
     config = ConfigObj(CONFIG_PATH)
-    token = config["MINIKUBE"]["backend"]["token"]
+    try:
+        token = config["MINIKUBE"]["backend"]["token"]
+    except KeyError:
+        token = config["DOCKER"]["backend"]["token"]
 
     subprocess.Popen(["kaos workspace list"],
                      shell=True, stdout=subprocess.PIPE).stdout.read()
@@ -212,7 +215,7 @@ def test_train(params):
     endpoint_name = serving_table[0][2]
     print(f"endpoing name: {endpoint_name}")
     r = requests.post(f"http://localhost:{params['k8s_port']}/{endpoint_name}/invocations",
-                      headers={"Content-Type": "application/json", "Token": token},
+                      headers={"Content-Type": "application/json", "X-Authorization-Token": token},
                       data=data)
 
     assert r.status_code == 200

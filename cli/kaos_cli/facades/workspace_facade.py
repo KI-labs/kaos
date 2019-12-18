@@ -46,7 +46,7 @@ class WorkspaceFacade:
 
         # POST /workspace/<name>
         r = requests.post(f"{base_url}/workspace/{name}", params={"user": user},
-                          headers={"Token": self.token})
+                          headers={"X-Authorization-Token": self.token})
 
         if r.status_code < 300:
             # set workspace to state
@@ -65,7 +65,7 @@ class WorkspaceFacade:
         name = self.workspace
 
         # GET /workspace/<name>
-        r = requests.get(f"{base_url}/workspace/{name}", headers={"Token": self.token})
+        r = requests.get(f"{base_url}/workspace/{name}", headers={"X-Authorization-Token": self.token})
 
         if r.status_code < 300:
             return r.json()
@@ -80,7 +80,7 @@ class WorkspaceFacade:
         name = self.workspace
 
         # DELETE /workspace/<name>
-        r = requests.delete(f"{base_url}/workspace/{name}", headers={"Token": self.token})
+        r = requests.delete(f"{base_url}/workspace/{name}", headers={"X-Authorization-Token": self.token})
         if r.status_code >= 300:
             raise RequestError(r.text)
 
@@ -97,7 +97,7 @@ class WorkspaceFacade:
         base_url = self.url
 
         # GET /workspace
-        r = requests.get(f"{base_url}/workspace", headers={"Token": self.token})
+        r = requests.get(f"{base_url}/workspace", headers={"X-Authorization-Token": self.token})
         if r.status_code >= 300:
             raise RequestError(r.text)
 

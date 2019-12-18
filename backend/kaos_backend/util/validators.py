@@ -171,10 +171,10 @@ def auth_required(function):
 
     def wrapper(*args, **kwargs):
         token = os.getenv("TOKEN")
-        if 'Token' not in request.headers:
+        if 'X-Authorization-Token' not in request.headers:
             raise AuthorizationError("Authorization header not present in the request")
 
-        req_token = request.headers['Token']
+        req_token = request.headers['X-Authorization-Token']
 
         if req_token != token:
             raise AuthorizationError("Unauthorized Token")
