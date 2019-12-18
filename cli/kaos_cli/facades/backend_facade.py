@@ -6,7 +6,7 @@ from distutils.dir_util import copy_tree
 
 import requests
 from kaos_cli.constants import DOCKER, MINIKUBE, PROVIDER_DICT, AWS, BACKEND, INFRASTRUCTURE, GCP, LOCAL_CONFIG_DICT, \
-    CONTEXTS, ACTIVE, BACKEND_CACHE, DEFAULT, USER, REMOTE
+    CONTEXTS, ACTIVE, BACKEND_CACHE, DEFAULT, USER, REMOTE, KAOS_STATE_DIR
 from kaos_cli.exceptions.exceptions import HostnameError
 from kaos_cli.services.state_service import StateService
 from kaos_cli.services.terraform_service import TerraformService
@@ -50,12 +50,18 @@ class BackendFacade:
         return self.state_service.get_section(self.active_context, INFRASTRUCTURE, 'kubeconfig')
 
     def init(self, url, auth_token):
-        if not self.state_service.is_created():
+        if not self.state_service.is_created(KAOS_STATE_DIR):
             self.state_service.create()
-        self.state_service.set(BACKEND, url=url, token=auth_token)
-        self.state_service.set_section(REMOTE, BACKEND, url=url, token=auth_token)
 
+        self.state_service.set(DEFAULT, user=USER)
+        self._set_context_list(REMOTE)
+        self._set_active_context(REMOTE)
+        self.state_service.set(REMOTE)
+        self.state_service.set_section(REMOTE, BACKEND, url=url, token=auth_token)
         self.state_service.write()
+
+    def is_created(self):
+        return self.state_service.is_created(KAOS_STATE_DIR)
 
     def list(self):
         try:
@@ -130,8 +136,8 @@ class BackendFacade:
         env_state = EnvironmentState.initialize(provider, env)
         if not env_state.if_build_dir_exists:
             build_dir(env_state.build_dir)
-        auth_token = uuid.uuid4()
-        extra_vars = self._get_vars(provider, env_state.build_dir, auth_token)
+
+        extra_vars = self._get_vars(provider, env_state.build_dir)
         self.tf_service.cd_dir(env_state.build_dir)
 
         self.tf_service.set_verbose(verbose)
@@ -156,7 +162,7 @@ class BackendFacade:
             self.state_service.set(current_context)
 
             try:
-                self.state_service.set_section(current_context, BACKEND, url=url, token=auth_token)
+                self.state_service.set_section(current_context, BACKEND, url=url, token=uuid.uuid4())
                 self.state_service.set_section(current_context, INFRASTRUCTURE, kubeconfig=kubeconfig)
             except Exception as e:
                 handle_specific_exception(e)
