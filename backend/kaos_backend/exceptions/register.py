@@ -86,4 +86,4 @@ def register_application_exception(app):
 
     @app.errorhandler(AuthorizationError)
     def handle_authorization_error(error):
-        return make_error_response(401, error_code="AUTHORIZATION FAILURE", message=error.message)
+        return make_error_response(401, error_code="AUTHORIZATION_FAILURE", message=error.message)
