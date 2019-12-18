@@ -70,9 +70,15 @@ class NotebookFacade:
         r = requests.post(f"{base_url}/notebook/{name}", data=open(c, 'rb').read(), params=kwargs,
                           headers={"X-Token": self.token})
 
-        if r.status_code >= 300:
+        if r.status_code < 300:
+            return r.json()
+        elif 300 <= r.status_code < 400:
             raise RequestError(f"Error while uploading source bundle: {r.text}")
-        return r.json()
+        elif 400 <= r.status_code < 500:
+            err = Error.from_dict(r.json())
+            raise RequestError(err.message)
+        else:
+            raise RequestError(r.text)
 
     def deploy(self, **kwargs):
         base_url = self.url
@@ -83,8 +89,15 @@ class NotebookFacade:
         r = requests.post(f"{base_url}/notebook/{name}", params=kwargs,
                           headers={"X-Token": self.token})
 
-        if r.status_code >= 300:
+        if r.status_code < 300:
+            return r.json()
+        elif 300 <= r.status_code < 400:
             raise RequestError(f"Error while deploying notebook: {r.text}")
+        elif 400 <= r.status_code < 500:
+            err = Error.from_dict(r.json())
+            raise RequestError(err.message)
+        else:
+            raise RequestError(r.text)
 
     def get_build_logs(self, job_id):
         base_url = self.url
@@ -116,7 +129,12 @@ class NotebookFacade:
         # DELETE /notebook/<name>/<notebook>
         r = requests.delete(f"{base_url}/notebook/{name}", headers={"X-Token": self.token})
 
-        if r.status_code >= 300:
+        if 300 <= r.status_code < 400:
+            raise RequestError(f"Error while deleting notebook: {r.text}")
+        elif 400 <= r.status_code < 500:
+            err = Error.from_dict(r.json())
+            raise RequestError(err.message)
+        elif r.status_code == 500:
             raise RequestError(r.text)
 
         # invalidate workspace cache

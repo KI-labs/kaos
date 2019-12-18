@@ -41,9 +41,17 @@ class ServeFacade:
 
         # GET /inference/<name>
         r = requests.get(f"{base_url}/inference/{name}", headers={"X-Token": self.token})
-        if r.status_code >= 300:
+
+        if r.status_code < 300:
+            return Response.from_dict(r.json()).response
+        elif 300 <= r.status_code < 400:
             raise NoServingJobsError()
-        return Response.from_dict(r.json()).response
+        elif 400 <= r.status_code < 500:
+            err = Error.from_dict(r.json())
+            raise RequestError(err.message)
+        else:
+            raise RequestError(r.text)
+
 
     def upload_source_bundle(self, c, model_id, **kwargs):
         base_url = self.url
@@ -90,9 +98,15 @@ class ServeFacade:
         # GET /inference/<name>/<endpoint>/bundle
         r = requests.get(f"{base_url}/inference/{name}/{endpoint}/bundle",
                          headers={"X-Token": self.token})
-        if r.status_code >= 300:
+        if r.status_code < 300:
+            return name, r.content
+        elif 300 <= r.status_code < 400:
+            raise NoServingJobsError()
+        elif 400 <= r.status_code < 500:
+            err = Error.from_dict(r.json())
+            raise RequestError(err.message)
+        else:
             raise RequestError(r.text)
-        return name, r.content
 
     def get_serve_logs(self, endpoint):
         base_url = self.url

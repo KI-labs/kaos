@@ -86,5 +86,4 @@ def register_application_exception(app):
 
     @app.errorhandler(AuthorizationError)
     def handle_authorization_error(error):
-        # TODO: Fix the error.message not getting picked up
-        return make_error_response(401, error_code="AUTHORIZATION FAILURE", message="Invalid Authorization")
+        return make_error_response(401, error_code="AUTHORIZATION FAILURE", message=error.message)

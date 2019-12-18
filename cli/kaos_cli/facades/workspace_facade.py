@@ -81,9 +81,12 @@ class WorkspaceFacade:
 
         # DELETE /workspace/<name>
         r = requests.delete(f"{base_url}/workspace/{name}", headers={"X-Token": self.token})
-        if r.status_code >= 300:
-            raise RequestError(r.text)
 
+        if 300 <= r.status_code < 500:
+            err = Error.from_dict(r.json())
+            raise RequestError(err.message)
+        elif r.status_code == 500:
+            raise RequestError(r.text)
         # unset workspace (since killed)
         name = ""
         self.state_service.set(PACHYDERM, workspace=name)
@@ -98,7 +101,10 @@ class WorkspaceFacade:
 
         # GET /workspace
         r = requests.get(f"{base_url}/workspace", headers={"X-Token": self.token})
-        if r.status_code >= 300:
+        if 300 <= r.status_code < 500:
+            err = Error.from_dict(r.json())
+            raise RequestError(err.message)
+        elif r.status_code == 500:
             raise RequestError(r.text)
 
         data = r.json()

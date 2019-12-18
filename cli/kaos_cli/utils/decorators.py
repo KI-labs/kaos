@@ -156,7 +156,7 @@ def workspace_check(func):
         current_workspace = config['pachyderm']['workspace']
 
         # GET all workspaces: /workspace
-        r = requests.get(f"{base_url}/workspace", headers={"Token": token})
+        r = requests.get(f"{base_url}/workspace", headers={"X-Token": token})
         if r.status_code == 401:
             click.echo("Unauthorized token")
             sys.exit(1)
