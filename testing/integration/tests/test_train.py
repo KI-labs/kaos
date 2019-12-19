@@ -172,6 +172,8 @@ def test_train(params):
     except KeyError:
         token = config["DOCKER"]["backend"]["token"]
 
+    print(token)
+
     subprocess.Popen(["kaos workspace list"],
                      shell=True, stdout=subprocess.PIPE).stdout.read()
 

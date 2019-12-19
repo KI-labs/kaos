@@ -2,9 +2,9 @@ import os
 import re
 
 from flask import request
-
 from kaos_backend.constants import MAX_CPU, MAX_GPU, MAX_MEMORY
-from kaos_backend.exceptions.exceptions import InvalidBundleError, MemoryRequestError, GPURequestError, CPURequestError, \
+from kaos_backend.exceptions.exceptions import InvalidBundleError, \
+    MemoryRequestError, GPURequestError, CPURequestError, \
     AuthorizationError
 
 SOURCE_URL = "https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#meaning-of-memory"

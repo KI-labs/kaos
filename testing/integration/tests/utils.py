@@ -69,6 +69,7 @@ def parse_serve_list(data):
 
 
 def run_cmd(cmd):
+    print(cmd)
     prc = subprocess.Popen([cmd],
                            shell=True, stdout=subprocess.PIPE)
     prc.wait()
