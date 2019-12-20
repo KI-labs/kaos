@@ -74,7 +74,7 @@ def walk(folder):
             yield os.path.abspath(os.path.join(root, filename))
 
 
-def upload_with_progress_bar(data, url, kwargs, label=None):
+def upload_with_progress_bar(data, url, kwargs, label=None, token=None):
     """
     Uses multipart data to show progress of upload to the user.
     Requires request.files['data'].read() instead of request.data on the backend site.
@@ -82,6 +82,7 @@ def upload_with_progress_bar(data, url, kwargs, label=None):
     :param url: target url
     :param kwargs: additional args for the post request
     :param label: label of progress bar
+    :param token: token to authorize the request
     :return: response from server
     """
     encoder = MultipartEncoder({'data': ('data', data, 'text/plain')})
@@ -95,7 +96,8 @@ def upload_with_progress_bar(data, url, kwargs, label=None):
               unit_divisor=1024) as bar:
         multipart_monitor = MultipartEncoderMonitor(encoder, lambda monitor: bar.update(monitor.bytes_read - bar.n))
         r = requests.post(url,
-                          data=multipart_monitor, headers={'Content-Type': multipart_monitor.content_type},
+                          data=multipart_monitor,
+                          headers={'Content-Type': multipart_monitor.content_type, 'X-Token': token},
                           params=kwargs)
 
     return r

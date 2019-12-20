@@ -1,9 +1,9 @@
 import time
 
 import requests
-
+from configobj import ConfigObj
+from kaos_cli.constants import CONFIG_PATH
 from utils import run_cmd, parse_serve_list, serve_and_assert, get_rand_str
-
 
 TIMEOUT = 150
 
@@ -30,8 +30,17 @@ def test_notebook(params):
     i = 0
     cond = True
     r = {}
+
+    # Get the token for authorizing with the serve endpoint
+    config = ConfigObj(CONFIG_PATH)
+    try:
+        token = config["MINIKUBE"]["backend"]["token"]
+    except KeyError:
+        token = config["DOCKER"]["backend"]["token"]
+
     while i < TIMEOUT and cond:
-        r = requests.get(f"http://localhost:{params['k8s_port']}/{serving_table[0][2]}/lab", allow_redirects=True)
+        r = requests.get(f"http://localhost:{params['k8s_port']}/{serving_table[0][2]}/lab", allow_redirects=True,
+                         headers={"X-Token": token})
         cond = r.status_code > 200
         time.sleep(10)
         i += 10

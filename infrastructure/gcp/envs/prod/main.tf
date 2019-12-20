@@ -124,6 +124,8 @@ module "ml_platform" {
   pachyderm_tag             = var.pachyderm_tag
   storage_backend           = "GOOGLE"
 
+  token = var.token
+
   data = {
     google-bucket = module.storage.storage_name
     google-cred   = file(var.credentials_path)

@@ -81,6 +81,7 @@ module "ml_platform" {
   api_cpu_limit = var.api_cpu_limit
 
   pachyderm_tag = var.pachyderm_tag
+  token = var.token
 
   data = {
     amazon-bucket = module.storage.bucket

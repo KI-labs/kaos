@@ -1,10 +1,14 @@
+import os
+
 import pytest
 from flask import Flask
 
-from kaos_backend.routes.train import build_train_blueprint
 from kaos_backend.controllers.train import TrainController
 from kaos_backend.exceptions.exceptions import JobNotFoundError, MetricNotFound, IncompleteDatumError
 from kaos_backend.exceptions.register import register_application_exception
+from kaos_backend.routes.train import build_train_blueprint
+
+os.environ["TOKEN"] = "TEST"
 
 
 @pytest.fixture()
@@ -34,20 +38,24 @@ def client(mocker):
 
 
 def test_train_info_existing_job(client):
-    r = client.get("/train/asdf/existing_job")
+    token = os.getenv("TOKEN")
+    r = client.get("/train/asdf/existing_job", headers={"X-Token": token})
     assert r.status_code == 200
 
 
 def test_train_info_no_job(client):
-    r = client.get("/train/asdf/nonexistent_job")
+    token = os.getenv("TOKEN")
+    r = client.get("/train/asdf/nonexistent_job", headers={"X-Token": token})
     assert r.status_code == 404
 
 
 def test_train_info_no_metric(client):
-    r = client.get("/train/asdf/job_no_metric")
+    token = os.getenv("TOKEN")
+    r = client.get("/train/asdf/job_no_metric", headers={"X-Token": token})
     assert r.status_code == 404
 
 
 def test_train_info_incomplete_datum(client):
-    r = client.get("/train/asdf/incomplete_datum")
+    token = os.getenv("TOKEN")
+    r = client.get("/train/asdf/incomplete_datum", headers={"X-Token": token})
     assert r.status_code == 500

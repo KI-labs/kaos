@@ -1,6 +1,5 @@
 import json
 import re
-from collections import OrderedDict
 
 import requests
 from kaos_cli.constants import WORKSPACE_CACHE, BACKEND, PACHYDERM, ACTIVE, DEFAULT
@@ -31,6 +30,10 @@ class WorkspaceFacade:
     def workspace(self):
         return self.state_service.get(PACHYDERM, 'workspace')
 
+    @property
+    def token(self):
+        return self.state_service.get_section(self.active_context, BACKEND, 'token')
+
     def create(self, name):
         base_url = self.url
         user = self.user
@@ -42,7 +45,8 @@ class WorkspaceFacade:
             raise WorkspaceExistsError(name)
 
         # POST /workspace/<name>
-        r = requests.post(f"{base_url}/workspace/{name}", params={"user": user})
+        r = requests.post(f"{base_url}/workspace/{name}", params={"user": user},
+                          headers={"X-Token": self.token})
 
         if r.status_code < 300:
             # set workspace to state
@@ -61,7 +65,7 @@ class WorkspaceFacade:
         name = self.workspace
 
         # GET /workspace/<name>
-        r = requests.get(f"{base_url}/workspace/{name}")
+        r = requests.get(f"{base_url}/workspace/{name}", headers={"X-Token": self.token})
 
         if r.status_code < 300:
             return r.json()
@@ -76,10 +80,13 @@ class WorkspaceFacade:
         name = self.workspace
 
         # DELETE /workspace/<name>
-        r = requests.delete(f"{base_url}/workspace/{name}")
-        if r.status_code >= 300:
-            raise RequestError(r.text)
+        r = requests.delete(f"{base_url}/workspace/{name}", headers={"X-Token": self.token})
 
+        if 300 <= r.status_code < 500:
+            err = Error.from_dict(r.json())
+            raise RequestError(err.message)
+        elif r.status_code == 500:
+            raise RequestError(r.text)
         # unset workspace (since killed)
         name = ""
         self.state_service.set(PACHYDERM, workspace=name)
@@ -93,8 +100,11 @@ class WorkspaceFacade:
         base_url = self.url
 
         # GET /workspace
-        r = requests.get(f"{base_url}/workspace")
-        if r.status_code >= 300:
+        r = requests.get(f"{base_url}/workspace", headers={"X-Token": self.token})
+        if 300 <= r.status_code < 500:
+            err = Error.from_dict(r.json())
+            raise RequestError(err.message)
+        elif r.status_code == 500:
             raise RequestError(r.text)
 
         data = r.json()

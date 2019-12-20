@@ -1,16 +1,16 @@
-import checksumdir
 import glob
 import os
-import requests
 import subprocess
 import time
 import uuid
 
-from utils import hash_file, get_rand_str, parse_train_info, parse_train_list,\
-    run_cmd, parse_serve_list, serve_and_assert
-
+import checksumdir
+import requests
 from PyPDF2 import PdfFileReader
-
+from configobj import ConfigObj
+from kaos_cli.constants import CONFIG_PATH
+from utils import hash_file, get_rand_str, parse_train_info, parse_train_list, \
+    run_cmd, parse_serve_list, serve_and_assert
 
 TIMEOUT = 150
 
@@ -136,7 +136,7 @@ def train_and_assert(workspace_name, expected_pretrained_jobs):
     print(f"code_path -> {code_path}")
     print(f"job id -> {job_id}")
     print(f"{training_table}")
-    
+
     assert checksumdir.dirhash(code_path, excluded_files=["__init__.py"]) == \
            checksumdir.dirhash("templates/property-val/model-train/property-val", excluded_files=["__init__.py"])
 
@@ -165,6 +165,15 @@ def train_and_assert(workspace_name, expected_pretrained_jobs):
 
 
 def test_train(params):
+    # Get the token for authorizing with the serve endpoint
+    config = ConfigObj(CONFIG_PATH)
+    try:
+        token = config["MINIKUBE"]["backend"]["token"]
+    except KeyError:
+        token = config["DOCKER"]["backend"]["token"]
+
+    print(token)
+
     subprocess.Popen(["kaos workspace list"],
                      shell=True, stdout=subprocess.PIPE).stdout.read()
 
@@ -208,7 +217,7 @@ def test_train(params):
     endpoint_name = serving_table[0][2]
     print(f"endpoing name: {endpoint_name}")
     r = requests.post(f"http://localhost:{params['k8s_port']}/{endpoint_name}/invocations",
-                      headers={"Content-Type": "application/json"},
+                      headers={"Content-Type": "application/json", "X-Token": token},
                       data=data)
 
     assert r.status_code == 200
@@ -226,7 +235,7 @@ def test_train(params):
     serve_code_path_matches = glob.glob(f"{serve_artifacts_dir}/*/*/code/property-val:*", recursive=True)
     assert len(serve_code_path_matches) == 1
     serve_code_path = serve_code_path_matches[0]
-    assert checksumdir.dirhash(serve_code_path, excluded_files=["__init__.py", "model.pkl"]) ==\
+    assert checksumdir.dirhash(serve_code_path, excluded_files=["__init__.py", "model.pkl"]) == \
            checksumdir.dirhash("templates/property-val/model-serve/property-val",
                                excluded_files=["__init__.py", "model.pkl"])
 
