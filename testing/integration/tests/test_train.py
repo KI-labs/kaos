@@ -1,11 +1,11 @@
+import checksumdir
 import glob
 import os
+import requests
 import subprocess
 import time
 import uuid
 
-import checksumdir
-import requests
 from PyPDF2 import PdfFileReader
 from configobj import ConfigObj
 from kaos_cli.constants import CONFIG_PATH
@@ -76,7 +76,7 @@ def train_and_assert(workspace_name, expected_pretrained_jobs):
     print(training_table)
     assert len(building_table) == 0
     assert len(training_table) == 1 + expected_pretrained_jobs
-    assert training_table[0][5] in ('JOB_RUNNING', 'JOB_SUCCESS')
+    assert training_table[0][5] in ('JOB_RUNNING', 'JOB_SUCCESS', 'JOB_MERGING')
 
     print("###############################################################")
     print("# wait if any training job is still running or merging")

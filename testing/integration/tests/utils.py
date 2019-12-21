@@ -4,7 +4,6 @@ import string
 import subprocess
 import time
 
-
 TIMEOUT = 150
 
 
@@ -68,12 +67,28 @@ def parse_serve_list(data):
     return building_table, serving_table
 
 
-def run_cmd(cmd):
+def run_cmd(cmd, env=None):
     print(cmd)
     prc = subprocess.Popen([cmd],
-                           shell=True, stdout=subprocess.PIPE)
+                           shell=True,
+                           stdout=subprocess.PIPE,
+                           stderr=subprocess.PIPE,
+                           env=env)
     prc.wait()
     return prc.returncode, prc.stdout, prc.stderr
+
+
+def run_cmd_error_check(code, stderr):
+    if code > 0:
+        if stderr is not None:
+            stderr = stderr.read().decode('utf-8')
+        raise Exception(f"run cmd error:\n{stderr}")
+
+
+def pretty_print(txt):
+    print("\n###############################################################\n"
+          f"# {txt}"
+          "\n###############################################################\n")
 
 
 def serve_and_assert(deploy_command, list_command):
@@ -135,4 +150,3 @@ def serve_and_assert(deploy_command, list_command):
     assert len(building_table) == 0
     assert len(serving_table) == 1
     assert serving_table[0][3] == 'PIPELINE_RUNNING'
-
