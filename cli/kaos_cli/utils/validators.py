@@ -88,7 +88,7 @@ def validate_index(n: int, ind: int, command: str):
     """
 
     # ensure index exists in indices
-    if -n <= ind < n:
+    if 0 <= ind < n:
         return ind
     else:
         raise IndexError(f"Index {ind} does not exist... Run `kaos {command} list` again")
