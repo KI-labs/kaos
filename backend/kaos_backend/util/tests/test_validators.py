@@ -17,14 +17,6 @@ def create_file(path):
     return temp
 
 
-def make_executable_file(path):
-    with open(path, 'w') as executable_file:
-        line = "#!"
-        executable_file.write(line)
-    executable_file.close()
-    return executable_file
-
-
 def remove_el(l, el):
     ll = l[:]
     ll.remove(el)
