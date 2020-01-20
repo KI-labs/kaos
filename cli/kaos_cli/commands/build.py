@@ -16,8 +16,13 @@ from kaos_cli.utils.rendering import render_table
 # BUILD group
 # =============
 @click.group(name='build', cls=CustomHelpOrder,
-             short_help=' {} and its {} '.format(
-                 click.style('build', bold=True), click.style('sub-commands', bold=True)))
+             short_help='{} and its {}: {}, {} and {}'.format(
+                 click.style('Infrastructure deployments', bold=True),
+                 click.style('sub-commands', bold=False),
+                 click.style('deploy', bold=True),
+                 click.style('list', bold=True),
+                 click.style('set', bold=True),
+                 click.style('active', bold=True)))
 def build():
     """
     Build command allows you to deploy infrastructre and list the available deployments
@@ -252,8 +257,9 @@ def get_active_context(backend: BackendFacade):
 
 
 @click.command(name='destroy',
-               short_help='{}'.format(
-                   click.style('Destroy the kaos backend', bold=True, fg='black')))
+               short_help='{} the {} backend'.format(
+                   click.style('Destroys', bold=True),
+                   click.style('kaos', bold=True)))
 @click.option('-c', '--cloud', type=click.Choice([DOCKER, MINIKUBE, AWS, GCP]),
               help='selected provider provider', required=True)
 @click.option('-e', '--env', type=click.Choice(['prod', 'stage', 'dev']),

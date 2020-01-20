@@ -30,8 +30,6 @@ class EnvironmentState:
         env_state = cls()
         env_state.cloud = cloud
         env_state.env = env
-        env_dir = f"{env_state.cloud}/{env_state.env}" if env_state.cloud not in [DOCKER, MINIKUBE] \
-            else f"{env_state.cloud}"
 
         infra_root = f"{PROVIDER_DICT.get(cloud)}"
 
@@ -110,7 +108,7 @@ def validate_index(n: int, ind: int, command: str):
     """
 
     # ensure index exists in indices
-    if -n <= ind < n:
+    if 0 <= ind < n:
         return ind
     else:
         raise IndexError(f"Index {ind} does not exist... Run `kaos {command} list` again")

@@ -219,7 +219,7 @@ class JobService:
 
             # separate logic for hyperopt since multiple files are on a single commit (only stats has "truth")
             if hyper_opt:
-                objs = self.client.list_file(f"{model_repo}/stats", path=f"/{datum.datum_info.datum.id}/pfs/out")[0]
+                objs = self.client.list_file(f"{model_repo}/stats", path=f"/{datum.datum_info.datum.id}/pfs/out")
             else:
                 objs = self.client.list_file(f"{model_repo}/{model_commit}", path="/")
 
