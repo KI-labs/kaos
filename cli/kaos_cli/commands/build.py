@@ -27,7 +27,7 @@ def build():
 
 @build.command(name='deploy',
                short_help='{}'.format(
-                   click.style('Build the kaos backend', bold=True, fg='black')))
+                   click.style('Build the kaos backend', bold=False, fg='white')))
 @click.option('-c', '--cloud', type=click.Choice([DOCKER, MINIKUBE, AWS, GCP]),
               help='selected provider', required=True)
 @click.option('-e', '--env', type=click.Choice(['prod', 'stage', 'dev']),
