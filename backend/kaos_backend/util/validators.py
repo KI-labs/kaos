@@ -32,7 +32,7 @@ class BundleValidator:
 
     MODEL = "model"
 
-    SHEBANG = "#!"
+    SHEBANG = re.compile(r"^(#!)")
 
     @classmethod
     def is_empty(cls, directory: str) -> bool:
@@ -95,7 +95,7 @@ class BundleValidator:
     def validate_is_file_executable(cls, executable_file, mode):
         f = open(executable_file)
         first_line = f.readline()
-        if cls.SHEBANG not in first_line:
+        if not re.match(cls.SHEBANG, first_line):
             raise InvalidBundleError(f"The {mode} file cannot be executed. "
                                      f"Please ensure that first line begins with the shebang '#!' "
                                      f"to make it an executable")
