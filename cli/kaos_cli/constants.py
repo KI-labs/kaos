@@ -98,3 +98,5 @@ PACHYDERM = 'pachyderm'
 CONTEXTS = 'contexts'
 ACTIVE = 'active'
 REMOTE = 'remote'
+
+TEST_CONFIG_PATH = os.path.join(KAOS_HOME, 'kaos_cli', 'facades', 'tests', 'fixtures', 'config')

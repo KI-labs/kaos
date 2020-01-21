@@ -93,13 +93,13 @@ def state_service_test_inputs():
 class TestStateService(TestCase):
 
     # Arrange
-    TestCase.backend = StateService()
+    TestCase.state_service = StateService()
     TestCase.switch = False
 
     def test_state_service_create(self):
 
         # Act
-        TestCase.backend.create()
+        TestCase.state_service.create()
 
         # Assert
         self.assertTrue(os.path.exists(KAOS_STATE_DIR))
@@ -107,15 +107,15 @@ class TestStateService(TestCase):
     def test_state_service_is_created(self):
 
         # Act
-        TestCase.backend.is_created(KAOS_STATE_DIR)
+        TestCase.state_service.is_created(KAOS_STATE_DIR)
 
         # Assert
-        self.assertEqual(True, TestCase.backend.is_created(KAOS_STATE_DIR))
+        self.assertEqual(True, TestCase.state_service.is_created(KAOS_STATE_DIR))
 
     def test_state_service_list_providers(self):
 
         # Act
-        provider_list = TestCase.backend.list_providers()
+        provider_list = TestCase.state_service.list_providers()
 
         # Assert
         self.assertEqual([], provider_list)
@@ -132,16 +132,16 @@ class TestStateService(TestCase):
                 context = str(context)
 
         # Act
-        TestCase.backend.set('section', context=context)
+        TestCase.state_service.set('section', context=context)
 
         # Assert
-        self.assertEqual(context, TestCase.backend.config['section']['context'])
+        self.assertEqual(context, TestCase.state_service.config['section']['context'])
 
         # Act
-        TestCase.backend.get('section', 'context')
+        TestCase.state_service.get('section', 'context')
 
         # Assert
-        self.assertEqual(context, TestCase.backend.config['section']['context'])
+        self.assertEqual(context, TestCase.state_service.config['section']['context'])
 
     @parameterized.expand(state_service_test_inputs)
     def test_state_service_set_and_get_sections(self, context, param):
@@ -155,60 +155,60 @@ class TestStateService(TestCase):
                 param = str(context)
 
         # Act
-        TestCase.backend.set_section('section', 'subsection', param=param)
+        TestCase.state_service.set_section('section', 'subsection', param=param)
 
         # Assert
-        self.assertEqual(param, TestCase.backend.config['section']['subsection']['param'])
+        self.assertEqual(param, TestCase.state_service.config['section']['subsection']['param'])
 
         # Act
-        TestCase.backend.get_section('section', 'subsection', 'param')
+        TestCase.state_service.get_section('section', 'subsection', 'param')
 
         # Assert
-        self.assertEqual(TestCase.backend.config['section']['subsection'],
-                         TestCase.backend.has_section('section', 'subsection'))
+        self.assertEqual(TestCase.state_service.config['section']['subsection'],
+                         TestCase.state_service.has_section('section', 'subsection'))
 
     def test_state_service_write(self):
 
         # Act
-        TestCase.backend.write()
+        TestCase.state_service.write()
 
         # Assert
-        self.assertEqual(TestCase.backend.config, ConfigObj(CONFIG_PATH))
+        self.assertEqual(TestCase.state_service.config, ConfigObj(CONFIG_PATH))
 
     @parameterized.expand(state_service_test_inputs)
     def test_state_service_has_section(self, context, param):
 
         # Arrange
-        TestCase.backend.set('section', context=context)
-        TestCase.backend.set_section('section', 'subsection', param=param)
+        TestCase.state_service.set('section', context=context)
+        TestCase.state_service.set_section('section', 'subsection', param=param)
 
         if not TestCase.switch:
             # Act
-            TestCase.backend.has_section('section', 'subsection')
+            TestCase.state_service.has_section('section', 'subsection')
 
             # Assert
-            self.assertEqual(TestCase.backend.config['section']['subsection'],
-                             TestCase.backend.has_section('section', 'subsection'))
+            self.assertEqual(TestCase.state_service.config['section']['subsection'],
+                             TestCase.state_service.has_section('section', 'subsection'))
 
             # Act
-            TestCase.backend.remove_section('section', 'subsection')
+            TestCase.state_service.remove_section('section', 'subsection')
 
             # Assert
             self.assertEqual("removed",
-                             "removed" if 'subsection' not in TestCase.backend.config['section'] else "not removed")
+                             "removed" if 'subsection' not in TestCase.state_service.config['section'] else "not removed")
 
     def test_state_service_remove(self):
 
         # Act
-        TestCase.backend.remove('section')
+        TestCase.state_service.remove('section')
 
         # Assert
-        self.assertEqual("removed", "removed" if 'section' not in TestCase.backend.config else "not removed")
+        self.assertEqual("removed", "removed" if 'section' not in TestCase.state_service.config else "not removed")
 
     def test_state_service_provider_delete(self):
 
         # Act
-        TestCase.backend.provider_delete(CONFIG_PATH)
+        TestCase.state_service.provider_delete(CONFIG_PATH)
 
         # Assert
         self.assertTrue(not os.path.exists(CONFIG_PATH))

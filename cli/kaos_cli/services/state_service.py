@@ -8,8 +8,8 @@ from kaos_cli.constants import KAOS_STATE_DIR, CONFIG_PATH, KAOS_TF_PATH
 
 class StateService:
 
-    def __init__(self, config=None):
-        self.config = config or ConfigObj(CONFIG_PATH)
+    def __init__(self):
+        self.config = ConfigObj(CONFIG_PATH)
 
     def set(self, section, **kwargs):
         self.config[section] = kwargs
