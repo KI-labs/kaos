@@ -395,3 +395,8 @@ class PachydermClient:
         app.logger.debug("@%s: delete all", PachydermClient.__name__)
         self.pps_client.delete_all()
         self.pfs_client.delete_all()
+
+    @handle_pachyderm_error
+    def create_branch(self, repo_name: str, branch_name: str):
+        app.logger.debug("@%s: check branch %s exists in %s", PachydermClient.__name__, branch_name, repo_name)
+        return self.pfs_client.create_branch(repo_name=repo_name, branch_name=branch_name)

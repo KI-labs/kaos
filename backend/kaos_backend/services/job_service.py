@@ -875,7 +875,7 @@ class JobService:
 
         # build dynamic output_branch
         output_branch = self.build_output_branch(image_name, data_name, hyper_name)
-        self.client.pfs_client.create_branch(repo_name=pipeline_name, branch_name=output_branch)
+        self.client.create_branch(repo_name=pipeline_name, branch_name=output_branch)
 
         data_input = proto.Input(pfs=proto.PFSInput(glob=f"/{data_name}",
                                                     repo=data_repo,
@@ -931,7 +931,7 @@ class JobService:
             app.logger.debug(pipeline_def["output_branch"])
 
             if not self.client.check_branch_exists(repo=pipeline_name, branch=pipeline_def["output_branch"]):
-                self.client.pfs_client.create_branch(repo_name=pipeline_name, branch_name=pipeline_def["output_branch"])
+                self.client.create_branch(repo_name=pipeline_name, branch_name=pipeline_def["output_branch"])
 
             # format according to create_pipeline
             data_input = proto.Input(pfs=proto.PFSInput(glob=pipeline_def["data_glob"],
