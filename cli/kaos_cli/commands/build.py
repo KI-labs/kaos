@@ -16,7 +16,7 @@ from kaos_cli.utils.rendering import render_table
 # BUILD group
 # =============
 @click.group(name='build', cls=CustomHelpOrder,
-             short_help='{} and its {}: {}, {} and {}'.format(
+             short_help='{} and its {}: {}, {}, {} and {}'.format(
                  click.style('Infrastructure deployments', bold=True),
                  click.style('sub-commands', bold=False),
                  click.style('deploy', bold=True),
