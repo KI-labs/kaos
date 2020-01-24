@@ -1,7 +1,7 @@
 import click
 from kaos_cli.factories.simple_factory import SimpleFactory
 
-from .commands.build import build, destroy
+from .commands.build import build, destroy, list_all
 from .commands.initialization import init
 from .commands.notebook import notebook
 from .commands.serve import serve

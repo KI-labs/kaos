@@ -8,7 +8,73 @@ import click
 import textdistance
 from kaos_cli.exceptions.exceptions import MissingArgumentError
 
-from ..constants import KAOS_STATE_DIR, DOCKER, MINIKUBE, KAOS_TF_PATH
+from ..constants import KAOS_STATE_DIR, DOCKER, MINIKUBE, KAOS_TF_PATH, TF_STATE
+
+
+class EnvironmentState:
+    """
+    This class is used to validate existence of already built environmnets
+    """
+    def __init__(self):
+        self.cloud = None
+        self.env = None
+        self.build_dir = None
+        self.tf_state_path = None
+        self.if_build_dir_exists = None
+        self.if_tfstate_exists = None
+
+    @classmethod
+    def initialize(cls, cloud, env) -> "EnvironmentState":
+        env_state = cls()
+        env_state.cloud = cloud
+        env_state.env = env
+        env_dir = f"{env_state.cloud}/{env_state.env}" if env_state.cloud not in [DOCKER, MINIKUBE] \
+            else f"{env_state.cloud}"
+        build_dir = os.path.join(KAOS_TF_PATH, env_dir)
+        tf_state_path = os.path.join(KAOS_TF_PATH, env_dir, f"{TF_STATE}")
+        env_state.if_build_dir_exists = os.path.exists(build_dir)
+        env_state.if_tfstate_exists = os.path.exists(tf_state_path)
+        env_state.build_dir = build_dir
+        env_state.tf_state_path = tf_state_path
+        return env_state
+
+    def validate_if_tfstate_exits(self) -> "EnvironmentState":
+        """
+        Ensure existence of kaos backend dir (tf_path) and throw appropriate warnings if it does not exist
+        """
+        if not self.if_tfstate_exists:
+            if self.env:
+                    click.echo("{} - {} [{}] backend in {} has not been deployed!".format(
+                        click.style("Warning", bold=True, fg='yellow'),
+                        click.style('kaos', bold=True),
+                        click.style(self.env, bold=True, fg='blue'),
+                        click.style(self.cloud, bold=True, fg='red')
+                    ))
+            elif not self.env:
+                click.echo("{} - {} backend in {} has not been deployed!".format(
+                    click.style("Warning", bold=True, fg='yellow'),
+                    click.style('kaos', bold=True),
+                    click.style(self.cloud, bold=True, fg='red')
+                ))
+            sys.exit(1)
+        else:
+            pass
+
+    def set_build_env(self) -> "EnvironmentState":
+        """
+        Simple method to ensure the right env is set for local v cloud kaos build
+        """
+
+        if self.env and self.cloud in [DOCKER, MINIKUBE]:
+            click.echo("{} - {} (-e/--env) is not applicable for {} deployment".format(
+                click.style("Warning", bold=True, fg='yellow'),
+                click.style("ENV", bold=True),
+                click.style(self.cloud, bold=True, fg='red')))
+            self.env = None
+        elif self.cloud in [DOCKER, MINIKUBE]:
+            self.env = None
+        else:
+            self.env = 'prod' if not self.env else self.env  # default = prod
 
 
 def validate_index(n: int, ind: int, command: str):
@@ -22,7 +88,7 @@ def validate_index(n: int, ind: int, command: str):
     """
 
     # ensure index exists in indices
-    if -n <= ind < n:
+    if 0 <= ind < n:
         return ind
     else:
         raise IndexError(f"Index {ind} does not exist... Run `kaos {command} list` again")
@@ -111,63 +177,13 @@ def validate_manifest_file(file_name) -> bool:
     return True
 
 
-def validate_build_env(cloud, env):
-    """
-    Simple validation of kaos build ENV
-
-    Args:
-        cloud (str): selected cloud backend
-        env (str): selected ENV
-
-    """
-
-    try:
-        if env and cloud in [DOCKER, MINIKUBE]:
-            click.echo("{} - {} (-e/--env) is not applicable for {} deployment".format(
-                click.style("Warning", bold=True, fg='yellow'),
-                click.style("ENV", bold=True),
-                click.style(cloud, bold=True, fg='red')))
-            return None
-        elif cloud in [DOCKER, MINIKUBE]:
-            return None
-        else:
-            return 'prod' if not env else env  # default = prod
-    except KeyError:
-        click.echo('{} - Key Error'.format(click.style("Aborting", bold=True, fg='red')))
-        sys.exit(1)
-
-
-def validate_build_dir(path):
-    """
-    Ensure existence of kaos backend dir
-
-    Args:
-        path (str): path containing kaos backend dir
-
-    """
-    if not os.path.exists(path):
-        cloud, *env = os.path.relpath(path, KAOS_TF_PATH).split('/')
-        if env:
-            click.echo("{} - {} [{}] backend in {} has not been deployed!".format(
-                click.style("Warning", bold=True, fg='yellow'),
-                click.style('kaos', bold=True),
-                click.style(env[0], bold=True, fg='blue'),
-                click.style(cloud, bold=True, fg='red')
-            ))
-        else:
-            click.echo("{} - {} backend in {} has not been deployed!".format(
-                click.style("Warning", bold=True, fg='yellow'),
-                click.style('kaos', bold=True),
-                click.style(cloud, bold=True, fg='red')
-            ))
-        sys.exit(1)
-
-def validate_unused_port(port: int, host: str='0.0.0.0') -> bool:
+def validate_unused_port(port: int, host: str = '0.0.0.0') -> bool:
     """
     Validate that a specific network port is unused.
 
     Args:
         port (int): the integer port number to check
+        host (str): hostip
     """
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         # Try to bind to a port, if it raises a socket error, 
@@ -177,3 +193,4 @@ def validate_unused_port(port: int, host: str='0.0.0.0') -> bool:
             return True
         except socket.error:
             return False
+

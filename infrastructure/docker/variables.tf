@@ -35,3 +35,6 @@ variable "api_cpu_request" {
 variable "api_cpu_limit" {
   default = "1"
 }
+
+variable "token" {
+}

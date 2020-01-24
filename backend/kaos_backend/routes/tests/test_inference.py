@@ -1,10 +1,14 @@
+import os
+
 import pytest
-from kaos_backend.exceptions.register import register_application_exception
 from flask import Flask
 
-from kaos_backend.routes.inference import build_inference_blueprint
 from kaos_backend.controllers.inference import InferenceController
 from kaos_backend.exceptions.exceptions import PipelineNotFoundError, PipelineInStandby
+from kaos_backend.exceptions.register import register_application_exception
+from kaos_backend.routes.inference import build_inference_blueprint
+
+os.environ["TOKEN"] = "TEST"
 
 
 @pytest.fixture()
@@ -32,15 +36,18 @@ def client(mocker):
 
 
 def test_inference_get_logs(client):
-    r = client.get("/inference/existing_endpoing/logs")
+    token = os.getenv("TOKEN")
+    r = client.get("/inference/existing_endpoing/logs", headers={"X-Token": token})
     assert r.status_code == 200
 
 
 def test_inference_get_logs_nonexistent_endpoint(client):
-    r = client.get("/inference/nonexistent_endpoint/logs")
+    token = os.getenv("TOKEN")
+    r = client.get("/inference/nonexistent_endpoint/logs", headers={"X-Token": token})
     assert r.status_code == 404
 
 
 def test_inference_get_logs_standby_endpoint(client):
-    r = client.get("/inference/standby_endpoint/logs")
+    token = os.getenv("TOKEN")
+    r = client.get("/inference/standby_endpoint/logs", headers={"X-Token": token})
     assert r.status_code == 500

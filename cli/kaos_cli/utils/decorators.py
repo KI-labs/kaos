@@ -1,6 +1,6 @@
 import os
 import sys
-from configparser import ConfigParser, ExtendedInterpolation
+from configobj import ConfigObj
 
 import click
 import requests
@@ -138,8 +138,7 @@ def workspace_check(func):
     """
 
     def wrapper(*args, **kwargs):
-        config = ConfigParser(interpolation=ExtendedInterpolation())
-        config.read(CONFIG_PATH)
+        config = ConfigObj(CONFIG_PATH)
 
         if 'pachyderm' not in config:
             click.echo("{} - {} not defined - first run {}".format(
@@ -148,12 +147,19 @@ def workspace_check(func):
                 click.style("kaos workspace set", bold=True, fg='green')))
             sys.exit(1)
 
+        # get active context
+        active_context = config['active']['environment']
+
         # get base_url
-        base_url = config.get('backend', 'url')
-        current_workspace = config.get('pachyderm', 'workspace')
+        base_url = config[active_context]['backend']['url']
+        token = config[active_context]['backend']['token']
+        current_workspace = config['pachyderm']['workspace']
 
         # GET all workspaces: /workspace
-        r = requests.get(f"{base_url}/workspace")
+        r = requests.get(f"{base_url}/workspace", headers={"X-Token": token})
+        if r.status_code == 401:
+            click.echo("Unauthorized token")
+            sys.exit(1)
         data = r.json()
         workspaces_list = [v for v in data['names']]
 
@@ -172,17 +178,64 @@ def workspace_check(func):
     return wrapper
 
 
+def context_check(func):
+    """
+    Decorator for confirming an active_context is defined in the CONFIG_PATH (i.e. kaos build set has been run).
+    """
+
+    def wrapper(*args, **kwargs):
+        config = ConfigObj(CONFIG_PATH)
+
+        if 'active' not in config:
+            click.echo("{} - {} not defined - first run {}".format(
+                click.style("Warning", bold=True, fg='yellow'),
+                click.style("active context", bold=True, fg='red'),
+                click.style("kaos build set", bold=True, fg='green')))
+            sys.exit(1)
+
+        # get active context
+        active_context = config['active']['environment']
+
+        # GET all contexts
+        contexts = config['contexts']['environments']
+
+        def __validate_context(context, active_context):
+            return context == active_context
+
+        if isinstance(contexts, list):
+            for context in contexts:
+                active_context_exists = __validate_context(context, active_context)
+        elif isinstance(contexts, str):
+            active_context_exists = __validate_context(contexts, active_context)
+
+        if not active_context_exists:
+            click.echo("{} - Active context/build {} has been {}. \n\n"
+                       "Please ensure the kaos build set is done on an existing/available deployment. \n\n"
+                       "Check available contexts with - {}".format(
+                click.style("Warning", bold=True, fg='yellow'),
+                click.style(active_context, bold=True, fg='green'),
+                click.style("destroyed", bold=True, fg='red'),
+                click.style("kaos build list", bold=True, fg='green')))
+            sys.exit(1)
+
+        func(*args, **kwargs)
+
+    return wrapper
+
+
 def health_check(func):
     """
     Decorator for confirming endpoint is running.
     """
 
     def wrapper(*args, **kwargs):
-        config = ConfigParser(interpolation=ExtendedInterpolation())
-        config.read(CONFIG_PATH)
+        config = ConfigObj(CONFIG_PATH)
+
+        # get active context
+        active_context = config['active']['environment']
 
         # get base_url
-        base_url = config.get('backend', 'url')
+        base_url = config[active_context]['backend']['url']
 
         try:
             func(*args, **kwargs)

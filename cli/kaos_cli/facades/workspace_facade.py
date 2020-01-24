@@ -1,9 +1,8 @@
 import json
 import re
-from collections import OrderedDict
 
 import requests
-from kaos_cli.constants import WORKSPACE_CACHE, BACKEND, PACHYDERM
+from kaos_cli.constants import WORKSPACE_CACHE, BACKEND, PACHYDERM, ACTIVE, DEFAULT
 from kaos_cli.exceptions.exceptions import RequestError, WorkspaceExistsError, InvalidWorkspaceError
 from kaos_cli.services.state_service import StateService
 from kaos_cli.utils.validators import find_similar_term, invalidate_cache, validate_cache, validate_index
@@ -16,16 +15,24 @@ class WorkspaceFacade:
         self.state_service = state_service
 
     @property
+    def active_context(self):
+        return self.state_service.get(ACTIVE, 'environment')
+
+    @property
     def url(self):
-        return self.state_service.get(BACKEND, 'url')
+        return self.state_service.get_section(self.active_context, BACKEND, 'url')
 
     @property
     def user(self):
-        return self.state_service.get(BACKEND, 'user')
+        return self.state_service.get(DEFAULT, 'user')
 
     @property
     def workspace(self):
         return self.state_service.get(PACHYDERM, 'workspace')
+
+    @property
+    def token(self):
+        return self.state_service.get_section(self.active_context, BACKEND, 'token')
 
     def create(self, name):
         base_url = self.url
@@ -38,7 +45,8 @@ class WorkspaceFacade:
             raise WorkspaceExistsError(name)
 
         # POST /workspace/<name>
-        r = requests.post(f"{base_url}/workspace/{name}", params={"user": user})
+        r = requests.post(f"{base_url}/workspace/{name}", params={"user": user},
+                          headers={"X-Token": self.token})
 
         if r.status_code < 300:
             # set workspace to state
@@ -57,7 +65,7 @@ class WorkspaceFacade:
         name = self.workspace
 
         # GET /workspace/<name>
-        r = requests.get(f"{base_url}/workspace/{name}")
+        r = requests.get(f"{base_url}/workspace/{name}", headers={"X-Token": self.token})
 
         if r.status_code < 300:
             return r.json()
@@ -72,12 +80,16 @@ class WorkspaceFacade:
         name = self.workspace
 
         # DELETE /workspace/<name>
-        r = requests.delete(f"{base_url}/workspace/{name}")
-        if r.status_code >= 300:
-            raise RequestError(r.text)
+        r = requests.delete(f"{base_url}/workspace/{name}", headers={"X-Token": self.token})
 
+        if 300 <= r.status_code < 500:
+            err = Error.from_dict(r.json())
+            raise RequestError(err.message)
+        elif r.status_code == 500:
+            raise RequestError(r.text)
         # unset workspace (since killed)
-        self.state_service.remove_section(PACHYDERM)
+        name = ""
+        self.state_service.set(PACHYDERM, workspace=name)
         self.state_service.write()
 
         # invalidate workspace cache
@@ -88,8 +100,11 @@ class WorkspaceFacade:
         base_url = self.url
 
         # GET /workspace
-        r = requests.get(f"{base_url}/workspace")
-        if r.status_code >= 300:
+        r = requests.get(f"{base_url}/workspace", headers={"X-Token": self.token})
+        if 300 <= r.status_code < 500:
+            err = Error.from_dict(r.json())
+            raise RequestError(err.message)
+        elif r.status_code == 500:
             raise RequestError(r.text)
 
         data = r.json()
@@ -113,8 +128,8 @@ class WorkspaceFacade:
     @staticmethod
     def get_workspace_by_ind(ind):
         data = validate_cache(WORKSPACE_CACHE, command='workspace')
-        loc = validate_index(len(data['ind']), ind, command='workspace')
-        return data['name'][loc]
+        loc = validate_index(len(data), ind, command='workspace')
+        return data[loc]['name']
 
     def find_similar_workspaces(self, name):
         workspaces = self.list(as_dict=False)['names']

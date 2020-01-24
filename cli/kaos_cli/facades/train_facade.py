@@ -2,7 +2,7 @@ import json
 import os
 
 import requests
-from kaos_cli.constants import PACHYDERM, BACKEND, TRAIN_CACHE
+from kaos_cli.constants import PACHYDERM, BACKEND, TRAIN_CACHE, ACTIVE, DEFAULT
 from kaos_cli.exceptions.exceptions import RequestError
 from kaos_cli.utils.helpers import build_dir, upload_with_progress_bar
 from kaos_cli.utils.validators import validate_cache, validate_index
@@ -14,23 +14,31 @@ class TrainFacade:
         self.state_service = state_service
 
     @property
+    def active_context(self):
+        return self.state_service.get(ACTIVE, 'environment')
+
+    @property
     def url(self):
-        return self.state_service.get(BACKEND, 'url')
+        return self.state_service.get_section(self.active_context, BACKEND, 'url')
 
     @property
     def user(self):
-        return self.state_service.get(BACKEND, 'user')
+        return self.state_service.get(DEFAULT, 'user')
 
     @property
     def workspace(self):
         return self.state_service.get(PACHYDERM, 'workspace')
+
+    @property
+    def token(self):
+        return self.state_service.get_section(self.active_context, BACKEND, 'token')
 
     def list(self):
         base_url = self.url
         name = self.workspace
 
         # GET /train/<name>
-        r = requests.get(f"{base_url}/train/{name}")
+        r = requests.get(f"{base_url}/train/{name}", headers={"X-Token": self.token})
         if r.status_code < 300:
             return r.json()
         elif 400 <= r.status_code < 500:
@@ -44,7 +52,8 @@ class TrainFacade:
         name = self.workspace
 
         # GET /train/<name>/<job_id>
-        r = requests.get(f"{base_url}/train/{name}/{job_id}", params={'sort_by': sort_by, 'page_id': page_id})
+        r = requests.get(f"{base_url}/train/{name}/{job_id}", params={'sort_by': sort_by, 'page_id': page_id},
+                         headers={"X-Token": self.token})
 
         if r.status_code < 300:
             return r.json()
@@ -63,7 +72,7 @@ class TrainFacade:
         name = self.workspace
 
         # get status of training queue
-        r = requests.get(f"{base_url}/train/{name}/inspect")
+        r = requests.get(f"{base_url}/train/{name}/inspect", headers={"X-Token": self.token})
         if r.status_code == 200:
             data = r.json()
         else:
@@ -81,7 +90,8 @@ class TrainFacade:
                              "include_data": include_data,
                              "include_model": include_model,
                              "model_id": model_id
-                         })
+                         },
+                         headers={"X-Token": self.token})
 
         if r.status_code < 300:
             return name, r.content
@@ -99,7 +109,8 @@ class TrainFacade:
         prov_dir = build_dir(out_dir, name, 'provenance')
 
         # GET /train/<name>/<model_id>/provenance
-        r = requests.get(f"{base_url}/train/{name}/{model_id}/provenance")
+        r = requests.get(f"{base_url}/train/{name}/{model_id}/provenance",
+                         headers={"X-Token": self.token})
 
         if r.status_code < 300:
             out_fid = os.path.join(prov_dir, f"model-{model_id}")
@@ -115,7 +126,7 @@ class TrainFacade:
         name = self.workspace
 
         # GET /train/<name>/<job_id>/logs
-        r = requests.get(f"{base_url}/train/{name}/{job_id}/logs")
+        r = requests.get(f"{base_url}/train/{name}/{job_id}/logs", headers={"X-Token": self.token})
 
         if r.status_code < 300:
             return r.json()
@@ -130,7 +141,7 @@ class TrainFacade:
         workspace = self.workspace
 
         # GET /train/<workspace>/<job_id>
-        r = requests.delete(f"{base_url}/train/{workspace}/{job_id}")
+        r = requests.delete(f"{base_url}/train/{workspace}/{job_id}", headers={"X-Token": self.token})
 
         if r.status_code < 300:
             return r.json()
@@ -154,7 +165,7 @@ class TrainFacade:
         name = self.workspace
 
         # GET /train/<name>/<job_id>/logs
-        r = requests.get(f"{base_url}/build/{name}/{job_id}/logs")
+        r = requests.get(f"{base_url}/build/{name}/{job_id}/logs", headers={"X-Token": self.token})
 
         if r.status_code >= 300:
             err = Error.from_json(r.json())
@@ -178,7 +189,8 @@ class TrainFacade:
 
         kwargs['user'] = user
         with open(bundle_file, 'rb') as data:
-            r = upload_with_progress_bar(data, f"{base_url}/train/{name}", kwargs, "  Uploading source bundle")
+            r = upload_with_progress_bar(data, f"{base_url}/train/{name}", kwargs, "  Uploading source bundle",
+                                         self.token)
 
         if r.status_code < 300:
             return r.json()
@@ -194,7 +206,8 @@ class TrainFacade:
         user = self.user
         kwargs['user'] = user
         with open(bundle_file, 'rb') as data:
-            r = upload_with_progress_bar(data, f"{base_url}/data/{name}/features", kwargs, "  Uploading data bundle")
+            r = upload_with_progress_bar(data, f"{base_url}/data/{name}/features", kwargs, "  Uploading data bundle",
+                                         self.token)
 
         if r.status_code < 300:
             return r.json()
@@ -215,7 +228,7 @@ class TrainFacade:
             r = upload_with_progress_bar(manif_f,
                                          f"{base_url}/data/{name}/manifest",
                                          kwargs,
-                                         "  Uploading manifest bundle")
+                                         "  Uploading manifest bundle", self.token)
 
             if r.status_code < 300:
                 return r.json()
@@ -239,7 +252,7 @@ class TrainFacade:
             f = json.dumps({})
             label = None
 
-        r = upload_with_progress_bar(f, f"{base_url}/data/{name}/params", kwargs, label=label)
+        r = upload_with_progress_bar(f, f"{base_url}/data/{name}/params", kwargs, label=label, token=self.token)
 
         if r.status_code < 300:
             return r.json()

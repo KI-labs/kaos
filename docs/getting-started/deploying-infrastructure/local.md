@@ -52,7 +52,7 @@ service/kubernetes   ClusterIP   10.96.0.1    <none>        443/TCP   2m
 Lastly, a **local** kaos cluster with **Docker Desktop** is built and destroyed as follows.
 
 ```bash
-kaos build -c DOCKER -v
+kaos build deploy -c DOCKER -v
 kaos destroy -c DOCKER -v
 ```
 
@@ -65,7 +65,7 @@ kaos destroy -c DOCKER -v
 kaos can be built and destroyed within **minikube** with the following commands.
 
 ```bash
-kaos build -c MINIKUBE -v
+kaos build deploy -c MINIKUBE -v
 kaos destroy -c MINIKUBE -v
 ```
 

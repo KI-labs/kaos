@@ -28,10 +28,10 @@ The current version of kaos supports both [**Local**](local.md) and [**Cloud**](
 
 {% page-ref page="cloud.md" %}
 
-Deploying infrastructure \(regardless of location\) is completed with the same command - `kaos build`. All available options are shown below.
+Deploying infrastructure \(regardless of location\) is completed with the same command - `kaos build deploy`. All available options are shown below.
 
 ```text
-Usage: kaos build [OPTIONS]
+Usage: kaos build deploy [OPTIONS]
 
 Options:
   -c, --cloud [DOCKER|MINIKUBE|AWS|GCP]
