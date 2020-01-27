@@ -152,11 +152,14 @@ def workspace_check(func):
 
         # get base_url
         base_url = config[active_context]['backend']['url']
-
+        token = config[active_context]['backend']['token']
         current_workspace = config['pachyderm']['workspace']
 
         # GET all workspaces: /workspace
-        r = requests.get(f"{base_url}/workspace")
+        r = requests.get(f"{base_url}/workspace", headers={"X-Token": token})
+        if r.status_code == 401:
+            click.echo("Unauthorized token")
+            sys.exit(1)
         data = r.json()
         workspaces_list = [v for v in data['names']]
 
@@ -179,6 +182,7 @@ def context_check(func):
     """
     Decorator for confirming an active_context is defined in the CONFIG_PATH (i.e. kaos build set has been run).
     """
+
     def wrapper(*args, **kwargs):
         config = ConfigObj(CONFIG_PATH)
 

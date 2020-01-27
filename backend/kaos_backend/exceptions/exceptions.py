@@ -92,3 +92,7 @@ class GPURequestError(ApplicationError):
 
 class MemoryRequestError(ApplicationError):
     pass
+
+
+class AuthorizationError(ApplicationError):
+    pass

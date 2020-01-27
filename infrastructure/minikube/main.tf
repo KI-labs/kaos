@@ -19,6 +19,7 @@ module "ml_platform" {
   api_memory_limit = var.api_memory_limit
   api_cpu_request = var.api_cpu_request
   api_cpu_limit = var.api_cpu_limit
+  token = var.token
 }
 
 module "docker_build" {
