@@ -1,28 +1,24 @@
+import os
+import shutil
 from parameterized import parameterized
-import re
-from unittest import TestCase
+from unittest import TestCase, skip
 
 from kaos_cli.facades.backend_facade import BackendFacade
 from kaos_cli.services.terraform_service import TerraformService
 from kaos_cli.services.state_service import StateService
 from kaos_cli.services.terraform_service import Command
-from kaos_cli.constants import CONFIG_PATH, ACTIVE, DEFAULT, CONTEXTS
+from kaos_cli.constants import CONFIG_PATH, ACTIVE, DEFAULT, CONTEXTS, KAOS_STATE_DIR
 
 
 def backend_facade_test_inputs():
+
+    common = ('backend', 'url', 'token', 'infrastructure', 'kubeconfig', 'user')
+
     return [
-        (
-            'DOCKER', 'backend', 'url', 'token', 'infrastructure', 'kubeconfig', 'user'
-        ),
-        (
-            'GCP', 'backend', 'url', 'token', 'infrastructure', 'kubeconfig', 'user'
-        ),
-        (
-            'AWS', 'backend', 'url', 'token', 'infrastructure', 'kubeconfig', 'user'
-        ),
-        (
-            'Remote1', 'backend', 'url', 'token', 'infrastructure', 'kubeconfig', 'user'
-        ),
+        ('DOCKER',) + common,
+        ('GCP',) + common,
+        ('AWS',) + common,
+        ('Remote1',) + common,
     ]
 
 
@@ -37,20 +33,22 @@ class TestBackendFacade(TestCase):
     def manipulate_context_list(self, context_list):
         self.state_service.set(CONTEXTS, environments=context_list)
 
-    # Arrange
-    TestCase.state_service = StateService()
-    TestCase.command = Command()
-    TestCase.tf_service = TerraformService(cmd=TestCase.command)
-
     def arrange_test_fixtures(self, environment, backend, url, token, infra, kubeconfig, user):
         # Arrange
+        # Instantiation
+        self.state_service = StateService()
+        self.command = Command()
+        self.tf_service = TerraformService(cmd=self.command)
+
+        # Arrange
+        # Initialization
         self.state_service.set(ACTIVE, environment=environment)
         self.state_service.set(CONTEXTS, environments=environment)
         self.state_service.set(DEFAULT, user=user)
         self.state_service.set(environment)
         self.state_service.set_section(environment, backend, url=url, token=token)
         self.state_service.set_section(environment, infra, kubeconfig=kubeconfig)
-        self.facade = BackendFacade(TestCase.state_service, TestCase.tf_service)
+        self.facade = BackendFacade(self.state_service, self.tf_service)
 
     @parameterized.expand(backend_facade_test_inputs)
     def test_method_get_active_context(self, environment, backend, url, token, infra, kubeconfig, user):
@@ -123,6 +121,7 @@ class TestBackendFacade(TestCase):
         # Assert
         self.assertEqual(kubeconfig_property, kubeconfig)
 
+    @skip("Skipping test for init method")
     @parameterized.expand(backend_facade_test_inputs)
     def test_method_init(self, environment, backend, url, token, infra, kubeconfig, user):
         # Arrange
@@ -264,9 +263,6 @@ class TestBackendFacade(TestCase):
         self.assertFalse(is_set)
         self.assertIsNone(current_context)
 
-    def test_remove_build_files(self):
-        pass
-
     @parameterized.expand(backend_facade_test_inputs)
     def test_method_set_context_list(self, environment, backend, url, token, infra, kubeconfig, user):
         # Arrange
@@ -345,24 +341,19 @@ class TestBackendFacade(TestCase):
         # Assert
         self.assertIsNone(active_context)
 
+    @parameterized.expand(backend_facade_test_inputs)
+    def test_method_remove_build_files(self, environment, backend, url, token, infra, kubeconfig, user):
 
+        # Arrange
+        self.arrange_test_fixtures(environment, backend, url, token, infra, kubeconfig, user)
+        test_path = os.path.join(KAOS_STATE_DIR, 'test')
+        os.mkdir(test_path)
 
+        # Act
+        self.facade._remove_build_files(test_path)
 
+        # Assert
+        self.assertFalse(os.path.exists(test_path))
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        # Rearrange
+        shutil.rmtree(test_path, ignore_errors=True)

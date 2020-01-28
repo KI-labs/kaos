@@ -46,10 +46,6 @@ class StateService:
         return [f for f in glob.glob(f'{KAOS_TF_PATH}/**/terraform.tfstate', recursive=True)]
 
     @staticmethod
-    def provider_delete(dir_build):
-        shutil.rmtree(dir_build, ignore_errors=True)
-
-    @staticmethod
     def full_delete(dir_build):
         shutil.rmtree(dir_build, ignore_errors=True)
 

@@ -9,7 +9,17 @@ from kaos_cli.utils.helpers import verbose_run
 from kaos_cli.constants import KAOS_STATE_DIR
 
 
-def command_append_data():
+def test_inputs_append_data():
+
+    """Returns different combinations of test input data/parameters that are used in the unit tests
+    :parameter:
+
+    :return: list
+    a list of tuples consisting of different set of parameter combinations
+    Ex: [(command1), ([command1, command2]), ([command1, command2, command3])..]
+
+    """
+
     return [
         (
             [],
@@ -27,7 +37,16 @@ def command_append_data():
     ]
 
 
-def command_execute_data():
+def test_inputs_execute_data():
+
+    """Returns different combinations of test input data/parameters that are used in the unit tests
+    :parameter:
+
+    :return: list
+    a list of tuples consisting of different parameter combinations
+    Ex: [(command1), ([command1, command2]), ([command1, command2, command3])..]
+
+    """
     return [
         (
             ['echo <---first_echo_command--->', 'echo <--- executing the second echo command --->'],
@@ -41,7 +60,7 @@ def command_execute_data():
 
 class TestTerraformService(TestCase):
 
-    @parameterized.expand(command_append_data)
+    @parameterized.expand(test_inputs_append_data)
     def test_command_append(self, command_append_data):
 
         # Arrange
@@ -54,7 +73,7 @@ class TestTerraformService(TestCase):
         # Assert
         self.assertEqual(command.history, command_append_data)
 
-    @parameterized.expand(command_execute_data)
+    @parameterized.expand(test_inputs_execute_data)
     def test_command_execute(self, command_execute_data):
 
         # Arrange
@@ -69,7 +88,7 @@ class TestTerraformService(TestCase):
         # Assert
         self.assertEqual(exitcode, 0)
 
-    @parameterized.expand(command_append_data)
+    @parameterized.expand(test_inputs_append_data)
     def test_command_clear(self, command_append_data):
 
         # Arrange
@@ -84,7 +103,7 @@ class TestTerraformService(TestCase):
         # Assert
         self.assertEqual(command.history, [])
 
-    @parameterized.expand(command_execute_data)
+    @parameterized.expand(test_inputs_execute_data)
     def test_command_verbose_true(self, command_execute_data):
 
         # Arrange
@@ -100,7 +119,7 @@ class TestTerraformService(TestCase):
                 self.assertEqual(command.run_cmd.func, verbose_run)
                 self.assertEqual(command.run_cmd.args[0], True)
 
-    @parameterized.expand(command_execute_data)
+    @parameterized.expand(test_inputs_execute_data)
     def test_command_verbose_false(self, command_execute_data):
 
         # Arrange
@@ -116,7 +135,7 @@ class TestTerraformService(TestCase):
                 self.assertEqual(command.run_cmd.func, verbose_run)
                 self.assertEqual(command.run_cmd.args[0], False)
 
-    @parameterized.expand(command_execute_data)
+    @parameterized.expand(test_inputs_execute_data)
     def test_tf_service_set_verbose_True(self, command_execute_data):
 
         # Arrange
@@ -136,7 +155,7 @@ class TestTerraformService(TestCase):
         self.assertEqual(tf_service.cmd.run_cmd.func, verbose_run)
         self.assertEqual(tf_service.cmd.run_cmd.args[0], True)
 
-    @parameterized.expand(command_execute_data)
+    @parameterized.expand(test_inputs_execute_data)
     def test_tf_service_set_verbose_False(self, command_execute_data):
 
         # Arrange
@@ -271,7 +290,7 @@ class TestTerraformService(TestCase):
         # Assert
         self.assertEqual(tf_service.cmd.history, command_history)
 
-    @parameterized.expand(command_execute_data)
+    @parameterized.expand(test_inputs_execute_data)
     def test_tf_service_execute(self, command_execute_data):
 
         # Arrange
