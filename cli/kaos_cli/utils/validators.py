@@ -9,7 +9,7 @@ import click
 import textdistance
 from kaos_cli.exceptions.exceptions import MissingArgumentError
 
-from ..constants import KAOS_STATE_DIR, DOCKER, MINIKUBE, KAOS_TF_PATH, TF_STATE, PROVIDER_DICT
+from ..constants import KAOS_STATE_DIR, DOCKER, MINIKUBE, PROVIDER_DICT
 
 
 class EnvironmentState:
@@ -34,14 +34,14 @@ class EnvironmentState:
         infra_root = f"{PROVIDER_DICT.get(cloud)}"
 
         if is_cloud_provider(cloud):
+            provider_directory = f"{infra_root}/{env}"
             build_dir = f"{infra_root}/__working_{env}"
             tf_state_path = f"{build_dir}/.terraform/terraform.tfstate"
-            provider_directory = f"{infra_root}/{env}"
             env_state.provider_directory = provider_directory
 
         else:
             build_dir = f"{infra_root}"
-            tf_state_path = f"{infra_root}/terraform.tfstate"
+            tf_state_path = f"{build_dir}/terraform.tfstate"
             env_state.provider_directory = infra_root
 
         env_state.if_build_dir_exists = os.path.exists(build_dir)

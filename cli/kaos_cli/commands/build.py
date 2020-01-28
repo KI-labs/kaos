@@ -7,6 +7,7 @@ from kaos_cli.exceptions.handle_exceptions import handle_specific_exception, han
 from kaos_cli.facades.backend_facade import BackendFacade, is_cloud_provider
 from typing import Optional
 
+from kaos_cli.utils.helpers import build_dir
 from kaos_cli.utils.custom_classes import CustomHelpOrder, NotRequiredIf
 from kaos_cli.utils.decorators import build_env_check, pass_obj
 from kaos_cli.utils.validators import validate_unused_port, validate_inputs, EnvironmentState
@@ -31,8 +32,9 @@ def build():
 
 
 @build.command(name='deploy',
-               short_help='{}'.format(
-                   click.style('Build the kaos backend', bold=False, fg='white')))
+               short_help='{} the {} backend'.format(
+                   click.style('Build', bold=True),
+                   click.style('kaos', bold=True)))
 @click.option('-c', '--cloud', type=click.Choice([DOCKER, MINIKUBE, AWS, GCP]),
               help='selected provider', required=True)
 @click.option('-e', '--env', type=click.Choice(['prod', 'stage', 'dev']),

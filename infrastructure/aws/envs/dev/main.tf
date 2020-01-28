@@ -29,7 +29,6 @@ module "eks" {
   cluster_delete_timeout      = "15m"
   kubeconfig_name             = local.prefix
   config_output_path          = "${path.module}/"
-  write_aws_auth_config       = true
   workers_additional_policies = module.policies.worker_additional_policies
 
   tags = merge(local.tags, local.cluster_autoscaler_tags)

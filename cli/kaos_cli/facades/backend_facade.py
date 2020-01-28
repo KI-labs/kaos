@@ -129,13 +129,14 @@ class BackendFacade:
 
     def build(self, provider, env, local_backend=False, verbose=False):
         env_state = EnvironmentState.initialize(provider, env)
+
         if not os.path.exists(env_state.build_dir):
             build_dir(env_state.build_dir)
 
         auth_token = uuid.uuid4()
         extra_vars = self._get_vars(provider, env_state.build_dir, auth_token)
-        self.tf_service.cd_dir(env_state.build_dir)
 
+        self.tf_service.cd_dir(env_state.build_dir)
         self.tf_service.set_verbose(verbose)
         self._tf_init(env_state, provider, env, local_backend, destroying=False)
         self.tf_service.plan(env_state.build_dir, extra_vars)
@@ -148,22 +149,16 @@ class BackendFacade:
 
         if env_state.if_tfstate_exists:
             url, kubeconfig = self._parse_config(env_state.build_dir)
-
             current_context = provider if provider in [DOCKER, MINIKUBE] else f"{provider}_{env}"
-
             self.state_service.set(DEFAULT, user=USER)
-
             self._set_context_list(current_context)
             self._set_active_context(current_context)
             self.state_service.set(current_context)
-
             self.state_service.set_section(current_context, BACKEND,
                                            url=url, token=auth_token)
             self.state_service.set_section(current_context, INFRASTRUCTURE,
                                            kubeconfig=kubeconfig)
-
             self.state_service.write()
-
             return True, env_state
 
         return False, env_state
@@ -218,7 +213,6 @@ class BackendFacade:
             self.tf_service.init(env_state.build_dir)
             self.tf_service.new_workspace(env_state.build_dir, env)
             self.tf_service.select_workspace(env_state.build_dir, env)
-
         else:
             copy_tree(env_state.provider_directory, env_state.build_dir)
             self.tf_service.init(env_state.build_dir)
@@ -310,7 +304,7 @@ class BackendFacade:
 
     @staticmethod
     def _get_vars(provider, dir_build, auth_token=None):
-        extra_vars = f"--var config_dir={dir_build} --var token={auth_token}"
+        extra_vars = f"--var config_dir={dir_build} --var token={auth_token} "
 
         if provider == AWS:
             KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
