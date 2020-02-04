@@ -52,7 +52,7 @@ def test_is_not_empty():
 def test_validate_bundle_structure_is_empty():
     with pytest.raises(InvalidBundleError, match="Bundle must be non-empty"):
         with TemporaryDirectory() as temp_dir:
-            BundleValidator.validate_bundle_structure(temp_dir, [])
+            BundleValidator.validate_bundle_structure(temp_dir, [], mode=None)
 
 
 def test_validate_bundle_structure_missing_root_directory():
@@ -60,7 +60,7 @@ def test_validate_bundle_structure_missing_root_directory():
         with TemporaryDirectory() as temp_dir:
             # temp file to avoid empty file exception
             temp = tempfile.NamedTemporaryFile(dir=temp_dir, delete=True)
-            BundleValidator.validate_bundle_structure(temp_dir, [])
+            BundleValidator.validate_bundle_structure(temp_dir, [], mode=None)
             temp.close()
 
 
@@ -72,7 +72,7 @@ def test_validate_bundle_structure_too_many_directories():
             tempfile.mkdtemp(dir=temp_dir)
             tempfile.mkdtemp(dir=temp_dir)
 
-            BundleValidator.validate_bundle_structure(temp_dir, [])
+            BundleValidator.validate_bundle_structure(temp_dir, [], mode=None)
             temp.close()
 
 
@@ -83,7 +83,7 @@ def test_validate_bundle_structure_missing_dockerfile_in_directory():
             temp = tempfile.NamedTemporaryFile(dir=temp_dir, delete=True)
             tempfile.mkdtemp(dir=temp_dir)
 
-            BundleValidator.validate_bundle_structure(temp_dir, [])
+            BundleValidator.validate_bundle_structure(temp_dir, [], mode=None)
             temp.close()
 
 
@@ -93,7 +93,45 @@ def test_validate_bundle_structure_missing_model_directory():
             base_dir = tempfile.mkdtemp(dir=temp_dir)
             filename = os.path.join(base_dir, "Dockerfile")
             create_file(filename)
-            BundleValidator.validate_bundle_structure(temp_dir, [])
+            BundleValidator.validate_bundle_structure(temp_dir, [], mode=None)
+
+
+def test_validate_train_bundle_missing_executable_file():
+    with pytest.raises(InvalidBundleError,
+                       match="The train file cannot be executed. "
+                             "Please ensure that first line begins with the shebang '#!' to make it an executable"):
+        with TemporaryDirectory() as temp_dir:
+            base_dir = tempfile.mkdtemp(dir=temp_dir)
+            dockerfile = os.path.join(base_dir, "Dockerfile")
+            create_file(dockerfile)
+            model_dir = os.path.join(base_dir, "model")
+            os.mkdir(model_dir)
+            mode = "train"
+            for f in REQ_TRAINING_FILES:
+                create_file(os.path.join(model_dir, f))
+
+            train_file = os.path.join(model_dir, mode)
+            create_file(train_file)
+            BundleValidator.validate_bundle_structure(temp_dir, [], mode=mode)
+
+
+def test_validate_serve_bundle_missing_executable_file():
+    with pytest.raises(InvalidBundleError,
+                       match="The serve file cannot be executed. "
+                             "Please ensure that first line begins with the shebang '#!' to make it an executable"):
+        with TemporaryDirectory() as temp_dir:
+            base_dir = tempfile.mkdtemp(dir=temp_dir)
+            dockerfile = os.path.join(base_dir, "Dockerfile")
+            create_file(dockerfile)
+            model_dir = os.path.join(base_dir, "model")
+            os.mkdir(model_dir)
+            mode = "serve"
+            for f in REQ_INFERENCE_FILES:
+                create_file(os.path.join(model_dir, f))
+
+            serve_file = os.path.join(model_dir, mode)
+            create_file(serve_file)
+            BundleValidator.validate_bundle_structure(temp_dir, [], mode=mode)
 
 
 @pytest.mark.parametrize("files_include,file_exclude", inference_test_cases)
