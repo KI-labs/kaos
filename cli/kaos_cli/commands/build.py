@@ -7,6 +7,7 @@ from kaos_cli.exceptions.handle_exceptions import handle_specific_exception, han
 from kaos_cli.facades.backend_facade import BackendFacade, is_cloud_provider
 from typing import Optional
 
+from kaos_cli.utils.helpers import build_dir
 from kaos_cli.utils.custom_classes import CustomHelpOrder, NotRequiredIf
 from kaos_cli.utils.decorators import build_env_check, pass_obj
 from kaos_cli.utils.validators import validate_unused_port, validate_inputs, EnvironmentState
@@ -16,8 +17,13 @@ from kaos_cli.utils.rendering import render_table
 # BUILD group
 # =============
 @click.group(name='build', cls=CustomHelpOrder,
-             short_help=' {} and its {} '.format(
-                 click.style('build', bold=True), click.style('sub-commands', bold=True)))
+             short_help='{} and its {}: {}, {}, {} and {}'.format(
+                 click.style('Infrastructure deployments', bold=True),
+                 click.style('sub-commands', bold=False),
+                 click.style('deploy', bold=True),
+                 click.style('list', bold=True),
+                 click.style('set', bold=True),
+                 click.style('active', bold=True)))
 def build():
     """
     Build command allows you to deploy infrastructre and list the available deployments
@@ -26,8 +32,9 @@ def build():
 
 
 @build.command(name='deploy',
-               short_help='{}'.format(
-                   click.style('Build the kaos backend', bold=True, fg='black')))
+               short_help='{} the {} backend'.format(
+                   click.style('Build', bold=True),
+                   click.style('kaos', bold=True)))
 @click.option('-c', '--cloud', type=click.Choice([DOCKER, MINIKUBE, AWS, GCP]),
               help='selected provider', required=True)
 @click.option('-e', '--env', type=click.Choice(['prod', 'stage', 'dev']),
@@ -58,9 +65,12 @@ def deploy(backend: BackendFacade, cloud: str, env: str, force: bool, verbose: b
         click.echo('{} - Performing {} build of the backend'.format(
             click.style("Warning", bold=True, fg='yellow'),
             click.style("force", bold=True)))
+        env_state.remove_terraform_files()
 
     # set env variable appropriately
     env_state.set_build_env()
+    cloud = env_state.cloud
+    env = env_state.env
 
     if not yes:
         # confirm creation of backend
@@ -106,7 +116,6 @@ def deploy(backend: BackendFacade, cloud: str, env: str, force: bool, verbose: b
             sys.exit(1)
     
     try:
-
         is_built_successfully, env_state = backend.build(env_state.cloud,
                                                          env_state.env,
                                                          local_backend=local_backend,
@@ -129,7 +138,7 @@ def deploy(backend: BackendFacade, cloud: str, env: str, force: bool, verbose: b
                 click.echo("{} - Successfully built {} [{}] environment".format(
                     click.style("Info", bold=True, fg='green'),
                     click.style('kaos', bold=True),
-                    click.style(env_state.env, bold=True, fg='blue')))
+                    click.style(env, bold=True, fg='blue')))
             else:
                 click.echo("{} - Successfully built {} environment".format(
                     click.style("Info", bold=True, fg='green'),
@@ -139,8 +148,8 @@ def deploy(backend: BackendFacade, cloud: str, env: str, force: bool, verbose: b
             click.echo("{} - Deployment Unsuccessful while creating {} [{} {}] environment".format(
                 click.style("Error", bold=True, fg='red'),
                 click.style('kaos', bold=True),
-                click.style(env_state.cloud, bold=True, fg='red'),
-                click.style(env_state.env, bold=True, fg='red'))),
+                click.style(cloud, bold=True, fg='red'),
+                click.style(env, bold=True, fg='red'))),
             sys.exit(1)
 
     except Exception as e:
@@ -250,8 +259,9 @@ def get_active_context(backend: BackendFacade):
 
 
 @click.command(name='destroy',
-               short_help='{}'.format(
-                   click.style('Destroy the kaos backend', bold=True, fg='black')))
+               short_help='{} the {} backend'.format(
+                   click.style('Destroys', bold=True),
+                   click.style('kaos', bold=True)))
 @click.option('-c', '--cloud', type=click.Choice([DOCKER, MINIKUBE, AWS, GCP]),
               help='selected provider provider', required=True)
 @click.option('-e', '--env', type=click.Choice(['prod', 'stage', 'dev']),
@@ -272,7 +282,7 @@ def destroy(backend: BackendFacade, cloud, env, verbose, yes):
     env_state.set_build_env()
 
     # Ensure that appropriate warnings are displayed
-    env_state.validate_if_tfstate_exits()
+    env_state.validate_if_tf_state_exits()
 
     if not yes:
         # confirm creation of backend

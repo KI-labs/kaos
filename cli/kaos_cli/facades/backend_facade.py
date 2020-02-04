@@ -5,19 +5,14 @@ import uuid
 from distutils.dir_util import copy_tree
 
 import requests
-from kaos_cli.constants import DOCKER, MINIKUBE, PROVIDER_DICT, AWS, BACKEND, INFRASTRUCTURE, GCP, LOCAL_CONFIG_DICT, \
+from kaos_cli.constants import DOCKER, MINIKUBE, AWS, BACKEND, INFRASTRUCTURE, GCP, LOCAL_CONFIG_DICT, \
     CONTEXTS, ACTIVE, BACKEND_CACHE, DEFAULT, USER, REMOTE, KAOS_STATE_DIR
 from kaos_cli.exceptions.exceptions import HostnameError
 from kaos_cli.services.state_service import StateService
 from kaos_cli.services.terraform_service import TerraformService
 from kaos_cli.utils.environment import check_environment
 from kaos_cli.utils.helpers import build_dir
-from kaos_cli.utils.validators import EnvironmentState
-from kaos_cli.exceptions.handle_exceptions import handle_specific_exception, handle_exception
-
-
-def is_cloud_provider(cloud):
-    return cloud not in (DOCKER, MINIKUBE)
+from kaos_cli.utils.validators import EnvironmentState, is_cloud_provider
 
 
 class BackendFacade:
@@ -134,17 +129,18 @@ class BackendFacade:
 
     def build(self, provider, env, local_backend=False, verbose=False):
         env_state = EnvironmentState.initialize(provider, env)
-        if not env_state.if_build_dir_exists:
+
+        if not os.path.exists(env_state.build_dir):
             build_dir(env_state.build_dir)
 
         auth_token = uuid.uuid4()
         extra_vars = self._get_vars(provider, env_state.build_dir, auth_token)
-        self.tf_service.cd_dir(env_state.build_dir)
 
+        self.tf_service.cd_dir(env_state.build_dir)
         self.tf_service.set_verbose(verbose)
-        directory = self._tf_init(provider, env, local_backend, destroying=False)
-        self.tf_service.plan(directory, extra_vars)
-        self.tf_service.apply(directory, extra_vars)
+        self._tf_init(env_state, provider, env, local_backend, destroying=False)
+        self.tf_service.plan(env_state.build_dir, extra_vars)
+        self.tf_service.apply(env_state.build_dir, extra_vars)
         self.tf_service.execute()
 
         # check if the deployed successfully
@@ -153,20 +149,15 @@ class BackendFacade:
 
         if env_state.if_tfstate_exists:
             url, kubeconfig = self._parse_config(env_state.build_dir)
-
             current_context = provider if provider in [DOCKER, MINIKUBE] else f"{provider}_{env}"
-
             self.state_service.set(DEFAULT, user=USER)
-
             self._set_context_list(current_context)
             self._set_active_context(current_context)
             self.state_service.set(current_context)
-
             self.state_service.set_section(current_context, BACKEND,
                                            url=url, token=auth_token)
             self.state_service.set_section(current_context, INFRASTRUCTURE,
                                            kubeconfig=kubeconfig)
-
             self.state_service.write()
             return True, env_state
 
@@ -177,14 +168,17 @@ class BackendFacade:
         self.tf_service.cd_dir(env_state.build_dir)
 
         self.tf_service.set_verbose(verbose)
-        directory = self._tf_init(env_state.cloud, env_state.env, local_backend=False, destroying=True)
+
+        self._tf_init(env_state, env_state.cloud, env_state.env, local_backend=False, destroying=True)
+
         current_context = env_state.cloud if env_state.cloud in [DOCKER, MINIKUBE] \
             else env_state.cloud + '_' + env_state.env
+
         self._delete_resources(current_context)
         self._unset_context_list(current_context)
         self._remove_section(current_context)
         self._deactivate_context()
-        self.tf_service.destroy(directory, extra_vars)
+        self.tf_service.destroy(env_state.build_dir, extra_vars)
         self.tf_service.execute()
         self._remove_build_files(env_state.build_dir)
         self.state_service.write()
@@ -207,25 +201,21 @@ class BackendFacade:
         if self.state_service.has_section(context, BACKEND):
             requests.delete(f"{self.url}/internal/resources")
 
-    def _tf_init(self, provider, env, local_backend, destroying=False):
-        directory = PROVIDER_DICT.get(provider)
+    def _tf_init(self, env_state, provider, env, local_backend, destroying=False):
         check_environment(provider)
         if is_cloud_provider(provider):
-            provider_directory = f"{directory}/{env}"
-            directory = f"{directory}/__working_{env}"
-            if not destroying or not os.path.isdir(directory):
-                copy_tree(provider_directory, directory)
+            if not destroying or not os.path.isdir(env_state.build_dir):
+                copy_tree(env_state.provider_directory, env_state.build_dir)
             if local_backend:
-                shutil.copy(LOCAL_CONFIG_DICT.get(provider), directory)
+                shutil.copy(LOCAL_CONFIG_DICT.get(provider), env_state.build_dir)
 
             # simply always create the workspace
-            self.tf_service.init(directory)
-            self.tf_service.new_workspace(directory, env)
-            self.tf_service.select_workspace(directory, env)
-
+            self.tf_service.init(env_state.build_dir)
+            self.tf_service.new_workspace(env_state.build_dir, env)
+            self.tf_service.select_workspace(env_state.build_dir, env)
         else:
-            self.tf_service.init(directory)
-        return directory
+            copy_tree(env_state.provider_directory, env_state.build_dir)
+            self.tf_service.init(env_state.build_dir)
 
     def _set_context_list(self, current_context):
         try:
@@ -236,17 +226,20 @@ class BackendFacade:
         updated_contexts = []
 
         if isinstance(contexts, list):
-            contexts.append(current_context)
+            if current_context not in contexts:
+                contexts.append(current_context)
             updated_contexts = contexts
         elif isinstance(contexts, str) or not contexts:
-            # There is only one context or no context in available contexts
-            if contexts:
-                # exactly one available context
-                updated_contexts.append(contexts)
-                updated_contexts.append(current_context)
-            else:
-                # no available context
-                updated_contexts.append(current_context)
+            # check if current context is the same as existing context
+            if current_context != contexts:
+                # There is only one context or no context in available contexts
+                if contexts:
+                    # exactly one available context
+                    updated_contexts.append(contexts)
+                    updated_contexts.append(current_context)
+                else:
+                    # no available context
+                    updated_contexts.append(current_context)
 
         self.state_service.set(CONTEXTS, environments=updated_contexts)
 
@@ -311,7 +304,7 @@ class BackendFacade:
 
     @staticmethod
     def _get_vars(provider, dir_build, auth_token=None):
-        extra_vars = f"--var config_dir={dir_build} --var token={auth_token}"
+        extra_vars = f"--var config_dir={dir_build} --var token={auth_token} "
 
         if provider == AWS:
             KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
