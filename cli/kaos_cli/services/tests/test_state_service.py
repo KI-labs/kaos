@@ -1,5 +1,7 @@
 import os
-from parameterized import parameterized, parameterized_class
+import unittest
+import mock
+from parameterized import parameterized_class
 from configobj import ConfigObj
 
 from unittest import TestCase
@@ -104,7 +106,6 @@ class TestStateService(TestCase):
     def instantiate_service(self):
         # Arrange
         self.state_service = StateService()
-        self.switch = False
 
     def test_state_service_create(self):
         # Arrange
@@ -142,7 +143,6 @@ class TestStateService(TestCase):
 
         # Arrange
         if not isinstance(self.context, str):
-            self.switch = True
             if self.context is None:
                 self.context = {}
             else:
@@ -159,7 +159,6 @@ class TestStateService(TestCase):
         self.instantiate_service()
 
         if not isinstance(self.context, str):
-            self.switch = True
             if self.context is None:
                 self.context = {}
             else:
@@ -179,7 +178,6 @@ class TestStateService(TestCase):
         self.state_service.set('section', context=self.context)
 
         if not isinstance(self.param, str):
-            self.switch = True
             if self.param is None:
                 self.param = {}
             else:
@@ -197,7 +195,6 @@ class TestStateService(TestCase):
         self.state_service.set('section', context=self.context)
 
         if not isinstance(self.param, str):
-            self.switch = True
             if self.param is None:
                 self.param = {}
             else:
@@ -229,13 +226,12 @@ class TestStateService(TestCase):
         self.state_service.set('section', context=self.context)
         self.state_service.set_section('section', 'subsection', param=self.param)
 
-        if not self.switch:
-            # Act
-            self.state_service.has_section('section', 'subsection')
+        # Act
+        self.state_service.has_section('section', 'subsection')
 
-            # Assert
-            self.assertEqual(self.state_service.config['section']['subsection'],
-                             self.state_service.has_section('section', 'subsection'))
+        # Assert
+        self.assertEqual(self.state_service.config['section']['subsection'],
+                         self.state_service.has_section('section', 'subsection'))
 
     def test_state_service_remove(self):
         # Arrange
@@ -261,15 +257,24 @@ class TestStateService(TestCase):
 
         self.assertTrue(is_removed)
 
-    def test_state_service_full_delete(self):
+
+class TestStateServiceMocked(unittest.TestCase):
+
+    def instantiate_service(self):
         # Arrange
-        self.instantiate_service()
-        test_path = os.path.join(KAOS_STATE_DIR, 'test')
-        os.mkdir(test_path)
+        self.state_service = StateService()
 
-        # Act
-        self.state_service.full_delete(test_path)
+    @mock.patch('shutil.rmtree')
+    def test_method_remove_build_files(self, rm_mock):
+            # Arrange
+            self.instantiate_service()
+            test_path = os.path.join(KAOS_STATE_DIR, 'test')
+            rm_mock.return_value = 'REMOVED'
 
-        # Assert
-        self.assertTrue(not os.path.exists(test_path))
+            # Act
+            self.state_service.full_delete(test_path)
+
+            # Assert
+            rm_mock.assert_called_with(test_path, ignore_errors=True)
+            self.assertEqual(rm_mock.return_value, 'REMOVED')
 

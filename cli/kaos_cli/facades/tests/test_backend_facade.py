@@ -1,5 +1,6 @@
 import os
-import shutil
+import unittest
+import mock
 from parameterized import parameterized
 from unittest import TestCase, skip
 
@@ -9,10 +10,10 @@ from kaos_cli.services.state_service import StateService
 from kaos_cli.services.terraform_service import Command
 from kaos_cli.constants import CONFIG_PATH, ACTIVE, DEFAULT, CONTEXTS, KAOS_STATE_DIR
 
+common = ('backend', 'url', 'token', 'infrastructure', 'kubeconfig', 'user')
+
 
 def backend_facade_test_inputs():
-
-    common = ('backend', 'url', 'token', 'infrastructure', 'kubeconfig', 'user')
 
     return [
         ('DOCKER',) + common,
@@ -341,19 +342,39 @@ class TestBackendFacade(TestCase):
         # Assert
         self.assertIsNone(active_context)
 
-    @parameterized.expand(backend_facade_test_inputs)
-    def test_method_remove_build_files(self, environment, backend, url, token, infra, kubeconfig, user):
+
+class TestBackendFacadeMocked(unittest.TestCase):
+
+    def arrange_test_fixtures(self, environment, backend, url, token, infra, kubeconfig, user):
+        # Arrange
+        # Instantiation
+        self.state_service = StateService()
+        self.command = Command()
+        self.tf_service = TerraformService(cmd=self.command)
 
         # Arrange
-        self.arrange_test_fixtures(environment, backend, url, token, infra, kubeconfig, user)
-        test_path = os.path.join(KAOS_STATE_DIR, 'test')
-        os.mkdir(test_path)
+        # Initialization
+        self.state_service.set(ACTIVE, environment=environment)
+        self.state_service.set(CONTEXTS, environments=environment)
+        self.state_service.set(DEFAULT, user=user)
+        self.state_service.set(environment)
+        self.state_service.set_section(environment, backend, url=url, token=token)
+        self.state_service.set_section(environment, infra, kubeconfig=kubeconfig)
+        self.facade = BackendFacade(self.state_service, self.tf_service)
 
-        # Act
-        self.facade._remove_build_files(test_path)
+    @mock.patch('shutil.rmtree')
+    def test_method_remove_build_files(self, rm_mock):
+            # Arrange
+            environment = "DOCKER"
 
-        # Assert
-        self.assertFalse(os.path.exists(test_path))
+            ## common = ('backend', 'url', 'token', 'infrastructure', 'kubeconfig', 'user')
+            self.arrange_test_fixtures(environment, common[0], common[1], common[2], common[3], common[4], common[5])
+            test_path = os.path.join(KAOS_STATE_DIR, 'test')
+            rm_mock.return_value = 'REMOVED'
 
-        # Rearrange
-        shutil.rmtree(test_path, ignore_errors=True)
+            # Act
+            self.facade._remove_build_files(test_path)
+
+            # Assert
+            rm_mock.assert_called_with(test_path, ignore_errors=True)
+            self.assertEqual(rm_mock.return_value, 'REMOVED')
