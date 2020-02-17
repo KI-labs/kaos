@@ -33,7 +33,7 @@ def handle_pachyderm_error(f):
             return a
         except _Rendezvous as e:
             print(e.debug_error_string())
-            err_desc = json.loads(e.debug_error_string())
+            err_desc = json.loads(e.debug_error_string().replace(" \"", " ").replace("\" ", " "))
             current_app.logger.error("@handle_pachyderm_error: %s", str(err_desc))
 
             grpc_message = err_desc.get(GRPC_MESSAGE, None)

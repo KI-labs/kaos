@@ -5,7 +5,7 @@ from kaos_backend.clients.pachyderm import PachydermClient
 from kaos_backend.services.job_service import JobService
 from kaos_backend.util.tests import create_zip_file
 from kaos_backend.util.validators import BundleValidator
-from python_pachyderm import PpsClient, PfsClient
+from python_pachyderm import Client
 
 
 def t_any(cls):
@@ -27,7 +27,7 @@ def create_job_service(mocker, workspaces=None):
          service: `kaos_backend.services.JobService`
 
     """
-    client = PachydermClient(PpsClient(), PfsClient())
+    client = PachydermClient(Client())
     service = JobService(client)
 
     def check_pipeline_exists_mock(pipeline_name):

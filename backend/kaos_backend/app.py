@@ -1,6 +1,5 @@
 import logging
 import os
-
 from flask import Flask
 from kaos_backend.clients.pachyderm import PachydermClient
 from kaos_backend.controllers.data import DataController
@@ -17,15 +16,14 @@ from kaos_backend.routes.notebook import build_notebook_blueprint
 from kaos_backend.routes.train import build_train_blueprint
 from kaos_backend.routes.workspace import build_workspace_blueprint
 from kaos_backend.services.job_service import JobService
-from python_pachyderm import PfsClient, PpsClient
+from python_pachyderm import Client
 
 PACHY_HOST = os.getenv("PACHD_SERVICE_HOST", "localhost")
 PACHY_PORT = os.getenv("PACHD_SERVICE_PORT_API_GRPC_PORT", 30650)
 
-pfs_client = PfsClient(PACHY_HOST, PACHY_PORT)
-pps_client = PpsClient(PACHY_HOST, PACHY_PORT)
+pclient = Client(PACHY_HOST, PACHY_PORT)
 
-pachyderm_client = PachydermClient(pps_client, pfs_client)
+pachyderm_client = PachydermClient(pclient)
 job_service = JobService(pachyderm_client)
 
 train_blueprint = build_train_blueprint(TrainController(job_service))
