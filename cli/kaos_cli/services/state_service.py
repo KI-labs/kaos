@@ -8,8 +8,8 @@ from kaos_cli.constants import KAOS_STATE_DIR, CONFIG_PATH, KAOS_TF_PATH
 
 class StateService:
 
-    def __init__(self, config=None):
-        self.config = config or ConfigObj(CONFIG_PATH)
+    def __init__(self):
+        self.config = ConfigObj(CONFIG_PATH)
 
     def set(self, section, **kwargs):
         self.config[section] = kwargs
@@ -44,10 +44,6 @@ class StateService:
     @staticmethod
     def list_providers():
         return [f for f in glob.glob(f'{KAOS_TF_PATH}/**/terraform.tfstate', recursive=True)]
-
-    @staticmethod
-    def provider_delete(dir_build):
-        shutil.rmtree(dir_build, ignore_errors=True)
 
     @staticmethod
     def full_delete(dir_build):

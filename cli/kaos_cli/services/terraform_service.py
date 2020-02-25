@@ -13,8 +13,9 @@ class Command:
         self.history.append(cmd)
 
     def execute(self):
-        self.run_cmd(";".join(self.history))
+        exitcode, out, err = self.run_cmd(";".join(self.history))
         self.clear()
+        return exitcode, out, err
 
     def clear(self):
         self.history = []
@@ -53,7 +54,8 @@ class TerraformService:
                         f"{extra_vars} --auto-approve {directory}")
 
     def execute(self):
-        self.cmd.execute()
+        exitcode, out, err = self.cmd.execute()
+        return exitcode, out, err
 
     def cd_dir(self, build_dir):
         self.cmd.append(f'cd {build_dir}')

@@ -12,7 +12,11 @@ from kaos_cli.services.state_service import StateService
 from kaos_cli.services.terraform_service import TerraformService
 from kaos_cli.utils.environment import check_environment
 from kaos_cli.utils.helpers import build_dir
-from kaos_cli.utils.validators import EnvironmentState, is_cloud_provider
+from kaos_cli.utils.validators import EnvironmentState
+
+
+def is_cloud_provider(cloud):
+    return cloud not in (DOCKER, MINIKUBE)
 
 
 class BackendFacade:
@@ -193,7 +197,6 @@ class BackendFacade:
         """
         Function to remove backend directory
         """
-        self.state_service.provider_delete(dir_build)
         if not self.state_service.list_providers():
             self.state_service.full_delete(dir_build)
 
