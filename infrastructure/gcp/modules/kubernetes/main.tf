@@ -16,9 +16,9 @@ resource "google_container_cluster" "new_container_cluster" {
       disabled = var.http_load_balancing
     }
 
-    kubernetes_dashboard {
-      disabled = var.kubernetes_dashboard
-    }
+//    kubernetes_dashboard {
+//      disabled = var.kubernetes_dashboard
+//    }
     //    network_policy_config {
     //      disabled = "${var.network_policy_config}"
     //    }
