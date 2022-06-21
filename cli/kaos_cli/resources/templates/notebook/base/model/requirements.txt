@@ -1,2 +1,2 @@
 jupyterlab==0.35.6
-numpy==1.16.2
+numpy==1.22.0
