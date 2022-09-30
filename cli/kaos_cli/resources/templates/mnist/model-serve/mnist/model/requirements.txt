@@ -2,4 +2,4 @@ numpy==1.16.2
 scikit-learn==0.20.3
 scikit-image==0.15.0
 pandas==0.24.2
-joblib==0.13.2
+joblib==1.2.0
